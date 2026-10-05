@@ -83,8 +83,12 @@ def run_e12_fairness_audit(
         f_mask = (df["gender"] == "Female").values
         rec_m = float(np.sum((preds == 1) & (y == 1) & m_mask) / np.sum((y == 1) & m_mask))
         rec_f = float(np.sum((preds == 1) & (y == 1) & f_mask) / np.sum((y == 1) & f_mask))
-        prec_m = float(np.sum((preds == 1) & (y == 1) & m_mask) / max(np.sum((preds == 1) & m_mask), 1))
-        prec_f = float(np.sum((preds == 1) & (y == 1) & f_mask) / max(np.sum((preds == 1) & f_mask), 1))
+        prec_m = float(
+            np.sum((preds == 1) & (y == 1) & m_mask) / max(np.sum((preds == 1) & m_mask), 1)
+        )
+        prec_f = float(
+            np.sum((preds == 1) & (y == 1) & f_mask) / max(np.sum((preds == 1) & f_mask), 1)
+        )
         cr_m = float(np.sum((preds == 1) & m_mask) / np.sum(m_mask))
         cr_f = float(np.sum((preds == 1) & f_mask) / np.sum(f_mask))
         gender_gap = abs(rec_m - rec_f)
@@ -94,8 +98,12 @@ def run_e12_fairness_audit(
         ns_mask = (df["SeniorCitizen"] == 0).values
         rec_s = float(np.sum((preds == 1) & (y == 1) & s_mask) / np.sum((y == 1) & s_mask))
         rec_ns = float(np.sum((preds == 1) & (y == 1) & ns_mask) / np.sum((y == 1) & ns_mask))
-        prec_s = float(np.sum((preds == 1) & (y == 1) & s_mask) / max(np.sum((preds == 1) & s_mask), 1))
-        prec_ns = float(np.sum((preds == 1) & (y == 1) & ns_mask) / max(np.sum((preds == 1) & ns_mask), 1))
+        prec_s = float(
+            np.sum((preds == 1) & (y == 1) & s_mask) / max(np.sum((preds == 1) & s_mask), 1)
+        )
+        prec_ns = float(
+            np.sum((preds == 1) & (y == 1) & ns_mask) / max(np.sum((preds == 1) & ns_mask), 1)
+        )
         cr_s = float(np.sum((preds == 1) & s_mask) / np.sum(s_mask))
         cr_ns = float(np.sum((preds == 1) & ns_mask) / np.sum(ns_mask))
         senior_gap = abs(rec_s - rec_ns)
@@ -163,10 +171,7 @@ def run_e12_fairness_audit(
         },
     }
 
-    if save_path:
-        out_path = Path(save_path)
-    else:
-        out_path = Path("reports") / "e12_fairness_audit.json"
+    out_path = Path(save_path) if save_path else Path("reports") / "e12_fairness_audit.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(output_payload, f, indent=2)

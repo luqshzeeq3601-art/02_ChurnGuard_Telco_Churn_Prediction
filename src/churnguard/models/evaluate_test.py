@@ -137,7 +137,7 @@ def compute_objectives_verification(
         else Path("reports") / "e11_champion_decision.json"
     )
     if e11_path.exists():
-        with open(e11_path, "r", encoding="utf-8") as f:
+        with open(e11_path, encoding="utf-8") as f:
             e11_data = json.load(f)
         mo1_passed = bool(e11_data.get("mo1_met", False))
         mo1_achieved = e11_data.get("mo1_achieved")
@@ -174,12 +174,10 @@ def compute_objectives_verification(
         m_mask = gender_arr == "Male"
         f_mask = gender_arr == "Female"
         rec_m = float(
-            np.sum((y_pred == 1) & (y_test == 1) & m_mask)
-            / max(np.sum((y_test == 1) & m_mask), 1)
+            np.sum((y_pred == 1) & (y_test == 1) & m_mask) / max(np.sum((y_test == 1) & m_mask), 1)
         )
         rec_f = float(
-            np.sum((y_pred == 1) & (y_test == 1) & f_mask)
-            / max(np.sum((y_test == 1) & f_mask), 1)
+            np.sum((y_pred == 1) & (y_test == 1) & f_mask) / max(np.sum((y_test == 1) & f_mask), 1)
         )
         gender_gap = abs(rec_m - rec_f)
         nfr7_passed = bool(gender_gap <= 0.05)
@@ -193,8 +191,7 @@ def compute_objectives_verification(
         s_mask = senior_arr == 1
         ns_mask = senior_arr == 0
         rec_s = float(
-            np.sum((y_pred == 1) & (y_test == 1) & s_mask)
-            / max(np.sum((y_test == 1) & s_mask), 1)
+            np.sum((y_pred == 1) & (y_test == 1) & s_mask) / max(np.sum((y_test == 1) & s_mask), 1)
         )
         rec_ns = float(
             np.sum((y_pred == 1) & (y_test == 1) & ns_mask)
@@ -403,9 +400,7 @@ def run_final_test_evaluation(
             "precision_at_tau": round(
                 float(precision_score(y_test, ru_pred_tau, zero_division=0)), 4
             ),
-            "recall_at_tau": round(
-                float(recall_score(y_test, ru_pred_tau, zero_division=0)), 4
-            ),
+            "recall_at_tau": round(float(recall_score(y_test, ru_pred_tau, zero_division=0)), 4),
             "f1_at_tau": round(float(f1_score(y_test, ru_pred_tau, zero_division=0)), 4),
             "profit_per_1k_customers_rm": round(
                 float(ru_profit_res["profit_per_1k_customers_rm"]), 2
@@ -429,9 +424,7 @@ def run_final_test_evaluation(
     scored_df["risk_tier"] = scored_df["churn_probability"].apply(assign_tier)
     scored_path = Path(CFG["paths"]["reports_dir"]) / "scored.csv"
     scored_path.parent.mkdir(parents=True, exist_ok=True)
-    scored_df.sort_values(by="churn_probability", ascending=False).to_csv(
-        scored_path, index=False
-    )
+    scored_df.sort_values(by="churn_probability", ascending=False).to_csv(scored_path, index=False)
 
     # Combine into comprehensive report
     final_report = {

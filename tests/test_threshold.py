@@ -74,11 +74,12 @@ def test_run_threshold_optimization_integration(tmp_path):
 def test_optimal_threshold_json_has_oof_source():
     """Verify optimal_threshold.json contains source: oof_train_val (F7)."""
     import json
+
     from churnguard.config import CFG
 
     thresh_file = CFG["paths"]["models_dir"] / "optimal_threshold.json"
     assert thresh_file.exists()
-    with open(thresh_file, "r", encoding="utf-8") as f:
+    with open(thresh_file, encoding="utf-8") as f:
         meta = json.load(f)
     assert meta.get("source") == "oof_train_val"
     assert meta.get("n_samples") == 5986

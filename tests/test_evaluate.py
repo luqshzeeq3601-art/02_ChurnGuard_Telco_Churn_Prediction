@@ -127,9 +127,9 @@ def test_tie_aware_row_order_invariance():
         perm_recall = compute_recall_at_k(perm_y_true, perm_y_prob, k=0.20)
         perm_lift = compute_lift_at_k(perm_y_true, perm_y_prob, k=0.10)
 
-        assert perm_recall == pytest.approx(base_recall, abs=1e-12), (
-            f"Recall@20 changed under permutation seed {seed}: {perm_recall} vs {base_recall}"
-        )
-        assert perm_lift == pytest.approx(base_lift, abs=1e-12), (
-            f"Lift@10 changed under permutation seed {seed}: {perm_lift} vs {base_lift}"
-        )
+        assert perm_recall == pytest.approx(
+            base_recall, abs=1e-12
+        ), f"Recall@20 changed under permutation seed {seed}: {perm_recall} vs {base_recall}"
+        assert perm_lift == pytest.approx(
+            base_lift, abs=1e-12
+        ), f"Lift@10 changed under permutation seed {seed}: {perm_lift} vs {base_lift}"
