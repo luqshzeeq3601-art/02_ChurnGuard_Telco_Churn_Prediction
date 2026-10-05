@@ -5,10 +5,33 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | Phase 3: Modelling + Tuning (W2-W3) |
-| Next task | **T3.1** Run E03 (Random Forest), E04 (XGBoost), E05 (LightGBM) |
-| Overall progress | 16 / 47 tasks |
+| Current phase | Phase 4: Evaluation, Business and Explainability (W3-W4) |
+| Next task | **T4.1** Calibration on val (E09) |
+| Overall progress | 21 / 47 tasks |
 | Health | On track |
+
+---
+
+## 05 Oct 2026: Phase 3 Modelling & Tuning Completed
+- **Done**:
+  - **T3.1**: Executed and logged tree-based candidate models across 5-fold Stratified CV:
+    - **E03 (Random Forest)**: CV PR-AUC: 0.6629 ± 0.0172, ROC-AUC: 0.8462, Lift@10: 2.79x
+    - **E04 (XGBoost)**: CV PR-AUC: 0.6631 ± 0.0266, ROC-AUC: 0.8437, Lift@10: 2.87x
+    - **E05 (LightGBM untuned)**: CV PR-AUC: 0.6598 ± 0.0251, ROC-AUC: 0.8409, Lift@10: 2.91x
+  - **T3.2**: Executed **E06 (LightGBM with SMOTE resampling inside CV)**. SMOTE degraded PR-AUC to 0.6537 ± 0.0274 and increased fold variance. Confirmed decision **D-005** (reject SMOTE in favor of cost/weight-based imbalance handling).
+  - **T3.3**: Built Optuna Bayesian hyperparameter search in `src/churnguard/models/tune.py` (60 trials maximizing CV PR-AUC).
+    - **E07 (Tuned LightGBM Champion)**: CV PR-AUC: **0.6732 ± 0.0217**, ROC-AUC: **0.8468**, Lift@10: **2.92x**, Recall@20: **51.22%**.
+    - Best parameters saved to `models/best_params.json`.
+  - **T3.4**: Executed **E08 (Fairness Ablation)** dropping `gender` and `SeniorCitizen` (`src/churnguard/models/fairness_ablation.py`):
+    - CV PR-AUC: 0.6706 ± 0.0217 (minimal 0.38% dip), ROC-AUC: 0.8464.
+    - Updated decision **D-006**: demographic features carry minimal bias; retained in v1 for fairness slicing (NFR7).
+  - **T3.5**: Verified SMART ML Objectives:
+    - **MO1**: Tuned model beats baseline (PR-AUC 0.6732 vs 0.6587; top-decile lift 2.92x).
+    - **MO2 (Ranking Quality)**: ROC-AUC 0.8468 >= 0.84, PR-AUC 0.6732 >= 0.62, Lift@10% 2.92 >= 2.5 -> **MET**.
+    - **MO4 (Robustness)**: CV PR-AUC std 0.0217 <= 0.03 -> **MET**.
+- **Next**: Phase 4 — Evaluation, Business and Explainability (starting with T4.1 probability calibration E09)
+- **Blockers**: None
+- **Code Quality**: 44 passed tests, 91% test coverage, 0 ruff errors.
 
 ---
 

@@ -25,11 +25,11 @@
 - [x] **T2.4** `train.py` with CV + MLflow logging | AC: E00, E01, E02 logged; results table updated
 
 ## Phase 3: Modelling + Tuning (W2-W3)
-- [ ] **T3.1** Run E03, E04, E05 | AC: logged; results table updated
-- [ ] **T3.2** Run E06 (SMOTE inside CV via imblearn Pipeline) | AC: logged; decision recorded
-- [ ] **T3.3** `tune.py` Optuna (E07) | AC: best params saved; MO1 met
-- [ ] **T3.4** E08 fairness ablation | AC: decision D-006 updated
-- [ ] **T3.5** Check MO2, MO4 on CV | AC: met or reason logged
+- [x] **T3.1** Run E03, E04, E05 | AC: logged; results table updated
+- [x] **T3.2** Run E06 (SMOTE inside CV via imblearn Pipeline) | AC: logged; decision recorded
+- [x] **T3.3** `tune.py` Optuna (E07) | AC: best params saved; MO1 met
+- [x] **T3.4** E08 fairness ablation | AC: decision D-006 updated
+- [x] **T3.5** Check MO2, MO4 on CV | AC: met or reason logged
 
 ## Phase 4: Evaluation, Business and Explainability (W3-W4)
 - [ ] **T4.1** Calibration on val (E09) | AC: Brier improves; reliability plot saved (MO3)
