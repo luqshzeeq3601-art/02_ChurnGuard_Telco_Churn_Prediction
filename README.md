@@ -2,7 +2,7 @@
 
 [![CI/CD Pipeline](https://github.com/ZeeqRyz/02_ChurnGuard_Telco_Churn_Prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/ZeeqRyz/02_ChurnGuard_Telco_Churn_Prediction/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen.svg)](https://github.com/ZeeqRyz/02_ChurnGuard_Telco_Churn_Prediction)
-[![Python](https://img.shields.io/badge/Python-3.10-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
 [![LightGBM](https://img.shields.io/badge/LightGBM-4.5-FF7A00.svg)](https://lightgbm.readthedocs.io/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40-FF4B4B.svg)](https://streamlit.io/)

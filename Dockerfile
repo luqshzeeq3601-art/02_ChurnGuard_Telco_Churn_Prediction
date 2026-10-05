@@ -1,5 +1,5 @@
 # Stage 1: Base Build & Runtime Image
-FROM python:3.10-slim as runtime
+FROM python:3.11-slim AS runtime
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

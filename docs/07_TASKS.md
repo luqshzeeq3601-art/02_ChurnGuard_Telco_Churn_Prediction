@@ -57,7 +57,7 @@
 
 ### Sprint A: Repo integrity
 - [x] **T9.1** Verify Phase 7 commit (0eba781) and commit review docs; working tree clean | AC: `pytest` green; `git status` clean (F8)
-- [ ] **T9.2** Clean repo: remove duplicate raw files and duplicate figures, Docker `python:3.11-slim`, `requires-python >=3.11`, rebuild image | AC: Docker smoke test passes (F10)
+- [x] **T9.2** Clean repo: remove duplicate raw files and duplicate figures, Docker `python:3.11-slim`, `requires-python >=3.11`, rebuild image | AC: Docker smoke test passes (F10)
 
 ### Sprint B: Model integrity
 - [ ] **T9.3** Tie-aware `recall_at_k` / `lift_at_k` + `n_unique_probs` in `evaluate.py` | AC: test proves row-order invariance (F2)

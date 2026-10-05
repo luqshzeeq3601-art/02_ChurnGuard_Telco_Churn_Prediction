@@ -257,7 +257,6 @@ def run_calibration_experiment(
     # 5. Generate and save figure
     fig_dir = CFG["paths"]["figures_dir"]
     fig_path1 = fig_dir / "07_calibration_curve.png"
-    fig_path2 = fig_dir / "calibration_curve.png"
 
     prob_dict = {
         "Uncalibrated (LightGBM)": probs_uncal,
@@ -266,7 +265,6 @@ def run_calibration_experiment(
     }
 
     fig = plot_calibration_curves(y_val, prob_dict, save_path=fig_path1)
-    fig.savefig(fig_path2, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
     # Choose best calibration method (lowest Brier score)
