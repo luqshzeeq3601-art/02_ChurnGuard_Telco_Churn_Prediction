@@ -289,12 +289,10 @@ def run_explainability_pipeline(
     if save_artifacts:
         fig_dir = CFG["paths"]["figures_dir"]
         fig_path1 = fig_dir / "09_shap_summary.png"
-        fig_path2 = fig_dir / "shap_summary.png"
 
         # Use subset of val_df for clean plot
         sample_df = val_df.sample(n=min(500, len(val_df)), random_state=42)
         fig = explainer.plot_global_summary(sample_df, save_path=fig_path1)
-        fig.savefig(fig_path2, dpi=300, bbox_inches="tight")
         plt.close(fig)
 
     # 3. Explain 5 sample customers

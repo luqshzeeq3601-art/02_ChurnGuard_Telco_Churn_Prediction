@@ -348,7 +348,6 @@ def run_threshold_optimization(
     if save_artifacts:
         fig_dir = CFG["paths"]["figures_dir"]
         fig_path1 = fig_dir / "08_profit_curve.png"
-        fig_path2 = fig_dir / "profit_curve.png"
 
         fig = plot_profit_curves(
             y_true=y_val,
@@ -357,7 +356,6 @@ def run_threshold_optimization(
             sensitivity_df=sens_df,
             save_path=fig_path1,
         )
-        fig.savefig(fig_path2, dpi=300, bbox_inches="tight")
         plt.close(fig)
 
         # Save optimal threshold summary to models/optimal_threshold.json

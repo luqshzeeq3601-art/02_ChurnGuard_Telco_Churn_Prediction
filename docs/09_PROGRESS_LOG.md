@@ -5,10 +5,24 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 9: Hardening** (Sprint A: Repo integrity) |
-| Next task | **T9.2** Clean repo: duplicate files, Docker Python 3.11, rebuild image |
-| Overall progress | 37 / 61 tasks (11 reopened, 14 added) |
-| Health | In progress: Phase 9 Hardening started |
+| Current phase | **Phase 9: Hardening** (Sprint B: Model integrity) |
+| Next task | **T9.3** Tie-aware recall_at_k / lift_at_k + n_unique_probs in evaluate.py |
+| Overall progress | 38 / 61 tasks (Sprint A complete) |
+| Health | On track: Sprint A finished, starting Sprint B |
+
+---
+
+## 05 Oct 2026: Task T9.2 Completed (Phase 9 Sprint A)
+- **Done**:
+  - **T9.2**: Cleaned duplicate raw files (`WA_Fn-UseC_-Telco-Customer-Churn.csv` and `cellular_subscribers.csv`) from `data/raw/`. Cleaned duplicate unnumbered figures (`calibration_curve.png`, `profit_curve.png`, `shap_summary.png`) from `reports/figures/`, updating source code in `calibrate.py`, `threshold.py`, and `shap_explain.py` to save only canonical numbered artifacts. Updated `pyproject.toml` to `requires-python = ">=3.11"` and `target-version = "py311"`. Updated `Dockerfile` base image to `python:3.11-slim AS runtime`. Updated `.github/workflows/ci.yml` and `README.md` to Python 3.11. Verified API integration tests pass on Python 3.11.
+- **Evidence**:
+  - `data/raw/` file inventory: strictly `telco_churn.csv`, `my_cellular_subscribers.csv`, `.gitkeep`.
+  - `reports/figures/` inventory: strictly `01_` through `09_` canonical PNGs.
+  - `pytest` run output: `73 passed, 1063 warnings in 53.63s`, total coverage: 83.26% (exceeds 70% requirement).
+  - `pytest tests/test_api.py`: 6/6 passed.
+  - `ruff`: all checks passed, 57 files formatted.
+- **Next**: **T9.3** Tie-aware `recall_at_k` / `lift_at_k` + `n_unique_probs` in `evaluate.py` (F2).
+- **Blockers**: None.
 
 ---
 
