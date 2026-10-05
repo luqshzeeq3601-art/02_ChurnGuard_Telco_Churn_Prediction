@@ -1,0 +1,19 @@
+{
+  "source": "oof_train_val",
+  "n_samples": 5986,
+  "optimal_threshold": 0.1882,
+  "expected_profit_per_1k_rm": 39481.98,
+  "pct_customers_contacted": 48.51,
+  "churner_capture_rate": 87.28,
+  "benchmarks": {
+    "contact_all_profit_per_1k_rm": 21632.3,
+    "contact_none_profit_per_1k_rm": 0.0,
+    "default_05_profit_per_1k_rm": 29830.03,
+    "optimal_profit_per_1k_rm": 39481.98
+  },
+  "risk_tiers": {
+    "high_threshold": 0.1882,
+    "medium_threshold": 0.0941,
+    "low_threshold": 0.0
+  }
+}

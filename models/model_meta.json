@@ -1,0 +1,125 @@
+{
+  "model_name": "churnguard-champion",
+  "model_version": "1.1.0",
+  "model_class": "CalibratedClassifierCV(LogisticRegression, method='sigmoid', cv=5)",
+  "runner_up_model": "CalibratedClassifierCV(LGBMClassifier, method='isotonic', cv=5)",
+  "fairness_mitigation": "Option M2 (dropped gender, SeniorCitizen)",
+  "test_reuse_disclosure": "Test set was reused exactly once for v1.1 evaluation after calibration redesign (E10) and champion re-decision (E11), as recorded in D-015.",
+  "created_at": "2026-10-05T08:40:52.129720Z",
+  "seed": 42,
+  "optimal_threshold": 0.1882,
+  "risk_tiers": {
+    "high": {
+      "min_prob": 0.1882,
+      "max_prob": 1.0,
+      "label": "High Risk"
+    },
+    "medium": {
+      "min_prob": 0.0941,
+      "max_prob": 0.1882,
+      "label": "Medium Risk"
+    },
+    "low": {
+      "min_prob": 0.0,
+      "max_prob": 0.0941,
+      "label": "Low Risk"
+    }
+  },
+  "features": {
+    "numeric_features": [
+      "tenure",
+      "MonthlyCharges",
+      "TotalCharges",
+      "avg_monthly_spend",
+      "charge_increase_ratio",
+      "num_services"
+    ],
+    "categorical_features": [
+      "gender",
+      "SeniorCitizen",
+      "Partner",
+      "Dependents",
+      "PhoneService",
+      "MultipleLines",
+      "InternetService",
+      "OnlineSecurity",
+      "OnlineBackup",
+      "DeviceProtection",
+      "TechSupport",
+      "StreamingTV",
+      "StreamingMovies",
+      "Contract",
+      "PaperlessBilling",
+      "PaymentMethod",
+      "tenure_bucket",
+      "has_protection_bundle",
+      "is_auto_pay",
+      "is_month_to_month",
+      "fiber_no_support"
+    ],
+    "total_feature_count": 27
+  },
+  "cost_parameters": {
+    "retention_offer_cost": 50,
+    "avg_monthly_revenue": 65,
+    "avg_customer_lifetime_months": 12,
+    "clv_if_retained": 780,
+    "profit_per_tp": 730,
+    "cost_per_fp": 50,
+    "cost_per_fn": 780
+  },
+  "test_performance": {
+    "roc_auc": {
+      "point_estimate": 0.8412,
+      "ci_95_lower": 0.8155,
+      "ci_95_upper": 0.8679
+    },
+    "pr_auc": {
+      "point_estimate": 0.6337,
+      "ci_95_lower": 0.5776,
+      "ci_95_upper": 0.6899
+    },
+    "brier_score": {
+      "point_estimate": 0.1381,
+      "ci_95_lower": 0.1247,
+      "ci_95_upper": 0.1509
+    },
+    "lift_at_10": {
+      "point_estimate": 2.8531,
+      "ci_95_lower": 2.5762,
+      "ci_95_upper": 3.1719
+    },
+    "recall_at_20": {
+      "point_estimate": 0.5009,
+      "ci_95_lower": 0.4608,
+      "ci_95_upper": 0.547
+    },
+    "precision_at_tau": {
+      "point_estimate": 0.5388,
+      "ci_95_lower": 0.4869,
+      "ci_95_upper": 0.5908
+    },
+    "recall_at_tau": {
+      "point_estimate": 0.7651,
+      "ci_95_lower": 0.7128,
+      "ci_95_upper": 0.814
+    },
+    "f1_at_tau": {
+      "point_estimate": 0.6324,
+      "ci_95_lower": 0.5884,
+      "ci_95_upper": 0.6734
+    },
+    "profit_per_1k_customers_rm": {
+      "point_estimate": 35253.55,
+      "ci_95_lower": 29077.4082,
+      "ci_95_upper": 41212.5005
+    }
+  },
+  "operational_summary": {
+    "pct_contacted": 37.75,
+    "churner_capture_rate": 76.51,
+    "net_profit_rm": 37263.0,
+    "profit_per_1k_rm": 35253.55,
+    "test_contact_all_profit_per_1k": 18193.09
+  }
+}

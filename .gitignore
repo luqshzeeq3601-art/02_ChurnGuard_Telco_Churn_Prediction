@@ -1,10 +1,9 @@
-# ===== Data =====
-/data/
-*.csv
+# ===== Data (keep raw benchmark and lightweight parquet splits) =====
+data/processed/*.csv
+data/cache/
 
 # ===== Model artifacts =====
-/models/
-*.joblib
+# Serialized Champion and Runner-up models are tracked for CI, Docker, and demo serving
 *.pkl
 
 # ===== MLflow =====
