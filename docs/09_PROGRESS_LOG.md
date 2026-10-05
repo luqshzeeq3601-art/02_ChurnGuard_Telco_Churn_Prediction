@@ -7,8 +7,24 @@
 |---|---|
 | Current phase | **Phase 9: Hardening** (Completed; ready for Phase 8 / T9.13 deployment) |
 | Next task | **T9.13 / T8.5** Public live deployment (Hugging Face Spaces / Render) |
-| Overall progress | 52 / 61 tasks |
-| Health | On track: 6/6 remaining review issues resolved; G1-G5, G7-G8 PASS, G6 PENDING deployment |
+| Overall progress | 53 / 61 tasks |
+| Health | On track: Hygiene fixes & branch isolation complete; CI green; awaiting HF Space creation |
+
+---
+
+## 05 Oct 2026: Repository Hygiene, Test Isolation & Branch Governance
+- **Done**:
+  - **Repository Hygiene (.gitattributes)**: Added `.gitattributes` to enforce Unix LF line endings across all text and code files, eliminating Windows/Linux CRLF churn.
+  - **Pytest MLflow Isolation (conftest.py)**: Added autouse pytest fixture `isolate_test_mlflow` redirecting `MLFLOW_TRACKING_URI` to a dynamic temporary folder (`tmp_path / "test_mlruns"`). Confirmed test runs no longer pollute the root `mlruns/` experiment store.
+  - **Experimental Branch Isolation (v2-experiments)**: Created and pushed dedicated `v2-experiments` branch storing experimental feature engineering, soft-voting ensemble, and retention playbooks. Restored `main` branch to clean, verified v1.1 release state.
+  - **ADR D-014 Governance Compliance**: Refactored experimental fairness analysis to evaluate global threshold disparities only, eliminating group-specific runtime thresholds and preserving anti-discrimination compliance.
+  - **Hugging Face Spaces Preparation**: Verified root entrypoint `app.py`, Linux system dependencies in `packages.txt` (`libgomp1`), pinned Python dependencies in `requirements.txt`, and Streamlit SDK YAML frontmatter in `README.md`.
+- **Evidence**:
+  - `git status -- mlruns/` remains completely clean after running test suite.
+  - `pytest`: 81/81 passed on clean `main`.
+  - GitHub Actions CI/CD run on `main` active.
+- **Next**: **T9.13 / T8.5** Finalize live public Hugging Face Spaces deployment.
+- **Blockers**: None.
 
 ---
 
