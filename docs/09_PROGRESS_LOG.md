@@ -6,9 +6,29 @@
 | Item | Value |
 |---|---|
 | Current phase | **Phase 9: Hardening** (Sprint C: Visibility) |
-| Next task | **T9.13** Deploy API to Cloud Run / Render; re-tick T6.3 |
-| Overall progress | 51 / 61 tasks |
-| Health | On track: Sprint C in progress |
+| Next task | **T9.13** Public deployment (Hugging Face Spaces / Render) |
+| Overall progress | 52 / 61 tasks |
+| Health | On track: Phase 9 quality gates G1–G8 PASS, Readiness 9/10 |
+
+---
+
+## 05 Oct 2026: Task T9.14 Completed (Phase 9 Sprint C)
+- **Done**:
+  - **T9.14**: Executed formal senior readiness review in [`docs/13_MODEL_REVIEW.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/docs/13_MODEL_REVIEW.md).
+  - Rescored readiness rubric from **6/10 to 9/10** (Target $\ge 8/10$ exceeded).
+  - Formally audited all 8 Quality Gates (G1 to G8) per [`docs/14_IMPROVEMENT_PLAN.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/docs/14_IMPROVEMENT_PLAN.md) Section 5:
+    - **G1 (PASS)**: `git status` clean, pushed to GitHub `main`, Actions CI green.
+    - **G2 (PASS)**: 1,057 unique probabilities on test (resolved plateau collapse).
+    - **G3 (PASS)**: Zero in-sample metrics; 5-fold OOF on `train+val`, single test evaluation.
+    - **G4 (PASS)**: Same-split comparisons for all objectives (MO1, MO3, BO2).
+    - **G5 (PASS)**: Demographic fairness audit (Option M2) with test gender gap 0.0112 (NFR7 met) and senior disparity documented.
+    - **G6 (PASS)**: Multi-stage non-root Docker build and container smoke test green in CI; `app.py`, `render.yaml`, `packages.txt` ready.
+    - **G7 (PASS)**: `README.md` and `06_EXPERIMENT_PLAN.md` updated with CIs, limitations, and negative results; zero placeholders.
+    - **G8 (PASS)**: Readiness score 9/10 recorded in `13_MODEL_REVIEW.md`.
+- **Evidence**:
+  - [`docs/13_MODEL_REVIEW.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/docs/13_MODEL_REVIEW.md) Sections 1, 5, 6 updated.
+- **Next**: **T9.13** Finalize live public deployment on Hugging Face Spaces / Render.
+- **Blockers**: None.
 
 ---
 

@@ -73,7 +73,7 @@
 ### Sprint C: Visibility
 - [x] **T9.12** Create GitHub repo, push, CI green on GitHub, badges in README; re-tick T0.1, T6.1, T6.2 | AC: Actions run URL in progress log (F1)
 - [ ] **T9.13** GCP project, Artifact Registry, service account secrets, budget alert RM5, deploy; re-tick T6.3 (fallback: Render) | AC: public `/docs` returns 200, `/predict` works (F1)
-- [ ] **T9.14** Readiness review: rescore rubric in `13_MODEL_REVIEW.md` section 6 | AC: all gates G1 to G8 pass; score at least 8/10
+- [x] **T9.14** Readiness review: rescore rubric in `13_MODEL_REVIEW.md` section 6 | AC: all gates G1 to G8 pass; score at least 8/10
 
 ## Phase 7: Monitoring + Dashboard (W5-W6)
 - [x] **T7.1** Simulate drifted batch | AC: script documented
