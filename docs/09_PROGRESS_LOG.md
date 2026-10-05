@@ -5,10 +5,26 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | Phase 2: Baseline (W2) |
-| Next task | **T2.1** `FeatureEngineer` transformer |
-| Overall progress | 12 / 47 tasks |
+| Current phase | Phase 3: Modelling + Tuning (W2-W3) |
+| Next task | **T3.1** Run E03 (Random Forest), E04 (XGBoost), E05 (LightGBM) |
+| Overall progress | 16 / 47 tasks |
 | Health | On track |
+
+---
+
+## 05 Oct 2026: Phase 2 Baseline Models Completed
+- **Done**:
+  - **T2.1**: Implemented `FeatureEngineer` scikit-learn transformer in `src/churnguard/features/build.py` implementing all 8 domain features from `05_DATA_SPEC.md` section 5 (`tenure_bucket`, `avg_monthly_spend`, `charge_increase_ratio`, `num_services`, `has_protection_bundle`, `is_auto_pay`, `is_month_to_month`, `fiber_no_support`). Tested individually in `tests/test_features.py`.
+  - **T2.2**: Implemented `ColumnTransformer` preprocessing pipeline handling numeric median imputation + standard scaling, categorical most-frequent imputation + OneHotEncoding (`handle_unknown="ignore"`). Verified shapes and fit-on-train-only discipline via `tests/test_features.py`.
+  - **T2.3**: Implemented comprehensive evaluation module in `src/churnguard/models/evaluate.py` providing PR-AUC, ROC-AUC, Brier score, Lift@10%, Recall@20%, F1, Precision, Recall, and business Expected Profit (RM). Validated on toy arrays in `tests/test_evaluate.py`.
+  - **T2.4**: Built 5-fold Stratified CV training engine with local MLflow tracking in `src/churnguard/models/train.py`. Executed and logged baselines E00, E01, E02:
+    - **E00 (Dummy Stratified Floor)**: CV PR-AUC: 0.2690 ± 0.0024, ROC-AUC: 0.5089, Lift@10: 1.03
+    - **E01 (Logistic Regression - Raw Features)**: CV PR-AUC: 0.6587 ± 0.0220, ROC-AUC: 0.8442, Lift@10: 2.83, Recall@20: 50.31%
+    - **E02 (Logistic Regression - Engineered Features)**: CV PR-AUC: 0.6611 ± 0.0124, ROC-AUC: 0.8458, Lift@10: 2.89, Recall@20: 50.61%
+  - Updated experiment results table in `docs/06_EXPERIMENT_PLAN.md`.
+- **Next**: Phase 3 — Modelling + Tuning (E03 Random Forest, E04 XGBoost, E05 LightGBM, E06 SMOTE, E07 Optuna)
+- **Blockers**: None
+- **Code Quality**: 28 passed tests, 94% test coverage, 0 ruff errors.
 
 ---
 
