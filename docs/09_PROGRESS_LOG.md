@@ -6,9 +6,28 @@
 | Item | Value |
 |---|---|
 | Current phase | **Phase 9: Hardening** (Sprint B: Model integrity) |
-| Next task | **T9.4** E10 calibration redesign (OOF train+val, uncal vs sigmoid vs isotonic) |
-| Overall progress | 39 / 61 tasks |
+| Next task | **T9.5** Re-optimise profit threshold on OOF calibrated probs + sensitivity |
+| Overall progress | 40 / 61 tasks |
 | Health | On track: Sprint B in progress |
+
+---
+
+## 05 Oct 2026: Task T9.4 Completed (Phase 9 Sprint B)
+- **Done**:
+  - **T9.4**: Redesigned calibration experiment (E10) using 5-fold Stratified cross-validation on combined `train + val` (5,986 samples). Compared uncalibrated LightGBM vs Sigmoid `cv=5` vs Isotonic `cv=5`. Eliminated probability plateau collapse (F2, F3) and avoided in-sample data leakage.
+  - Pre-registered selection rule applied: Isotonic `cv=5` selected (lowest Brier score 0.1341, PR-AUC delta -0.0017 $\le 0.005$, unique probabilities 2,842 $\ge 200$).
+  - Exported out-of-fold calibrated predictions to `models/oof_train_val_preds.parquet`.
+  - Regenerated canonical calibration plot `reports/figures/07_calibration_curve.png` and logged parameters/metrics/artifacts to MLflow experiment `E10_Calibration_Redesign`.
+- **Evidence**:
+  - Out-of-Fold Calibration Metrics (5,986 samples):
+    - *Uncalibrated*: Brier = 0.1522, PR-AUC = 0.6601, ROC-AUC = 0.8474, ECE = 0.1136, Unique Probs = 5,969
+    - *Sigmoid cv=5*: Brier = 0.1344, PR-AUC = 0.6621, ROC-AUC = 0.8479, ECE = 0.0205, Unique Probs = 5,978
+    - *Isotonic cv=5*: Brier = **0.1341**, PR-AUC = 0.6584, ROC-AUC = 0.8467, ECE = **0.0142**, Unique Probs = **2,842**
+  - Unique probability levels: 2,842 (surpasses $\ge 200$ acceptance criteria; previous prefit collapsed to 32).
+  - Out-of-fold Expected Calibration Error (ECE): reduced from 0.1136 to 0.0142.
+  - `pytest tests/test_calibrate.py`: 3/3 passed in 23.89s.
+- **Next**: **T9.5** Re-optimise profit threshold on OOF calibrated probs + sensitivity (F7).
+- **Blockers**: None.
 
 ---
 
