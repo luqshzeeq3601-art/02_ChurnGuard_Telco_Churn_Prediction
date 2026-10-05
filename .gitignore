@@ -1,15 +1,15 @@
 # ===== Data =====
-data/
+/data/
 *.csv
 
 # ===== Model artifacts =====
-models/
+/models/
 *.joblib
 *.pkl
 
 # ===== MLflow =====
-mlruns/
-mlartifacts/
+/mlruns/
+/mlartifacts/
 
 # ===== Python =====
 .venv/

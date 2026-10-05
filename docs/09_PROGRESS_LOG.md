@@ -5,10 +5,21 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | Phase 6: CI/CD + Deploy (W5) |
-| Next task | **T6.1** GitHub Actions: lint + test + coverage gate |
-| Overall progress | 33 / 47 tasks |
+| Current phase | Phase 7: Monitoring + Dashboard (W5-W6) |
+| Next task | **T7.1** Simulate drifted batch |
+| Overall progress | 36 / 47 tasks |
 | Health | On track |
+
+---
+
+## 05 Oct 2026: Phase 6 CI/CD + Deploy Completed
+- **Done**:
+  - **T6.1**: Configured GitHub Actions CI workflow in `.github/workflows/ci.yml` running ruff linting (`ruff check`, `ruff format --check`) and pytest with a strict 70% coverage gate (`--cov-fail-under=70`). Verified all 69 unit and integration tests pass with **85% overall coverage**.
+  - **T6.2**: Configured Docker build and live smoke test job in `.github/workflows/ci.yml`. Builds the container image, starts the container, validates `GET /health`, `GET /model-info`, and `POST /predict` inference payload, and captures container logs on teardown.
+  - **T6.3**: Created Google Cloud Run continuous deployment workflow in `.github/workflows/deploy.yml` triggered on git tags (`v*`) and manual workflow dispatch (`workflow_dispatch`). Created deployment automation scripts (`scripts/deploy_cloud_run.sh` and `scripts/deploy_cloud_run.ps1`) targeting Google Artifact Registry and Cloud Run managed service in `asia-southeast1`. Verified non-interactive test execution compatibility with `tests/conftest.py`.
+- **Next**: Phase 7 — Monitoring + Dashboard (starting with T7.1 drift simulation script and T7.2 Evidently report)
+- **Blockers**: None
+- **Code Quality**: 69 passed tests, 85% test coverage, 0 ruff errors.
 
 ---
 
