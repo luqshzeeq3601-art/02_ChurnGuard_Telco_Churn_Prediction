@@ -11,6 +11,7 @@ mlflow==2.18.0
 
 # Data validation
 pandera==0.21.0
+multimethod==1.10
 
 # Visualisation
 matplotlib==3.9.3
