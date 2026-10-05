@@ -22,6 +22,10 @@ import streamlit as st
 
 from churnguard.config import CFG
 from churnguard.models.predict import ChurnPredictor
+from churnguard.models.retention_playbook import (
+    compute_dynamic_clv,
+    recommend_retention_playbook,
+)
 
 # Page setup
 st.set_page_config(
@@ -138,6 +142,7 @@ with st.sidebar:
         "Navigation",
         [
             "🎯 Single Customer Assessment",
+            "⚡ What-If Simulator & Retention Playbooks",
             "📊 Batch Scoring & Retention Targeting",
             "💡 Strategic Business Insights",
             "🇲🇾 Malaysia Market Context",
@@ -147,12 +152,15 @@ with st.sidebar:
 
     st.markdown("---")
     st.subheader("Model Status")
-    st.write(f"**Model:** `{meta.get('model_name', 'LightGBM Champion')}`")
-    st.write(f"**Version:** `{meta.get('model_version', '1.0.0')}`")
-    st.write("**Optimal Threshold ($\\tau^*$):** `0.18`")
-    st.write("**ROC-AUC (Test):** `0.8412`")
-    st.write("**PR-AUC (Test):** `0.6337`")
-    st.caption("Framed for fictional Malaysian telco **NusaTel** (RM currency).")
+    opt_tau = meta.get("optimal_threshold", 0.1882)
+    roc_pt = meta.get("test_performance", {}).get("roc_auc", {}).get("point_estimate", 0.8449)
+    pr_pt = meta.get("test_performance", {}).get("pr_auc", {}).get("point_estimate", 0.6739)
+    st.write(f"**Model:** `{meta.get('model_name', 'churnguard-champion')}`")
+    st.write(f"**Version:** `{meta.get('model_version', '1.1.0')}`")
+    st.write(f"**Optimal Threshold ($\\tau^*$):** `{opt_tau}`")
+    st.write(f"**ROC-AUC (Test):** `{roc_pt:.4f}`")
+    st.write(f"**PR-AUC (Test):** `{pr_pt:.4f}`")
+    st.caption("Framed for Malaysian telco **NusaTel** (RM currency).")
 
 
 # Header
@@ -275,13 +283,171 @@ if selected_page == "🎯 Single Customer Assessment":
                 rec = "✅ Organic service / Cross-sell opportunities"
             st.markdown(f"**Recommended Action:**<br>{rec}", unsafe_allow_html=True)
 
-        st.markdown("#### 🔍 Plain-Language Frontline Explanation Codes (SHAP)")
-        for i, reason in enumerate(reasons, 1):
-            st.markdown(f"**{i}.** {reason}")
+            st.markdown("#### 🔍 Plain-Language Frontline Explanation Codes (SHAP)")
+            for i, reason in enumerate(reasons, 1):
+                st.markdown(f"**{i}.** {reason}")
+
+            # Dynamic Retention Playbook Recommendation
+            playbook = recommend_retention_playbook(customer_payload, churn_prob=prob)
+            dyn_clv = compute_dynamic_clv(monthly_charges, tenure, contract)
+            st.markdown("#### 🎁 Prescriptive Frontline Retention Playbook")
+            st.success(
+                f"**Recommended Action**: **{playbook['primary_playbook']}** ({playbook['urgency']})\n\n"
+                f"- **Offer Details**: {playbook['action_details']}\n"
+                f"- **Estimated Churn Reduction**: ~{playbook['estimated_churn_reduction_pct']}%\n"
+                f"- **Action Cost**: RM{playbook['estimated_action_cost_rm']:.2f} | **Preserved Dynamic CLV**: RM{dyn_clv:,.2f}"
+            )
 
 
 # ==========================================
-# PAGE 2: Batch Scoring & Retention Targeting
+# PAGE 2: What-If Simulator & Retention Playbooks
+# ==========================================
+elif selected_page == "⚡ What-If Simulator & Retention Playbooks":
+    st.subheader("⚡ Frontline 'What-If' Retention Counterfactual Simulator")
+    st.info(
+        "💡 Simulate retention interventions in real-time. Compare the baseline customer risk against modified contract terms, security bundles, and payment methods to measure immediate risk reduction and CLV impact."
+    )
+
+    base_col, sim_col = st.columns(2)
+
+    with base_col:
+        st.markdown("### 📋 Baseline Customer Profile")
+        b_tenure = st.slider("Current Tenure (Months)", 1, 72, 4, key="b_tenure")
+        b_contract = st.selectbox(
+            "Current Contract",
+            ["Month-to-month", "One year", "Two year"],
+            index=0,
+            key="b_contract",
+        )
+        b_internet = st.selectbox(
+            "Internet Service", ["Fiber optic", "DSL", "No"], index=0, key="b_internet"
+        )
+        b_tech = st.selectbox("Tech Support", ["No", "Yes"], index=0, key="b_tech")
+        b_security = st.selectbox("Online Security", ["No", "Yes"], index=0, key="b_security")
+        b_pay = st.selectbox(
+            "Payment Method",
+            [
+                "Electronic check",
+                "Mailed check",
+                "Bank transfer (automatic)",
+                "Credit card (automatic)",
+            ],
+            index=0,
+            key="b_pay",
+        )
+        b_monthly = st.slider("Monthly Charges (RM)", 20.0, 140.0, 85.0, step=5.0, key="b_monthly")
+
+    with sim_col:
+        st.markdown("### 🛠️ Simulated Retention Intervention")
+        s_contract = st.selectbox(
+            "Intervention Contract",
+            ["Month-to-month", "One year", "Two year"],
+            index=1,
+            key="s_contract",
+        )
+        s_tech = st.selectbox("Offer Tech Support?", ["Yes", "No"], index=0, key="s_tech")
+        s_security = st.selectbox(
+            "Offer Online Security?", ["Yes", "No"], index=0, key="s_security"
+        )
+        s_pay = st.selectbox(
+            "Convert to Payment Method",
+            [
+                "Credit card (automatic)",
+                "Bank transfer (automatic)",
+                "Electronic check",
+                "Mailed check",
+            ],
+            index=0,
+            key="s_pay",
+        )
+        discount_pct = st.slider("Retention Plan Discount (%)", 0, 30, 10, step=5, key="s_disc")
+        s_monthly = b_monthly * (1.0 - (discount_pct / 100.0))
+        st.write(
+            f"**Adjusted Monthly Charge**: `RM{s_monthly:.2f}` (Discount: `RM{b_monthly - s_monthly:.2f}/mo`)"
+        )
+
+    # Evaluate baseline vs simulated
+    base_payload = {
+        "customerID": "SIM-BASE",
+        "gender": "Female",
+        "SeniorCitizen": 0,
+        "Partner": "No",
+        "Dependents": "No",
+        "tenure": b_tenure,
+        "PhoneService": "Yes",
+        "MultipleLines": "Yes",
+        "InternetService": b_internet,
+        "OnlineSecurity": b_security,
+        "OnlineBackup": "No",
+        "DeviceProtection": "No",
+        "TechSupport": b_tech,
+        "StreamingTV": "Yes",
+        "StreamingMovies": "Yes",
+        "Contract": b_contract,
+        "PaperlessBilling": "Yes",
+        "PaymentMethod": b_pay,
+        "MonthlyCharges": b_monthly,
+        "TotalCharges": b_monthly * max(1, b_tenure),
+    }
+
+    sim_payload = dict(base_payload)
+    sim_payload.update(
+        {
+            "Contract": s_contract,
+            "TechSupport": s_tech,
+            "OnlineSecurity": s_security,
+            "PaymentMethod": s_pay,
+            "MonthlyCharges": s_monthly,
+            "TotalCharges": s_monthly * max(1, b_tenure),
+        }
+    )
+
+    base_res = predictor.predict_single(base_payload)
+    sim_res = predictor.predict_single(sim_payload)
+
+    base_prob = base_res["churn_probability"]
+    sim_prob = sim_res["churn_probability"]
+    prob_delta = sim_prob - base_prob
+
+    base_clv = compute_dynamic_clv(b_monthly, b_tenure, b_contract)
+    sim_clv = compute_dynamic_clv(s_monthly, b_tenure, s_contract)
+    clv_delta = sim_clv - base_clv
+
+    st.markdown("---")
+    st.markdown("### 📊 Counterfactual Impact Comparison")
+
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Baseline Churn Risk", f"{base_prob:.1%}")
+    m2.metric(
+        "Simulated Churn Risk",
+        f"{sim_prob:.1%}",
+        delta=f"{prob_delta:+.1%}",
+        delta_color="inverse",
+    )
+    m3.metric("Baseline Dynamic CLV", f"RM{base_clv:,.0f}")
+    m4.metric(
+        "Simulated Dynamic CLV",
+        f"RM{sim_clv:,.0f}",
+        delta=f"+RM{clv_delta:,.0f}" if clv_delta >= 0 else f"-RM{abs(clv_delta):,.0f}",
+    )
+
+    if prob_delta < -0.15:
+        st.balloons()
+        st.success(
+            f"🎉 **High Impact Retention Deal!** This intervention drops churn risk from **{base_prob:.1%}** down to **{sim_prob:.1%}** (a **{abs(prob_delta):.1%} absolute reduction**) and boosts expected preserved CLV by **+RM{clv_delta:,.0f}**."
+        )
+    elif prob_delta < 0:
+        st.info(
+            f"✅ **Moderate Risk Reduction**: Churn probability drops by **{abs(prob_delta):.1%}**, successfully stabilizing the account."
+        )
+    else:
+        st.warning(
+            "⚠️ **Negligible Impact**: The simulated changes did not meaningfully lower the customer's churn risk."
+        )
+
+
+# ==========================================
+# PAGE 3: Batch Scoring & Retention Targeting
 # ==========================================
 elif selected_page == "📊 Batch Scoring & Retention Targeting":
     st.subheader("Batch Scoring & Profit-Optimized Campaign Targeting")
