@@ -1,0 +1,17 @@
+# .dockerignore
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+data/raw/
+data/interim/
+mlruns/
+.git/
+.github/
+notebooks/
+tests/
