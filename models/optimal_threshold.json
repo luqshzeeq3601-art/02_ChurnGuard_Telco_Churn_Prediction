@@ -5,6 +5,29 @@
   "expected_profit_per_1k_rm": 39481.98,
   "pct_customers_contacted": 48.51,
   "churner_capture_rate": 87.28,
+  "strategies": {
+    "profit_optimal": {
+      "threshold": 0.1882,
+      "name": "Profit-Optimal (Unconstrained)",
+      "description": "Maximizes net campaign financial return",
+      "target_pct": 48.51,
+      "expected_churner_recall": 87.28
+    },
+    "budget_top30": {
+      "threshold": 0.3757,
+      "name": "Balanced Capacity (Top 30% Budget Cap)",
+      "description": "Targets highest-risk 30% to conserve retention voucher outlay",
+      "target_pct": 30.02,
+      "expected_churner_recall": 67.51
+    },
+    "budget_top20": {
+      "threshold": 0.5257,
+      "name": "Strict Budget (Top 20% Call-Center Cap)",
+      "description": "Focuses frontline retention agents on the top quintile risk group",
+      "target_pct": 20.11,
+      "expected_churner_recall": 51.07
+    }
+  },
   "benchmarks": {
     "contact_all_profit_per_1k_rm": 21632.3,
     "contact_none_profit_per_1k_rm": 0.0,

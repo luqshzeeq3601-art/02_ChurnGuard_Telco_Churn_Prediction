@@ -386,6 +386,16 @@ def run_threshold_optimization(
         )
         plt.close(fig)
 
+        # Compute budget capacity cutoffs (top 30% and top 20%)
+        tau_30 = float(np.percentile(probs_val, 70))
+        tau_20 = float(np.percentile(probs_val, 80))
+        res_30 = compute_profit_for_threshold(
+            y_true=y_val, y_prob=probs_val, threshold=tau_30, clv_values=clv_val
+        )
+        res_20 = compute_profit_for_threshold(
+            y_true=y_val, y_prob=probs_val, threshold=tau_20, clv_values=clv_val
+        )
+
         # Save optimal threshold summary to models/optimal_threshold.json
         threshold_meta = {
             "source": source_label,
@@ -398,6 +408,31 @@ def run_threshold_optimization(
             "churner_capture_rate": round(
                 opt_res["optimal_metrics"]["churner_capture_rate"] * 100, 2
             ),
+            "strategies": {
+                "profit_optimal": {
+                    "threshold": round(opt_res["optimal_threshold"], 4),
+                    "name": "Profit-Optimal (Unconstrained)",
+                    "description": "Maximizes net campaign financial return",
+                    "target_pct": round(opt_res["optimal_metrics"]["pct_contacted"] * 100, 2),
+                    "expected_churner_recall": round(
+                        opt_res["optimal_metrics"]["churner_capture_rate"] * 100, 2
+                    ),
+                },
+                "budget_top30": {
+                    "threshold": round(tau_30, 4),
+                    "name": "Balanced Capacity (Top 30% Budget Cap)",
+                    "description": "Targets highest-risk 30% to conserve retention voucher outlay",
+                    "target_pct": round(res_30["pct_contacted"] * 100, 2),
+                    "expected_churner_recall": round(res_30["churner_capture_rate"] * 100, 2),
+                },
+                "budget_top20": {
+                    "threshold": round(tau_20, 4),
+                    "name": "Strict Budget (Top 20% Call-Center Cap)",
+                    "description": "Focuses frontline retention agents on the top quintile risk group",
+                    "target_pct": round(res_20["pct_contacted"] * 100, 2),
+                    "expected_churner_recall": round(res_20["churner_capture_rate"] * 100, 2),
+                },
+            },
             "benchmarks": {
                 "contact_all_profit_per_1k_rm": round(
                     opt_res["benchmarks"]["contact_all_profit_per_1k"], 2

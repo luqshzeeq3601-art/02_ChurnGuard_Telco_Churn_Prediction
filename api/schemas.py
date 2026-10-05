@@ -168,3 +168,10 @@ class ModelInfoResponse(BaseModel):
     test_performance: dict[str, Any] = Field(
         description="Held-out test set metrics with 95% bootstrap CIs"
     )
+    operational_summary: dict[str, Any] | None = Field(
+        default=None, description="Test operational results (contact rate, capture rate, profit)"
+    )
+    targeting_strategies: dict[str, Any] | None = Field(
+        default=None,
+        description="Retention campaign budget targeting strategies (optimal, top30, top20)",
+    )

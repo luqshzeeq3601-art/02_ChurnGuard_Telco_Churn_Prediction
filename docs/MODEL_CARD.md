@@ -51,14 +51,23 @@ Evaluated on the held-out test set ($N = 1,057$, 281 churners) with **1,000x per
 |---|---|---|---|---|
 | **ROC-AUC** | **0.8449** | [0.8207, 0.8714] | 0.8473 | $\ge 0.84$ (MO2 Met) |
 | **PR-AUC** | **0.6739** | [0.6203, 0.7262] | 0.6760 | $\ge 0.62$ (MO2 Met) |
-| **Brier Score** | **0.1361** | [0.1236, 0.1476] | 0.1340 | $\le 0.1542$ (MO3 Met) |
+| **Brier Score** | **0.1361** | [0.1236, 0.1476] | 0.1340 | MO3: No Gain (Already Calibrated: 0.1361 vs 0.1361) |
 | **Lift @ 10%** | **2.84x** | [2.52x, 3.18x] | 2.98x | $\ge 2.50\text{x}$ (MO2 Met) |
-| **Recall @ 20%** | **48.40%** | [44.21%, 53.26%] | 51.60% | $\ge 50.00\%$ |
+| **Recall @ 20%** | **48.40%** | [44.21%, 53.26%] | 51.60% | $\ge 50.00\%$ (BO1 Missed) |
 | **Optimal Threshold ($\tau^*$)** | **0.1882** | — | 0.1882 | Profit-maximising on OOF |
 | **Precision @ $\tau^*$** | **47.53%** | [43.42%, 51.91%] | 49.79% | — |
 | **Recall @ $\tau^*$** | **88.97%** | [85.00%, 92.44%] | 85.41% | — |
 | **F1 Score @ $\tau^*$** | **0.6196** | [0.5799, 0.6576] | 0.6291 | — |
-| **Expected Profit / 1k** | **RM36,720.15** | [RM30,063.54, RM42,997.04] | RM37,613.72 | Beats Contact All (RM18,193) |
+| **Expected Profit / 1k** | **RM36,720.15** | [RM30,063.54, RM42,997.04] | RM37,613.72 | Beats Contact All (RM18,193) (BO2 Met) |
+
+### Campaign Budget Targeting Strategies (on Held-out Test Split)
+To provide operational flexibility under varying retention voucher and call-center capacity constraints, three targeting strategies are supported:
+
+| Strategy | Decision Threshold ($\tau$) | Contact Rate (%) | Churner Recall (%) | Precision (%) | Net Profit / 1k (RM) | Operational Profile |
+|---|---|---|---|---|---|---|
+| **Profit-Optimal (Unconstrained)** | **0.1882** | **49.76%** (526 / 1,057) | **88.97%** (250 / 281) | 47.53% | **RM36,720.15** | Maximizes net campaign financial return |
+| **Balanced Capacity (Top 30% Cap)** | **0.3667** | **29.99%** (317 / 1,057) | **66.19%** (186 / 281) | 58.68% | **RM33,819.98** | Conserves 40% voucher budget with 92% profit retention |
+| **Strict Budget (Top 20% Cap)** | **0.4714** | **20.06%** (212 / 1,057) | **48.40%** (136 / 281) | 64.15% | **RM26,064.94** | Focuses frontline call-center capacity on top quintile risk |
 
 ### Baseline Policy Comparisons (on Held-out Test Split)
 - **Optimal Policy ($\tau^* = 0.1882$)**: Expected Profit = **RM36,720.15 / 1,000 customers**
@@ -79,8 +88,9 @@ Fairness audit conducted across out-of-fold calibrated predictions at $\tau^* = 
 | **M2** | `gender` + `SeniorCitizen` | **RM38,693.49** | **0.0195** | **0.0744** | **0.0744** | **Selected (D-014)** |
 
 ### Disparity Analysis & Rationale
-- **Gender**: Recall gap is **0.0195** (Male 87.06% vs Female 89.02%), comfortably satisfying the non-functional requirement $\text{gap} \le 0.05$ (NFR7).
-- **Senior Citizens**: Recall gap is **0.0744** (Senior 93.58% vs Non-Senior 86.14%). This remaining gap is documented as a known limitation driven by ground-truth base rate disparity: Senior citizens have an actual churn rate of **41.3%** compared to **23.6%** for non-seniors (a 1.75x ratio), primarily concentrated in month-to-month fiber optic contracts lacking technical support bundles.
+- **NFR7 Compliance Status**: **Partially Met (Gender Only)**.
+- **Gender**: Recall gap is **0.0195** on OOF / **0.0112** on Test (Male 88.4% vs Female 89.5%), comfortably satisfying the non-functional requirement $\text{gap} \le 0.05$ (NFR7 Passed for gender).
+- **Senior Citizens**: Recall gap is **0.0744** on OOF / **0.0911** on Test (Senior 95.8% vs Non-Senior 86.7%). This remaining gap is documented as a known limitation driven by ground-truth base rate disparity: Senior citizens have an actual churn rate of **41.3%** compared to **23.6%** for non-seniors (a 1.75x ratio), primarily concentrated in month-to-month fiber optic contracts lacking technical support bundles.
 - **Group-Specific Thresholds**: Explicitly rejected per Decision **D-014** to prevent discriminatory pricing or differential treatment under Malaysian Fair Trade practices.
 
 ---

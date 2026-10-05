@@ -5,7 +5,7 @@
   "runner_up_model": "CalibratedClassifierCV(LGBMClassifier, method='isotonic', cv=5)",
   "fairness_mitigation": "Option M2 (dropped gender, SeniorCitizen)",
   "test_reuse_disclosure": "Test set was reused exactly once for v1.1 evaluation after calibration redesign (E10) and champion re-decision (E11), as recorded in D-015.",
-  "created_at": "2026-10-05T08:40:52.129720Z",
+  "created_at": "2026-10-05T09:24:31.854584Z",
   "seed": 42,
   "optimal_threshold": 0.1882,
   "risk_tiers": {
@@ -35,8 +35,6 @@
       "num_services"
     ],
     "categorical_features": [
-      "gender",
-      "SeniorCitizen",
       "Partner",
       "Dependents",
       "PhoneService",
@@ -57,7 +55,7 @@
       "is_month_to_month",
       "fiber_no_support"
     ],
-    "total_feature_count": 27
+    "total_feature_count": 25
   },
   "cost_parameters": {
     "retention_offer_cost": 50,
@@ -70,56 +68,82 @@
   },
   "test_performance": {
     "roc_auc": {
-      "point_estimate": 0.8412,
-      "ci_95_lower": 0.8155,
-      "ci_95_upper": 0.8679
+      "point_estimate": 0.8449,
+      "ci_95_lower": 0.8207,
+      "ci_95_upper": 0.8714
     },
     "pr_auc": {
-      "point_estimate": 0.6337,
-      "ci_95_lower": 0.5776,
-      "ci_95_upper": 0.6899
+      "point_estimate": 0.6739,
+      "ci_95_lower": 0.6203,
+      "ci_95_upper": 0.7262
     },
     "brier_score": {
-      "point_estimate": 0.1381,
-      "ci_95_lower": 0.1247,
-      "ci_95_upper": 0.1509
+      "point_estimate": 0.1361,
+      "ci_95_lower": 0.1236,
+      "ci_95_upper": 0.1476
     },
     "lift_at_10": {
-      "point_estimate": 2.8531,
-      "ci_95_lower": 2.5762,
-      "ci_95_upper": 3.1719
+      "point_estimate": 2.8389,
+      "ci_95_lower": 2.5167,
+      "ci_95_upper": 3.1828
     },
     "recall_at_20": {
-      "point_estimate": 0.5009,
-      "ci_95_lower": 0.4608,
-      "ci_95_upper": 0.547
+      "point_estimate": 0.484,
+      "ci_95_lower": 0.4421,
+      "ci_95_upper": 0.5326
     },
     "precision_at_tau": {
-      "point_estimate": 0.5388,
-      "ci_95_lower": 0.4869,
-      "ci_95_upper": 0.5908
+      "point_estimate": 0.4753,
+      "ci_95_lower": 0.4342,
+      "ci_95_upper": 0.5191
     },
     "recall_at_tau": {
-      "point_estimate": 0.7651,
-      "ci_95_lower": 0.7128,
-      "ci_95_upper": 0.814
+      "point_estimate": 0.8897,
+      "ci_95_lower": 0.85,
+      "ci_95_upper": 0.9244
     },
     "f1_at_tau": {
-      "point_estimate": 0.6324,
-      "ci_95_lower": 0.5884,
-      "ci_95_upper": 0.6734
+      "point_estimate": 0.6196,
+      "ci_95_lower": 0.5799,
+      "ci_95_upper": 0.6576
     },
     "profit_per_1k_customers_rm": {
-      "point_estimate": 35253.55,
-      "ci_95_lower": 29077.4082,
-      "ci_95_upper": 41212.5005
+      "point_estimate": 36720.15,
+      "ci_95_lower": 30063.5383,
+      "ci_95_upper": 42997.0416
     }
   },
   "operational_summary": {
-    "pct_contacted": 37.75,
-    "churner_capture_rate": 76.51,
-    "net_profit_rm": 37263.0,
-    "profit_per_1k_rm": 35253.55,
+    "pct_contacted": 49.76,
+    "churner_capture_rate": 88.97,
+    "net_profit_rm": 38813.2,
+    "profit_per_1k_rm": 36720.15,
     "test_contact_all_profit_per_1k": 18193.09
+  },
+  "targeting_strategies": {
+    "profit_optimal": {
+      "name": "Profit-Optimal (Unconstrained)",
+      "threshold": 0.1882,
+      "pct_contacted": 49.76,
+      "churner_capture_rate": 88.97,
+      "precision": 0.4753,
+      "profit_per_1k_rm": 36720.15
+    },
+    "budget_top30": {
+      "name": "Balanced Capacity (Top 30% Budget Cap)",
+      "threshold": 0.3667,
+      "pct_contacted": 29.99,
+      "churner_capture_rate": 66.19,
+      "precision": 58.68,
+      "profit_per_1k_rm": 33819.98
+    },
+    "budget_top20": {
+      "name": "Strict Budget (Top 20% Call-Center Cap)",
+      "threshold": 0.4714,
+      "pct_contacted": 20.06,
+      "churner_capture_rate": 48.4,
+      "precision": 64.15,
+      "profit_per_1k_rm": 26064.94
+    }
   }
 }
