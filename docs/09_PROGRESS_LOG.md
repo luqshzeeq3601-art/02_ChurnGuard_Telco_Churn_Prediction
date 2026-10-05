@@ -6,9 +6,27 @@
 | Item | Value |
 |---|---|
 | Current phase | **Phase 9: Hardening** (Sprint B: Model integrity) |
-| Next task | **T9.10** `docs/MODEL_CARD.md`: intended use, data, metrics with CI, fairness table, limitations |
-| Overall progress | 45 / 61 tasks |
+| Next task | **T9.11** Update `06_EXPERIMENT_PLAN.md` results (E10 to E12, v1.1), README results + limitations |
+| Overall progress | 46 / 61 tasks |
 | Health | On track: Sprint B in progress |
+
+---
+
+## 05 Oct 2026: Task T9.10 Completed (Phase 9 Sprint B)
+- **Done**:
+  - **T9.10**: Authored comprehensive production Model Card [`docs/MODEL_CARD.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/docs/MODEL_CARD.md) following the Mitchell et al. (2019) specification.
+  - Documented:
+    - Model Details (v1.1.0 Champion Logistic Regression M2 + Sigmoid cv=5, Runner-up LightGBM + Isotonic cv=5).
+    - Intended use, out-of-scope and prohibited use cases.
+    - Data splits & feature engineering with explicit fairness mitigation (Option M2).
+    - Side-by-side test performance table with 1,000x percentile bootstrap 95% Confidence Intervals.
+    - Full E12 fairness trade-off audit across gender and senior citizens with base-rate disparity explanation.
+    - Decisions log cross-references (D-013, D-014, D-015).
+    - Limitations and caveats.
+- **Evidence**:
+  - [`docs/MODEL_CARD.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/docs/MODEL_CARD.md) authored and verified.
+- **Next**: **T9.11** Update `06_EXPERIMENT_PLAN.md` results (E10 to E12, v1.1), README results + limitations + "what did not work" (F9).
+- **Blockers**: None.
 
 ---
 
