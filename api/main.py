@@ -108,6 +108,8 @@ def get_model_info() -> ModelInfoResponse:
         features=meta.get("features", {}),
         cost_parameters=meta.get("cost_parameters", {}),
         test_performance=meta.get("test_performance", {}),
+        operational_summary=meta.get("operational_summary"),
+        targeting_strategies=meta.get("targeting_strategies"),
     )
 
 

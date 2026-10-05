@@ -307,7 +307,27 @@ elif selected_page == "📊 Batch Scoring & Retention Targeting":
     if df_to_score is not None:
         st.write(f"Loaded **{len(df_to_score):,}** customer records.")
 
-        with st.expander("⚙️ Campaign Profit Assumptions (RM)", expanded=False):
+        with st.expander("⚙️ Campaign Strategy & Budget Constraints", expanded=True):
+            strat_col1, strat_col2 = st.columns([2, 1])
+            with strat_col1:
+                target_strategy = st.radio(
+                    "Retention Campaign Strategy",
+                    [
+                        "🎯 Profit-Optimal (Unconstrained, tau=0.1882) — Maximize net RM return (~49.8% contact rate, 89.0% recall)",
+                        "⚖️ Balanced Capacity (Top 30% Cap, tau=0.3667) — Conserve retention vouchers (~30.0% contact rate, 66.2% recall)",
+                        "⚡ Strict Budget (Top 20% Cap, tau=0.4714) — Focus frontline call-center capacity (~20.1% contact rate, 48.4% recall)",
+                        "🛠️ Custom Risk Cutoff",
+                    ],
+                    index=0,
+                )
+            with strat_col2:
+                if "Custom Risk Cutoff" in target_strategy:
+                    custom_tau = st.slider(
+                        "Custom Decision Threshold (tau)", 0.05, 0.95, 0.1882, 0.01
+                    )
+                else:
+                    custom_tau = None
+
             c_col1, c_col2, c_col3 = st.columns(3)
             with c_col1:
                 offer_cost = st.number_input("Retention Offer Cost (RM)", value=50.0, step=5.0)
@@ -319,27 +339,44 @@ elif selected_page == "📊 Batch Scoring & Retention Targeting":
         if st.button("⚡ Score & Rank Entire Batch", type="primary"):
             with st.spinner("Executing model scoring and SHAP reason extraction..."):
                 scored_df = predictor.predict_batch(df_to_score, include_reasons=True)
+                n_total = len(scored_df)
+
+                # Determine active threshold from chosen strategy
+                if "Top 30%" in target_strategy:
+                    active_tau = 0.3667
+                    strategy_label = "Balanced Capacity (Top 30% Cap)"
+                elif "Top 20%" in target_strategy:
+                    active_tau = 0.4714
+                    strategy_label = "Strict Budget (Top 20% Cap)"
+                elif custom_tau is not None:
+                    active_tau = custom_tau
+                    strategy_label = f"Custom (tau={active_tau:.2f})"
+                else:
+                    active_tau = 0.1882
+                    strategy_label = "Profit-Optimal (Unconstrained)"
+
+                # Targeted flag based on active strategy
+                scored_df["targeted_in_campaign"] = scored_df["churn_probability"] >= active_tau
 
                 # Summary metrics
-                n_total = len(scored_df)
+                n_targeted = int(scored_df["targeted_in_campaign"].sum())
                 n_high = (scored_df["risk_tier"] == "High").sum()
                 n_med = (scored_df["risk_tier"] == "Medium").sum()
                 n_low = (scored_df["risk_tier"] == "Low").sum()
 
                 # Estimated campaign economics
-                targeted_count = n_high
-                exp_saved = targeted_count * retention_rate
+                exp_saved = n_targeted * retention_rate
                 gross_clv_saved = exp_saved * clv_retained
-                campaign_cost = targeted_count * offer_cost
+                campaign_cost = n_targeted * offer_cost
                 net_campaign_profit = gross_clv_saved - campaign_cost
 
                 st.markdown("---")
-                st.markdown("### 📈 Cohort Targeting Summary")
+                st.markdown(f"### 📈 Campaign Economics Summary ({strategy_label})")
                 m1, m2, m3, m4 = st.columns(4)
-                m1.metric("Total Customers", f"{n_total:,}")
-                m2.metric("High Risk (Targeted)", f"{n_high:,} ({n_high/n_total:.1%})")
-                m3.metric("Medium Risk", f"{n_med:,} ({n_med/n_total:.1%})")
-                m4.metric("Net Campaign Profit", f"RM {net_campaign_profit:,.2f}")
+                m1.metric("Total Cohort", f"{n_total:,}")
+                m2.metric("Contacted (Targeted)", f"{n_targeted:,} ({n_targeted/n_total:.1%})")
+                m3.metric("Estimated Voucher Outlay", f"RM {campaign_cost:,.2f}")
+                m4.metric("Net Projected Campaign Profit", f"RM {net_campaign_profit:,.2f}")
 
                 st.markdown("### 📋 Ranked Customer Priority List")
                 tier_filter = st.multiselect(

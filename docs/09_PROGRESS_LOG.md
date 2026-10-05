@@ -5,10 +5,31 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 9: Hardening** (Sprint C: Visibility) |
-| Next task | **T9.13** Public deployment (Hugging Face Spaces / Render) |
+| Current phase | **Phase 9: Hardening** (Completed; ready for Phase 8 / T9.13 deployment) |
+| Next task | **T9.13 / T8.5** Public live deployment (Hugging Face Spaces / Render) |
 | Overall progress | 52 / 61 tasks |
-| Health | On track: Phase 9 quality gates G1–G8 PASS, Readiness 9/10 |
+| Health | On track: 6/6 remaining review issues resolved; G1-G5, G7-G8 PASS, G6 PENDING deployment |
+
+---
+
+## 05 Oct 2026: Resolution of 6 Remaining Model Review Issues
+- **Done**:
+  - **Issue 1 (High - NFR7 Fairness Status)**: Explicitly set NFR7 status to `"partially_met_gender_only"` in `reports/final_metrics.json`, `docs/MODEL_CARD.md`, and `README.md`. Gender recall gap is 0.0112 ($\le 0.05$ target met); senior recall gap (0.0911) is documented as ground-truth base rate disparity (41.3% vs 23.6%).
+  - **Issue 2 (High - MO3 Calibration Status)**: Set MO3 status to `"no_gain_already_calibrated"` in `reports/final_metrics.json`, `docs/MODEL_CARD.md`, and `README.md`. Test calibrated Brier (0.1361) and uncalibrated Brier (0.1361) are identical, reflecting that Logistic Regression log-odds are already well-calibrated.
+  - **Issue 3 (High - Model Metadata Sync)**: Regenerated `models/model_meta.json` via `serialize.py` with exact v1.1 test operational numbers (49.76% contacted, 88.97% captured, RM36,720.15/1k net profit) and complete M2 feature list (25 features).
+  - **Issue 4 (Medium - Multi-Strategy Budget Targeting)**: Added budget-constrained targeting strategies alongside the unconstrained profit-optimal threshold:
+    - *Profit-Optimal (Unconstrained, $\tau^* = 0.1882$)*: 49.76% contacted, 88.97% recall, 47.53% precision, RM36,720.15/1k.
+    - *Balanced Capacity (Top 30% Cap, $\tau = 0.3667$)*: 29.99% contacted, 66.19% recall, 58.68% precision, RM33,819.98/1k (saves 40% voucher budget).
+    - *Strict Budget (Top 20% Cap, $\tau = 0.4714$)*: 20.06% contacted, 48.40% recall, 64.15% precision, RM26,064.94/1k (saves 60% voucher budget).
+    - Integrated strategies into `models/optimal_threshold.json`, `api/schemas.py`, `api/main.py`, `app/streamlit_app.py`, `README.md`, and `docs/MODEL_CARD.md`.
+  - **Issue 5 (Medium - Gate G6 Restoration)**: Restored original Gate G6 definition (`Public URL returns 200; /predict or demo works`), marked as `PENDING (T9.13)`, and adjusted readiness rubric to 8.5/10 pre-deployment (projected 9/10 post-deploy).
+  - **Issue 6 (Low - ADR D-017 Recorded)**: Added **D-017** in `docs/08_DECISIONS_LOG.md` documenting tracking of small open benchmark data (<1 MB) and serialized model in git for zero-dependency CI and 1-click cloud deployment.
+- **Evidence**:
+  - `pytest tests/`: 81/81 passed with 82.2% code coverage.
+  - `ruff`: all checks passed, 65 files formatted.
+  - `reports/final_metrics.json`, `models/model_meta.json`, `models/optimal_threshold.json` regenerated and synchronized.
+- **Next**: **T9.13** Deploy live instance to Hugging Face Spaces / Render and verify Gate G6.
+- **Blockers**: None.
 
 ---
 

@@ -98,7 +98,10 @@ def save_final_model_artifacts(
     else:
         test_metrics_data = {}
 
-    num_cols, cat_cols = get_feature_lists(include_engineered=True)
+    num_cols, cat_cols = get_feature_lists(
+        include_engineered=True,
+        drop_cols=["gender", "SeniorCitizen"],
+    )
 
     # 6. Construct metadata dictionary
     meta = {
@@ -135,6 +138,7 @@ def save_final_model_artifacts(
         "cost_parameters": CFG["cost"],
         "test_performance": test_metrics_data.get("metrics", {}),
         "operational_summary": test_metrics_data.get("operational_summary", {}),
+        "targeting_strategies": test_metrics_data.get("targeting_strategies", {}),
     }
 
     meta_path = out_dir / "model_meta.json"

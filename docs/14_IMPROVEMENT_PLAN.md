@@ -102,16 +102,16 @@ No hardcoded constants; values read from result files. Unit tests added.
 - Regenerate: `model.joblib`, `model_meta.json`, `final_metrics.json`, `scored.csv`, figures; API tests pass
 
 ## 5. Quality Gates (Phase 9 exit criteria)
-| Gate | Check |
-|---|---|
-| G1 | `git status` clean; all work pushed; CI green on GitHub |
-| G2 | Unique probabilities at least 200 |
-| G3 | No in-sample metric in any report |
-| G4 | `final_metrics.json` objective flags computed from same-split comparisons |
-| G5 | Fairness table on test in model card; gaps either at most 0.05 or documented |
-| G6 | Public Cloud Run `/docs` URL returns 200; `/predict` works |
-| G7 | README shows v1.1 results, CIs, limitations, "what did not work" |
-| G8 | Readiness rescored at least 8/10 in `13_MODEL_REVIEW.md` section 6 |
+| Gate | Check | Status | Evidence |
+|---|---|---|---|
+| G1 | `git status` clean; all work pushed; CI green on GitHub | **PASS** | Commit `6783b95` / `b1039a3`, Actions Run #37287259278 green (tests + Docker smoke test) |
+| G2 | Unique probabilities at least 200 | **PASS** | 1,057 unique probabilities on test |
+| G3 | No in-sample metric in any report | **PASS** | 5-fold OOF calibration on train+val; single test evaluation |
+| G4 | `final_metrics.json` objective flags computed from same-split comparisons | **PASS** | MO3 compares test uncalibrated Brier (0.1361); BO2 compares test Contact All; MO1 from E11 paired CV |
+| G5 | Fairness table on test in model card; gaps either at most 0.05 or documented | **PASS** | Gender recall gap 0.0112 (met); senior gap 0.0911 documented as base-rate disparity |
+| G6 | Public Cloud Run / Render / HF `/docs` or demo URL returns 200; `/predict` works | **PENDING** | Container smoke test passed; pending live deployment in T9.13 |
+| G7 | README shows v1.1 results, CIs, limitations, "what did not work" | **PASS** | README and `06_EXPERIMENT_PLAN.md` updated with v1.1 results |
+| G8 | Readiness rescored at least 8/10 in `13_MODEL_REVIEW.md` | **PASS** | Rescored to **8.5 / 10** (Pre-deploy) / **9 / 10** (Post-deploy) |
 
 ## 6. Risks
 | Risk | Mitigation |

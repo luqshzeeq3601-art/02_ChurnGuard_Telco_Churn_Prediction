@@ -72,15 +72,41 @@
     "profit_per_1k_rm": 36720.15,
     "test_contact_all_profit_per_1k": 18193.09
   },
+  "targeting_strategies": {
+    "profit_optimal": {
+      "name": "Profit-Optimal (Unconstrained)",
+      "threshold": 0.1882,
+      "pct_contacted": 49.76,
+      "churner_capture_rate": 88.97,
+      "precision": 0.4753,
+      "profit_per_1k_rm": 36720.15
+    },
+    "budget_top30": {
+      "name": "Balanced Capacity (Top 30% Budget Cap)",
+      "threshold": 0.3667,
+      "pct_contacted": 29.99,
+      "churner_capture_rate": 66.19,
+      "precision": 58.68,
+      "profit_per_1k_rm": 33819.98
+    },
+    "budget_top20": {
+      "name": "Strict Budget (Top 20% Call-Center Cap)",
+      "threshold": 0.4714,
+      "pct_contacted": 20.06,
+      "churner_capture_rate": 48.4,
+      "precision": 64.15,
+      "profit_per_1k_rm": 26064.94
+    }
+  },
   "objectives_verification": {
     "MO1_beat_baseline": false,
     "MO2_roc_auc_ge_084": true,
     "MO2_pr_auc_ge_062": true,
     "MO2_lift_ge_25": true,
-    "MO3_brier_calibrated": true,
+    "MO3_brier_calibrated": "no_gain_already_calibrated",
     "BO1_recall_at_20_ge_50": false,
     "BO2_profit_beats_all_and_none": true,
-    "NFR7_demographic_fairness": true
+    "NFR7_demographic_fairness": "partially_met_gender_only"
   },
   "objectives_detail": {
     "MO1": {
@@ -115,7 +141,9 @@
       "uncalibrated_test_brier": 0.1361,
       "brier_improvement": 0.0,
       "same_test_rows": true,
-      "passed": true
+      "status": "no_gain_already_calibrated",
+      "finding": "No gain: Logistic Regression log-odds are already well calibrated on test (Brier 0.1361 vs 0.1361)",
+      "passed": false
     },
     "BO1": {
       "recall_at_20": 0.484,
@@ -133,8 +161,12 @@
     "NFR7": {
       "test_gender_recall_gap": 0.0112,
       "test_senior_recall_gap": 0.0911,
+      "gender_passed": true,
+      "senior_passed": false,
       "threshold": 0.05,
-      "passed": true
+      "status": "partially_met_gender_only",
+      "finding": "Partially met: Gender parity met (gap 0.0112 <= 0.05); senior citizen recall gap (0.0911) reflects ground-truth base-rate disparity",
+      "passed": false
     }
   }
 }

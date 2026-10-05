@@ -50,7 +50,7 @@ Evaluated on the held-out test split ($N = 1,057$, 281 churners, 26.58% prevalen
 |---|---|---|---|---|---|
 | **ROC-AUC** | $\ge 0.84$ | **0.8449** | `[0.8207, 0.8714]` | 0.8473 | ✅ Met (MO2) |
 | **PR-AUC** | $\ge 0.62$ | **0.6739** | `[0.6203, 0.7262]` | 0.6760 | ✅ Met (MO2) |
-| **Brier Score** | $< 0.16$ (Calibrated) | **0.1361** (vs 0.1472 uncal) | `[0.1236, 0.1476]` | 0.1340 | ✅ Met (MO3) |
+| **Brier Score** | $< 0.16$ (Calibrated) | **0.1361** | `[0.1236, 0.1476]` | 0.1340 | ℹ️ No Gain: Already Calibrated (MO3) |
 | **Top-Decile Lift** | $\ge 2.5\times$ (tie-aware) | **$2.84\times$** | `[2.52x, 3.18x]` | $2.98\times$ | ✅ Met (MO2) |
 | **Recall@20%** | $\ge 50\%$ (tie-aware) | **48.40%** | `[44.21%, 53.26%]` | 51.60% | ⚠️ Near-miss (BO1) |
 | **Expected Profit / 1k** | $>$ Contact All (RM 18,193) | **RM 36,720.15** | `[RM 30,064, RM 42,997]` | RM 37,613.72 | ✅ Met (BO2) |
@@ -59,7 +59,17 @@ Evaluated on the held-out test split ($N = 1,057$, 281 churners, 26.58% prevalen
 | **Precision at $\tau^*$** | — | **47.53%** | `[43.42%, 51.91%]` | 49.79% | Operational |
 | **Recall at $\tau^*$** | — | **88.97%** | `[85.00%, 92.44%]` | 85.41% | Operational |
 | **Inference Latency (p95)** | $< 100\text{ ms}$ | **< 4 ms** | — | 4.8 ms | ✅ Met (EO2) |
-| **Test Code Coverage** | $\ge 70\%$ | **85%** (75 tests) | — | — | ✅ Met (EO3) |
+| **Test Code Coverage** | $\ge 70\%$ | **82.2%** (81 tests) | — | — | ✅ Met (EO3) |
+
+### 🎯 Multi-Strategy Retention Campaign Targeting
+
+To give operational teams granular control over retention voucher spend and call-center capacity, ChurnGuard provides three targeting strategies evaluated on the held-out test split ($N=1,057$):
+
+| Strategy | Decision Threshold ($\tau$) | Contact Rate (%) | Churner Recall (%) | Precision (%) | Net Profit / 1k (RM) | Best Suited For |
+|---|---|---|---|---|---|---|
+| **Profit-Optimal (Unconstrained)** | **0.1882** | **49.76%** (526 / 1,057) | **88.97%** (250 / 281) | 47.53% | **RM 36,720.15** | Unconstrained voucher budgets; maximizing gross retained CLV |
+| **Balanced Capacity (Top 30% Cap)** | **0.3667** | **29.99%** (317 / 1,057) | **66.19%** (186 / 281) | 58.68% | **RM 33,819.98** | Conserving 40% voucher budget while keeping 92% of maximum profit |
+| **Strict Budget (Top 20% Cap)** | **0.4714** | **20.06%** (212 / 1,057) | **48.40%** (136 / 281) | 64.15% | **RM 26,064.94** | Strict call-center seat limits; high-touch outreach to highest-risk quintile |
 
 ---
 
@@ -78,7 +88,7 @@ Rigorous empirical iteration surfaced several approaches that failed or did not 
 
 1. **Static Cross-Sectional Framing:** Churn is modeled as a binary label on snapshot data rather than continuous-time survival analysis (time-to-event). Customer risk may shift before monthly batch refreshes.
 2. **Fixed Campaign Economics:** Economic optimization assumes constant campaign parameters ($C_{\text{contact}} = \text{RM 50}$, $\text{CLV} = \text{RM 780}$, $r_{\text{success}} = 20\%$). Heterogeneous voucher sizing or discount elasticity is not currently modeled.
-3. **Senior Citizen Base Rate Disparity:** Senior citizens exhibit higher observed churn (41.3% vs 23.6% for non-seniors), largely driven by high adoption of unbundled month-to-month fiber optic contracts. Feature-blind models still capture this through behavioral surrogates.
+3. **Fairness Status (NFR7 - Partially Met: Gender Only):** Option M2 achieves full gender parity (test recall gap 0.0112 $\le 0.05$). However, senior citizens exhibit a test recall gap of 0.0911 driven by ground-truth base rate disparity (41.3% senior churn rate vs 23.6% for non-seniors) concentrated in unbundled month-to-month fiber optic subscriptions. Group-specific thresholds were rejected per D-014.
 4. **Single Telco Portfolio Context:** Trained on IBM Telco dataset framed for Malaysian market dynamics (NusaTel). Regional customer retention patterns require localized re-calibration.
 
 ---

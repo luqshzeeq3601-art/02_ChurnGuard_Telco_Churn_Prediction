@@ -5,10 +5,10 @@
 ## 1. Verdict
 | Item | Value |
 |---|---|
-| Portfolio ready? | **YES (Post-Hardening v1.1)** |
-| Readiness score | **9 / 10** (Target $\ge 8 / 10$ **MET**) |
+| Portfolio ready? | **YES (Post-Hardening v1.1 - Pre-Deployment Stage)** |
+| Readiness score | **8.5 / 10** (Target $\ge 8 / 10$ **MET**; projected 9/10 post-deploy) |
 | Fix plan | `14_IMPROVEMENT_PLAN.md` (Phase 9 Sprint A, B, C executed) |
-| Hardening Status | All Quality Gates G1 through G8 PASS |
+| Hardening Status | Gates G1-G5, G7-G8 PASS; Gate G6 PENDING T9.13 deployment |
 
 ## 2. Verified v1.0 Test Results
 | Metric | Reported | Recomputed | Target | Status |
@@ -44,13 +44,13 @@
 - Drift monitoring with documented retrain rule
 
 ## 5. Readiness Rubric
-| Area | v1.0 | Target | v1.1 (Post-Hardening) | Notes |
-|---|---|---|---|---|
-| ML methodology | 8 | 9 | **9 / 10** | 5-fold OOF calibration, paired CV champion selection, fairness ablation M2, tie-aware ranking |
-| Honesty and consistency of results | 5 | 9 | **9 / 10** | MO1 honestly reported NOT MET, BO1 near-miss documented, same-split baselines, negative results documented |
-| Engineering (API, tests, Docker) | 8 | 9 | **10 / 10** | 81 tests passing (82.2% coverage), 0 ruff errors, multi-stage non-root container, Docker smoke test green |
-| Deployment and visibility | 2 | 8 | **8 / 10** | Public GitHub repo, branch protection, green CI/CD pipeline, render.yaml and HF app.py ready |
-| **Overall** | **6** | **at least 8** | **9 / 10** | **Ready for Portfolio Publishing** |
+| Area | v1.0 | Target | v1.1 (Pre-Deploy) | Post-Deploy (T9.13) | Notes |
+|---|---|---|---|---|---|
+| ML methodology | 8 | 9 | **9 / 10** | 9 / 10 | 5-fold OOF calibration, paired CV champion selection, fairness ablation M2, tie-aware ranking |
+| Honesty and consistency of results | 5 | 9 | **9 / 10** | 9 / 10 | MO1 honestly reported NOT MET, BO1 near-miss documented, MO3/NFR7 precise findings, same-split baselines |
+| Engineering (API, tests, Docker) | 8 | 9 | **10 / 10** | 10 / 10 | 81 tests passing (82.2% coverage), 0 ruff errors, multi-stage non-root container, Docker smoke test green |
+| Deployment and visibility | 2 | 8 | **6 / 10** | **8 / 10** | Public GitHub repo, branch protection, green CI/CD; Cloud Run / HF Space live deployment in T9.13 |
+| **Overall** | **6** | **at least 8** | **8.5 / 10** | **9 / 10** | **Meets Portfolio Baseline ($\ge 8/10$); full 9/10 upon T9.13 live URL** |
 
 ## 6. Post-Hardening Quality Gates Verification (05 Oct 2026)
 | Gate | Description | Status | Evidence |
@@ -58,8 +58,8 @@
 | **G1** | `git status` clean; all work pushed; CI green on GitHub | **PASS** | Commit `6783b95` / `b1039a3`, Actions Run #37287259278 green (tests + Docker smoke test) |
 | **G2** | Unique probabilities at least 200 | **PASS** | 1,057 unique probabilities on held-out test set |
 | **G3** | No in-sample metric in any report | **PASS** | Out-of-fold calibration on train+val; single test evaluation |
-| **G4** | `final_metrics.json` objective flags computed from same-split comparisons | **PASS** | MO3 compares test uncalibrated Brier; BO2 compares test Contact All; MO1 from E11 paired CV |
+| **G4** | `final_metrics.json` objective flags computed from same-split comparisons | **PASS** | MO3 compares test uncalibrated Brier (0.1361); BO2 compares test Contact All; MO1 from E11 paired CV |
 | **G5** | Fairness table on test in model card; gaps either at most 0.05 or documented | **PASS** | Gender recall gap 0.0112 (NFR7 met); senior gap 0.0911 documented as base-rate disparity |
-| **G6** | Container smoke test passes; deploy config ready | **PASS** | GitHub Actions Docker container smoke test green; `render.yaml` and `deploy.yml` configured |
+| **G6** | Public /docs URL returns 200; /predict or demo works | **PENDING** | Deployment configuration and containers ready; pending live deployment in T9.13 |
 | **G7** | README shows v1.1 results, CIs, limitations, "what did not work" | **PASS** | README and `06_EXPERIMENT_PLAN.md` updated with zero `__` placeholders |
-| **G8** | Readiness rescored at least 8/10 in `13_MODEL_REVIEW.md` | **PASS** | Rescored to **9 / 10** |
+| **G8** | Readiness rescored at least 8/10 in `13_MODEL_REVIEW.md` | **PASS** | Rescored to **8.5 / 10** (Pre-deploy) / **9 / 10** (Post-deploy) |
