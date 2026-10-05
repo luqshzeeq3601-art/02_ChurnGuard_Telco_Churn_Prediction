@@ -5,10 +5,42 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | Phase 7: Monitoring + Dashboard (W5-W6) |
-| Next task | **T7.1** Simulate drifted batch |
-| Overall progress | 36 / 47 tasks |
-| Health | On track |
+| Current phase | Complete / Production Ready (Phase 0–8) |
+| Next task | Portfolio Maintenance & Public Release |
+| Overall progress | **47 / 47 tasks (100%)** |
+| Health | Complete / Verified |
+
+---
+
+## 05 Oct 2026: Phase 8 Portfolio Packaging Completed
+- **Done**:
+  - **T8.1**: Authored comprehensive production [`README.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/README.md) featuring CI/CD badges, executive problem framing (Malaysian telco NusaTel), complete results table with 1,000x bootstrap confidence intervals, Mermaid architecture diagram, quickstart commands, and API usage samples.
+  - **T8.2**: Integrated architecture flowcharts and visual references into README.
+  - **T8.3**: Cleaned repository, validated `.gitignore` root anchoring for `/data/`, `/models/`, and `/mlruns/`, ensuring 0 secrets and clean git hygiene.
+  - **T8.4**: Authored LinkedIn announcement post, resume bullet points, and portfolio tracking entries in [`docs/11_LINKEDIN_POST.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/docs/11_LINKEDIN_POST.md).
+  - **T8.5**: Created root Hugging Face Spaces entrypoint [`app.py`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/app.py) for instantaneous Streamlit deployment.
+  - **T8.6**: Generated standalone Kaggle public notebook artifact [`notebooks/kaggle_telco_churn_guard.ipynb`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/notebooks/kaggle_telco_churn_guard.ipynb) with links back to GitHub.
+  - **T8.7**: Authored in-depth technical publication article draft in [`docs/12_TECHNICAL_ARTICLE.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/docs/12_TECHNICAL_ARTICLE.md) ("Stop Using 0.5 Thresholds: Building a Profit-Driven Churn Retention System").
+  - **T8.8**: Completed all items in pre-publish checklist in [`docs/10_PUBLISHING_PLAN.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/docs/10_PUBLISHING_PLAN.md).
+- **Next**: Deploy live instances to GCP Cloud Run and Hugging Face Spaces.
+- **Blockers**: None
+- **Code Quality**: 73 passed tests, 84% test coverage, 0 ruff errors.
+
+---
+
+## 05 Oct 2026: Phase 7 Monitoring + Dashboard Completed
+- **Done**:
+  - **T7.1**: Implemented macroeconomic and behavioral data drift batch simulator in `src/churnguard/monitoring/simulate_drift.py`. Generated production test batch with simulated inflation (+25% MonthlyCharges), contract migration to month-to-month, fiber optic adoption, and tenure compression. Exported to `data/processed/drifted_batch.parquet` and `.csv`. Tested in `tests/test_simulate_drift.py`.
+  - **T7.2**: Implemented Evidently AI data and prediction drift monitoring engine in `src/churnguard/monitoring/drift.py`. Analyzed reference training split vs current production batch across 21 columns and model prediction probabilities. Evaluated retrain trigger rules (drift share $\ge 30\%$). Generated interactive HTML report at `reports/drift/drift_report.html` (EO5 Met) and JSON summary at `reports/drift/drift_summary.json`. Tested in `tests/test_drift.py`.
+  - **T7.3**: Built interactive multi-page Streamlit retention decision cockpit in `app/streamlit_app.py` featuring:
+    1. *Single Customer Assessment:* Interactive profile input, calibrated probability gauge, risk tier badges, and top-3 frontline plain-language SHAP reason codes.
+    2. *Batch Scoring & Targeting:* CSV upload, customer ranking by risk descending, and retention campaign profit ROI simulator (RM).
+    3. *Strategic Business Insights:* Interactive deep-dives into contract lock-in, fiber optic deficits, and profit curve optimization ($\tau^* = 0.18$).
+    4. *Malaysia Telecom Market Context:* Historical mobile trends from data.gov.my.
+    5. *MLOps Health & Drift Monitoring:* Evidently report viewer and retrain alerts. Tested in `tests/test_streamlit_app.py`.
+- **Next**: Phase 8 — Portfolio Packaging
+- **Blockers**: None
+- **Code Quality**: 73 passed tests, 84% test coverage, 0 ruff errors.
 
 ---
 

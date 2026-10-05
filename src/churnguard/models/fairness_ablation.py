@@ -8,8 +8,8 @@ Updates Decision D-006 per docs/08_DECISIONS_LOG.md.
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import Any
+
 import lightgbm as lgb
 
 from churnguard.config import CFG

@@ -1,0 +1,22 @@
+{
+  "dataset_drift_detected": false,
+  "share_of_drifted_columns": 0.2381,
+  "number_of_drifted_columns": 5,
+  "total_columns_analyzed": 21,
+  "drifted_features": [
+    "prediction",
+    "MonthlyCharges",
+    "TotalCharges",
+    "tenure",
+    "Contract"
+  ],
+  "retrain_recommended": false,
+  "retrain_rule_description": "Trigger retrain if share of drifted features >= 30% or dataset drift detected.",
+  "reference_rows": 4930,
+  "current_rows": 1057,
+  "prediction_drift": {
+    "drift_detected": true,
+    "drift_score": 0.3121725701135698,
+    "stat_test": null
+  }
+}

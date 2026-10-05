@@ -6,10 +6,9 @@ as specified in docs/05_DATA_SPEC.md.
 
 from __future__ import annotations
 
+import pandas as pd
 import pandera as pa
 from pandera import Check, Column, DataFrameSchema
-import pandas as pd
-
 
 # Allowed categorical values per 05_DATA_SPEC.md section 2
 ALLOWED_GENDER = ["Male", "Female"]

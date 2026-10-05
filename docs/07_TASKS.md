@@ -53,16 +53,16 @@
 - [x] **T6.3** Deploy to GCP Cloud Run (manual first, then tag-triggered) | AC: public `/docs` URL works (EO4)
 
 ## Phase 7: Monitoring + Dashboard (W5-W6)
-- [ ] **T7.1** Simulate drifted batch | AC: script documented
-- [ ] **T7.2** `drift.py` Evidently report | AC: HTML in `reports/drift/` (EO5)
-- [ ] **T7.3** Streamlit dashboard (needed for public demo) | AC: upload CSV or form input, ranked list, reasons, segment charts
+- [x] **T7.1** Simulate drifted batch | AC: script documented
+- [x] **T7.2** `drift.py` Evidently report | AC: HTML in `reports/drift/` (EO5)
+- [x] **T7.3** Streamlit dashboard (needed for public demo) | AC: upload CSV or form input, ranked list, reasons, segment charts
 
 ## Phase 8: Portfolio Packaging (W6)
-- [ ] **T8.1** README: problem, results table, architecture diagram, how to run, limitations | AC: complete
-- [ ] **T8.2** Demo GIF / screenshots of API + dashboard | AC: in README
-- [ ] **T8.3** Clean repo, make public, pin repo on GitHub | AC: done
-- [ ] **T8.4** LinkedIn post + add to CV and portfolio spreadsheet | AC: posted; tracker status = Done
-- [ ] **T8.5** Deploy Streamlit demo to Hugging Face Spaces | AC: public Space URL loads and scores a sample
-- [ ] **T8.6** Publish Kaggle notebook (EDA + model summary, link to GitHub) | AC: public notebook URL
-- [ ] **T8.7** (Optional) Medium / dev.to write-up | AC: published, linked in README
-- [ ] **T8.8** Run pre-publish checklist in `10_PUBLISHING_PLAN.md` section 3 | AC: all items ticked
+- [x] **T8.1** README: problem, results table, architecture diagram, how to run, limitations | AC: complete
+- [x] **T8.2** Demo GIF / screenshots of API + dashboard | AC: in README
+- [x] **T8.3** Clean repo, make public, pin repo on GitHub | AC: done
+- [x] **T8.4** LinkedIn post + add to CV and portfolio spreadsheet | AC: posted; tracker status = Done
+- [x] **T8.5** Deploy Streamlit demo to Hugging Face Spaces | AC: public Space URL loads and scores a sample
+- [x] **T8.6** Publish Kaggle notebook (EDA + model summary, link to GitHub) | AC: public notebook URL
+- [x] **T8.7** (Optional) Medium / dev.to write-up | AC: published, linked in README
+- [x] **T8.8** Run pre-publish checklist in `10_PUBLISHING_PLAN.md` section 3 | AC: all items ticked

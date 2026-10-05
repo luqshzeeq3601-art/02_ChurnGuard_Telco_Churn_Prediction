@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,9 +29,9 @@ def compute_profit_for_threshold(
     threshold: float,
     offer_cost: float = 50.0,
     success_rate: float = 0.30,
-    clv_values: Optional[np.ndarray] = None,
+    clv_values: np.ndarray | None = None,
     default_clv: float = 780.0,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Calculate detailed financial and operational metrics for a specific decision threshold.
 
     Args:
@@ -49,11 +49,7 @@ def compute_profit_for_threshold(
     y_true = np.asarray(y_true).astype(int)
     y_prob = np.asarray(y_prob).astype(float)
     n = len(y_true)
-
-    if clv_values is None:
-        clvs = np.full(n, default_clv)
-    else:
-        clvs = np.asarray(clv_values).astype(float)
+    clvs = np.full(n, default_clv) if clv_values is None else np.asarray(clv_values).astype(float)
 
     contacted_mask = y_prob >= threshold
     n_contacted = int(np.sum(contacted_mask))
@@ -61,12 +57,26 @@ def compute_profit_for_threshold(
 
     true_churners_contacted = int(np.sum(contacted_mask & (y_true == 1)))
     total_churners = int(np.sum(y_true))
-    churner_capture_rate = float(true_churners_contacted / total_churners) if total_churners > 0 else 0.0
+    churner_capture_rate = (
+        float(true_churners_contacted / total_churners) if total_churners > 0 else 0.0
+    )
 
     # Campaign Financials
     total_cost = n_contacted * offer_cost
     # Revenue preserved: for each true churner contacted, success_rate * individual CLV
-    revenue_preserved = float(np.sum(contacted_mask & (y_true == 1)) * success_rate * np.mean(clvs[contacted_mask & (y_true == 1)] if true_churners_contacted > 0 else default_clv)) if true_churners_contacted > 0 else 0.0
+    revenue_preserved = (
+        float(
+            np.sum(contacted_mask & (y_true == 1))
+            * success_rate
+            * np.mean(
+                clvs[contacted_mask & (y_true == 1)]
+                if true_churners_contacted > 0
+                else default_clv
+            )
+        )
+        if true_churners_contacted > 0
+        else 0.0
+    )
     net_profit = revenue_preserved - total_cost
 
     # Profit per 1,000 customers
@@ -90,10 +100,10 @@ def find_optimal_threshold(
     y_prob: np.ndarray,
     offer_cost: float = 50.0,
     success_rate: float = 0.30,
-    clv_values: Optional[np.ndarray] = None,
+    clv_values: np.ndarray | None = None,
     default_clv: float = 780.0,
-    thresholds: Optional[np.ndarray] = None,
-) -> Dict[str, Any]:
+    thresholds: np.ndarray | None = None,
+) -> dict[str, Any]:
     """Find the threshold that maximises net campaign profit.
 
     Args:
@@ -174,9 +184,9 @@ def find_optimal_threshold(
 def run_sensitivity_analysis(
     y_true: np.ndarray,
     y_prob: np.ndarray,
-    success_rates: Optional[List[float]] = None,
-    offer_costs: Optional[List[float]] = None,
-    clv_values: Optional[np.ndarray] = None,
+    success_rates: list[float] | None = None,
+    offer_costs: list[float] | None = None,
+    clv_values: np.ndarray | None = None,
     default_clv: float = 780.0,
 ) -> pd.DataFrame:
     """Evaluate optimal threshold and profit across varying business assumptions."""
@@ -214,9 +224,9 @@ def run_sensitivity_analysis(
 def plot_profit_curves(
     y_true: np.ndarray,
     y_prob: np.ndarray,
-    optimal_res: Dict[str, Any],
+    optimal_res: dict[str, Any],
     sensitivity_df: pd.DataFrame,
-    save_path: Optional[Path | str] = None,
+    save_path: Path | str | None = None,
 ) -> plt.Figure:
     """Generate publication-ready profit curve and sensitivity chart."""
     fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2, figsize=(16, 6))
@@ -236,12 +246,24 @@ def plot_profit_curves(
             )["profit_per_1k_customers_rm"]
             for t in thresholds
         ]
-        ax1.plot(thresholds, curve_data, label=f"Success Rate: {int(sr*100)}%", color=color, linewidth=2.5)
+        ax1.plot(
+            thresholds,
+            curve_data,
+            label=f"Success Rate: {int(sr*100)}%",
+            color=color,
+            linewidth=2.5,
+        )
 
     # Highlight optimal threshold for default case (30% success rate)
     opt_t = optimal_res["optimal_threshold"]
     opt_profit = optimal_res["optimal_metrics"]["profit_per_1k_customers_rm"]
-    ax1.axvline(opt_t, color="#c0392b", linestyle="--", linewidth=1.5, label=f"Optimal Threshold (tau* = {opt_t:.2f})")
+    ax1.axvline(
+        opt_t,
+        color="#c0392b",
+        linestyle="--",
+        linewidth=1.5,
+        label=f"Optimal Threshold (tau* = {opt_t:.2f})",
+    )
     ax1.scatter([opt_t], [opt_profit], color="#c0392b", s=100, zorder=5)
     ax1.annotate(
         f"Max Profit: RM{opt_profit:,.0f} / 1k\n@ tau* = {opt_t:.2f}",
@@ -256,17 +278,26 @@ def plot_profit_curves(
     ax1.axhline(0, color="gray", linestyle=":", alpha=0.7)
     ax1.set_xlabel("Decision Threshold (tau)", fontsize=11, fontweight="bold")
     ax1.set_ylabel("Expected Profit per 1,000 Customers (RM)", fontsize=11, fontweight="bold")
-    ax1.set_title("Retention Campaign Profit Curve by Decision Threshold", fontsize=12, fontweight="bold", pad=12)
+    ax1.set_title(
+        "Retention Campaign Profit Curve by Decision Threshold",
+        fontsize=12,
+        fontweight="bold",
+        pad=12,
+    )
     ax1.legend(loc="lower right", frameon=True, fontsize=9)
     ax1.grid(True, linestyle="--", alpha=0.5)
 
     # Right: Sensitivity Matrix (Bar chart by Offer Cost and Success Rate)
-    piv = sensitivity_df.pivot(index="offer_cost_rm", columns="success_rate", values="profit_per_1k_rm")
+    piv = sensitivity_df.pivot(
+        index="offer_cost_rm", columns="success_rate", values="profit_per_1k_rm"
+    )
     piv.plot(kind="bar", ax=ax2, colormap="viridis", width=0.75, edgecolor="black", alpha=0.85)
 
     ax2.set_xlabel("Retention Offer Cost (RM)", fontsize=11, fontweight="bold")
     ax2.set_ylabel("Expected Profit per 1,000 Customers (RM)", fontsize=11, fontweight="bold")
-    ax2.set_title("Profit Sensitivity: Offer Cost vs Success Rate", fontsize=12, fontweight="bold", pad=12)
+    ax2.set_title(
+        "Profit Sensitivity: Offer Cost vs Success Rate", fontsize=12, fontweight="bold", pad=12
+    )
     ax2.legend(title="Success Rate", labels=["20%", "30%", "40%"], loc="upper right", frameon=True)
     ax2.grid(True, linestyle="--", alpha=0.5, axis="y")
     plt.xticks(rotation=0)
@@ -282,9 +313,9 @@ def plot_profit_curves(
 
 
 def run_threshold_optimization(
-    val_path: Optional[Path | str] = None,
+    val_path: Path | str | None = None,
     save_artifacts: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Execute complete threshold optimization and sensitivity workflow on validation set."""
     cal_res = run_calibration_experiment(log_to_mlflow=False)
     best_calibrator = cal_res["best_calibrator"]
@@ -333,14 +364,26 @@ def run_threshold_optimization(
         models_dir = CFG["paths"]["models_dir"]
         threshold_meta = {
             "optimal_threshold": round(opt_res["optimal_threshold"], 4),
-            "expected_profit_per_1k_rm": round(opt_res["optimal_metrics"]["profit_per_1k_customers_rm"], 2),
+            "expected_profit_per_1k_rm": round(
+                opt_res["optimal_metrics"]["profit_per_1k_customers_rm"], 2
+            ),
             "pct_customers_contacted": round(opt_res["optimal_metrics"]["pct_contacted"] * 100, 2),
-            "churner_capture_rate": round(opt_res["optimal_metrics"]["churner_capture_rate"] * 100, 2),
+            "churner_capture_rate": round(
+                opt_res["optimal_metrics"]["churner_capture_rate"] * 100, 2
+            ),
             "benchmarks": {
-                "contact_all_profit_per_1k_rm": round(opt_res["benchmarks"]["contact_all_profit_per_1k"], 2),
-                "contact_none_profit_per_1k_rm": round(opt_res["benchmarks"]["contact_none_profit_per_1k"], 2),
-                "default_05_profit_per_1k_rm": round(opt_res["benchmarks"]["default_05_profit_per_1k"], 2),
-                "optimal_profit_per_1k_rm": round(opt_res["benchmarks"]["optimal_profit_per_1k"], 2),
+                "contact_all_profit_per_1k_rm": round(
+                    opt_res["benchmarks"]["contact_all_profit_per_1k"], 2
+                ),
+                "contact_none_profit_per_1k_rm": round(
+                    opt_res["benchmarks"]["contact_none_profit_per_1k"], 2
+                ),
+                "default_05_profit_per_1k_rm": round(
+                    opt_res["benchmarks"]["default_05_profit_per_1k"], 2
+                ),
+                "optimal_profit_per_1k_rm": round(
+                    opt_res["benchmarks"]["optimal_profit_per_1k"], 2
+                ),
             },
             "risk_tiers": {
                 "high_threshold": round(opt_res["optimal_threshold"], 4),
@@ -368,7 +411,11 @@ if __name__ == "__main__":
     print(f"Optimal Threshold (tau*): {opt['optimal_threshold']:.2f}")
     print(f"Contact Rate at tau*:      {opt['optimal_metrics']['pct_contacted']*100:.1f}%")
     print(f"Churner Capture at tau*:   {opt['optimal_metrics']['churner_capture_rate']*100:.1f}%")
-    print(f"Profit per 1k (tau*):      RM{opt['optimal_metrics']['profit_per_1k_customers_rm']:,.2f}")
+    print(
+        f"Profit per 1k (tau*):      RM{opt['optimal_metrics']['profit_per_1k_customers_rm']:,.2f}"
+    )
     print(f"Profit per 1k (tau=0.5):   RM{opt['benchmarks']['default_05_profit_per_1k']:,.2f}")
     print(f"Profit per 1k (Contact All): RM{opt['benchmarks']['contact_all_profit_per_1k']:,.2f}")
-    print(f"Profit per 1k (Contact None): RM{opt['benchmarks']['contact_none_profit_per_1k']:,.2f}")
+    print(
+        f"Profit per 1k (Contact None): RM{opt['benchmarks']['contact_none_profit_per_1k']:,.2f}"
+    )

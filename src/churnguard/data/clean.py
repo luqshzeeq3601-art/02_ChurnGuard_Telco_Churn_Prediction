@@ -8,7 +8,6 @@ Implements decision D-003:
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 
 
@@ -46,10 +45,9 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
             df_clean["TotalCharges"] = df_clean["TotalCharges"].fillna(0.0).astype(float)
 
     # 2. Target encoding (Yes -> 1, No -> 0)
-    if "Churn" in df_clean.columns:
-        if df_clean["Churn"].dtype == object:
-            churn_mapping = {"Yes": 1, "No": 0}
-            df_clean["Churn"] = df_clean["Churn"].map(churn_mapping)
+    if "Churn" in df_clean.columns and df_clean["Churn"].dtype == object:
+        churn_mapping = {"Yes": 1, "No": 0}
+        df_clean["Churn"] = df_clean["Churn"].map(churn_mapping)
 
     # 3. Numeric column casting
     if "tenure" in df_clean.columns:

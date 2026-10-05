@@ -11,8 +11,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any
+
 import lightgbm as lgb
-import mlflow
 import numpy as np
 import optuna
 import pandas as pd
@@ -80,7 +80,9 @@ def tune_lightgbm(
     study = optuna.create_study(direction="maximize", sampler=sampler)
 
     print(f"\n[Optuna] Starting hyperparameter optimization with {n_trials} trials...")
-    study.optimize(lambda trial: objective(trial, X, y), n_trials=n_trials, show_progress_bar=False)
+    study.optimize(
+        lambda trial: objective(trial, X, y), n_trials=n_trials, show_progress_bar=False
+    )
 
     best_params = study.best_params
     best_pr_auc = study.best_value
@@ -97,7 +99,9 @@ def tune_lightgbm(
     }
 
     # Save to models/best_params.json
-    out_file = Path(output_path) if output_path else CFG["paths"]["models_dir"] / "best_params.json"
+    out_file = (
+        Path(output_path) if output_path else CFG["paths"]["models_dir"] / "best_params.json"
+    )
     out_file.parent.mkdir(parents=True, exist_ok=True)
     with open(out_file, "w", encoding="utf-8") as fh:
         json.dump(full_best_params, fh, indent=2)

@@ -27,8 +27,8 @@ def create_eda_notebook():
                     "2. Which demographic, account, and service factors have the strongest association with churn?\n",
                     "3. How do tenure, monthly charges, and lifetime value interact with customer retention?\n",
                     "4. What are the key business insights to drive proactive retention targeting?\n",
-                    "5. How does this align with real-world Malaysian telecommunications trends (data.gov.my)?"
-                ]
+                    "5. How does this align with real-world Malaysian telecommunications trends (data.gov.my)?",
+                ],
             },
             {
                 "cell_type": "code",
@@ -51,16 +51,16 @@ def create_eda_notebook():
                     "plt.rcParams['figure.figsize'] = (10, 6)\n",
                     "plt.rcParams['font.size'] = 11\n",
                     "\n",
-                    "print(f'Config loaded. Random seed: {SEED}')"
-                ]
+                    "print(f'Config loaded. Random seed: {SEED}')",
+                ],
             },
             {
                 "cell_type": "markdown",
                 "metadata": {},
                 "source": [
                     "## 2. Load Processed Training Split\n",
-                    "> **Rule (CLAUDE.md):** No data leakage. We perform all exploratory data analysis strictly on the **training set** (`data/processed/train.parquet`, N = 4,930, 70% split)."
-                ]
+                    "> **Rule (CLAUDE.md):** No data leakage. We perform all exploratory data analysis strictly on the **training set** (`data/processed/train.parquet`, N = 4,930, 70% split).",
+                ],
             },
             {
                 "cell_type": "code",
@@ -71,16 +71,16 @@ def create_eda_notebook():
                     "train_path = CFG['paths']['processed_dir'] / 'train.parquet'\n",
                     "df_train = pd.read_parquet(train_path)\n",
                     "print(f'Training dataset shape: {df_train.shape[0]:,} rows x {df_train.shape[1]} columns')\n",
-                    "df_train.head(5)"
-                ]
+                    "df_train.head(5)",
+                ],
             },
             {
                 "cell_type": "markdown",
                 "metadata": {},
                 "source": [
                     "## 3. Target Distribution & Class Imbalance\n",
-                    "Let's inspect the baseline churn rate across the training cohort."
-                ]
+                    "Let's inspect the baseline churn rate across the training cohort.",
+                ],
             },
             {
                 "cell_type": "code",
@@ -107,16 +107,16 @@ def create_eda_notebook():
                     "ax.set_ylabel('Customer Count')\n",
                     "ax.set_ylim(0, max(churn_counts) * 1.15)\n",
                     "plt.tight_layout()\n",
-                    "plt.show()"
-                ]
+                    "plt.show()",
+                ],
             },
             {
                 "cell_type": "markdown",
                 "metadata": {},
                 "source": [
                     "## 4. Categorical Feature Analysis & Churn Rates\n",
-                    "We analyze the churn rate across contract types, internet services, add-on protections, payment methods, and billing options."
-                ]
+                    "We analyze the churn rate across contract types, internet services, add-on protections, payment methods, and billing options.",
+                ],
             },
             {
                 "cell_type": "code",
@@ -135,16 +135,16 @@ def create_eda_notebook():
                     "    table['share_%'] = (table['count'] / len(df_train) * 100).round(2)\n",
                     "    print(f'=== Churn Rates by {col} ===')\n",
                     "    display(table)\n",
-                    "    print('\\n')"
-                ]
+                    "    print('\\n')",
+                ],
             },
             {
                 "cell_type": "markdown",
                 "metadata": {},
                 "source": [
                     "## 5. Numeric Feature Distributions by Churn Status\n",
-                    "Let's evaluate `tenure`, `MonthlyCharges`, and `TotalCharges` across churners vs retained customers."
-                ]
+                    "Let's evaluate `tenure`, `MonthlyCharges`, and `TotalCharges` across churners vs retained customers.",
+                ],
             },
             {
                 "cell_type": "code",
@@ -164,16 +164,16 @@ def create_eda_notebook():
                     "    axes[idx].set_xticklabels(['Retained (0)', 'Churned (1)'])\n",
                     "    axes[idx].set_title(f'{col} by Churn Status', fontweight='bold')\n",
                     "plt.tight_layout()\n",
-                    "plt.show()"
-                ]
+                    "plt.show()",
+                ],
             },
             {
                 "cell_type": "markdown",
                 "metadata": {},
                 "source": [
                     "## 6. Interaction Analysis: Tenure Buckets × Contract Type\n",
-                    "Contract flexibility combined with early customer lifecycle creates critical risk clusters."
-                ]
+                    "Contract flexibility combined with early customer lifecycle creates critical risk clusters.",
+                ],
             },
             {
                 "cell_type": "code",
@@ -192,16 +192,16 @@ def create_eda_notebook():
                     "display(Markdown('### Churn Rate (%) by Contract & Tenure Bucket'))\n",
                     "display(pivot_rates.round(2))\n",
                     "display(Markdown('### Customer Count (n) by Contract & Tenure Bucket'))\n",
-                    "display(pivot_counts)"
-                ]
+                    "display(pivot_counts)",
+                ],
             },
             {
                 "cell_type": "markdown",
                 "metadata": {},
                 "source": [
                     "## 7. Malaysia Telecommunications Macro Context\n",
-                    "Using data from `data.gov.my` (Malaysian Cellular Subscribers by Plan Type), we evaluate national postpaid vs prepaid trends."
-                ]
+                    "Using data from `data.gov.my` (Malaysian Cellular Subscribers by Plan Type), we evaluate national postpaid vs prepaid trends.",
+                ],
             },
             {
                 "cell_type": "code",
@@ -225,8 +225,8 @@ def create_eda_notebook():
                     "ax.set_xlabel('Year')\n",
                     "ax.legend()\n",
                     "plt.tight_layout()\n",
-                    "plt.show()"
-                ]
+                    "plt.show()",
+                ],
             },
             {
                 "cell_type": "markdown",
@@ -259,27 +259,23 @@ def create_eda_notebook():
                     "\n",
                     "6. **Postpaid Protection Maximizes Long-Term Customer Lifetime Value (CLV):**\n",
                     "   - National Malaysian data shows steady growth in postpaid plans (>10M subscribers) where contractual retention directly preserves consistent ARPU.\n",
-                    "   - *Action:* Target retention intervention on high-ARPU postpaid subscribers with high predicted churn probability."
-                ]
-            }
+                    "   - *Action:* Target retention intervention on high-ARPU postpaid subscribers with high predicted churn probability.",
+                ],
+            },
         ],
         "metadata": {
-            "kernelspec": {
-                "display_name": "Python 3",
-                "language": "python",
-                "name": "python3"
-            },
+            "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
             "language_info": {
                 "codemirror_mode": {"name": "ipython", "version": 3},
                 "file_extension": ".py",
                 "mimetype": "text/x-python",
                 "name": "python",
                 "nbformat": 4,
-                "nbformat_minor": 5
-            }
+                "nbformat_minor": 5,
+            },
         },
         "nbformat": 4,
-        "nbformat_minor": 5
+        "nbformat_minor": 5,
     }
 
     out_file = Path("notebooks/01_eda.ipynb")

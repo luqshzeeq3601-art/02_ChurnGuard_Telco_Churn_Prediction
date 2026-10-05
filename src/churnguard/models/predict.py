@@ -12,7 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import joblib
 import numpy as np
@@ -27,8 +27,8 @@ class ChurnPredictor:
 
     def __init__(
         self,
-        model_path: Optional[Path | str] = None,
-        meta_path: Optional[Path | str] = None,
+        model_path: Path | str | None = None,
+        meta_path: Path | str | None = None,
     ) -> None:
         """Initialize predictor by loading serialized pipeline and metadata.
 
@@ -36,21 +36,29 @@ class ChurnPredictor:
             model_path: Path to models/model.joblib.
             meta_path: Path to models/model_meta.json.
         """
-        m_path = Path(model_path) if model_path else Path(CFG["paths"]["models_dir"]) / "model.joblib"
-        mt_path = Path(meta_path) if meta_path else Path(CFG["paths"]["models_dir"]) / "model_meta.json"
+        m_path = (
+            Path(model_path) if model_path else Path(CFG["paths"]["models_dir"]) / "model.joblib"
+        )
+        mt_path = (
+            Path(meta_path) if meta_path else Path(CFG["paths"]["models_dir"]) / "model_meta.json"
+        )
 
         if not m_path.exists():
-            raise FileNotFoundError(f"Model artifact not found at {m_path}. Run training & serialization first.")
+            raise FileNotFoundError(
+                f"Model artifact not found at {m_path}. Run training & serialization first."
+            )
         if not mt_path.exists():
             raise FileNotFoundError(f"Model metadata not found at {mt_path}.")
 
         self.model = joblib.load(m_path)
-        with open(mt_path, "r", encoding="utf-8") as f:
+        with open(mt_path, encoding="utf-8") as f:
             self.meta = json.load(f)
 
         self.model_version = self.meta.get("model_version", "1.0.0")
         self.optimal_threshold = float(self.meta.get("optimal_threshold", 0.18))
-        self.medium_threshold = float(self.meta.get("risk_tiers", {}).get("medium", {}).get("min_prob", 0.09))
+        self.medium_threshold = float(
+            self.meta.get("risk_tiers", {}).get("medium", {}).get("min_prob", 0.09)
+        )
 
         # Initialize SHAP explainer for reason code generation
         # Extract underlying fitted pipeline from CalibratedClassifierCV if calibrated
@@ -71,7 +79,7 @@ class ChurnPredictor:
             return "Medium"
         return "Low"
 
-    def predict_single(self, customer: Dict[str, Any] | pd.Series) -> Dict[str, Any]:
+    def predict_single(self, customer: dict[str, Any] | pd.Series) -> dict[str, Any]:
         """Generate prediction, risk tier, and plain-language reasons for a single customer.
 
         Args:
@@ -106,7 +114,7 @@ class ChurnPredictor:
 
     def predict_batch(
         self,
-        data: pd.DataFrame | List[Dict[str, Any]],
+        data: pd.DataFrame | list[dict[str, Any]],
         include_reasons: bool = True,
     ) -> pd.DataFrame:
         """Score multiple customers and return a DataFrame ranked by churn risk descending.
@@ -118,13 +126,12 @@ class ChurnPredictor:
         Returns:
             DataFrame with predictions, ranked descending by churn_probability.
         """
-        if isinstance(data, list):
-            df = pd.DataFrame(data)
-        else:
-            df = data.copy()
+        df = pd.DataFrame(data) if isinstance(data, list) else data.copy()
 
         if len(df) == 0:
-            return pd.DataFrame(columns=["customerID", "churn_probability", "risk_tier", "top_reasons", "rank"])
+            return pd.DataFrame(
+                columns=["customerID", "churn_probability", "risk_tier", "top_reasons", "rank"]
+            )
 
         probs = self.model.predict_proba(df)[:, 1]
         probs_rounded = np.round(probs, 4)
@@ -143,7 +150,9 @@ class ChurnPredictor:
         result_df["model_version"] = self.model_version
 
         # Sort descending by risk
-        result_df = result_df.sort_values(by="churn_probability", ascending=False).reset_index(drop=True)
+        result_df = result_df.sort_values(by="churn_probability", ascending=False).reset_index(
+            drop=True
+        )
         result_df["rank"] = np.arange(1, len(result_df) + 1)
 
         return result_df
@@ -151,7 +160,7 @@ class ChurnPredictor:
 
 def score_file_cli(
     input_file: Path | str,
-    output_file: Optional[Path | str] = None,
+    output_file: Path | str | None = None,
     top_n: int = 5,
 ) -> pd.DataFrame:
     """Read a batch file (CSV or Parquet), score customers, and export ranked CSV."""
@@ -159,23 +168,28 @@ def score_file_cli(
     if not in_path.exists():
         raise FileNotFoundError(f"Input file not found at: {in_path}")
 
-    if in_path.suffix == ".parquet":
-        df = pd.read_parquet(in_path)
-    else:
-        df = pd.read_csv(in_path)
+    df = pd.read_parquet(in_path) if in_path.suffix == ".parquet" else pd.read_csv(in_path)
 
     predictor = ChurnPredictor()
     scored_df = predictor.predict_batch(df, include_reasons=True)
 
-    out_path = Path(output_file) if output_file else Path(CFG["paths"]["reports_dir"]) / "scored.csv"
+    out_path = (
+        Path(output_file) if output_file else Path(CFG["paths"]["reports_dir"]) / "scored.csv"
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Flatten reasons list for clean CSV export
     export_df = scored_df.copy()
     if "top_reasons" in export_df.columns:
-        export_df["reason_1"] = export_df["top_reasons"].apply(lambda r: r[0] if len(r) > 0 else "")
-        export_df["reason_2"] = export_df["top_reasons"].apply(lambda r: r[1] if len(r) > 1 else "")
-        export_df["reason_3"] = export_df["top_reasons"].apply(lambda r: r[2] if len(r) > 2 else "")
+        export_df["reason_1"] = export_df["top_reasons"].apply(
+            lambda r: r[0] if len(r) > 0 else ""
+        )
+        export_df["reason_2"] = export_df["top_reasons"].apply(
+            lambda r: r[1] if len(r) > 1 else ""
+        )
+        export_df["reason_3"] = export_df["top_reasons"].apply(
+            lambda r: r[2] if len(r) > 2 else ""
+        )
         export_df = export_df.drop(columns=["top_reasons"])
 
     export_df.to_csv(out_path, index=False)
@@ -193,7 +207,14 @@ def score_file_cli(
         print(f"  - {tier:<8} Risk: {count:>5} ({pct:>5.1f}%)")
 
     print(f"\nTop {top_n} Highest Risk Customers:")
-    display_cols = ["rank", "customerID", "churn_probability", "risk_tier", "Contract", "MonthlyCharges"]
+    display_cols = [
+        "rank",
+        "customerID",
+        "churn_probability",
+        "risk_tier",
+        "Contract",
+        "MonthlyCharges",
+    ]
     cols_present = [c for c in display_cols if c in scored_df.columns]
     print(scored_df[cols_present].head(top_n).to_string(index=False))
 
@@ -203,7 +224,9 @@ def score_file_cli(
 def main() -> None:
     """CLI Entry point for batch scoring."""
     parser = argparse.ArgumentParser(description="ChurnGuard Batch Customer Scoring CLI")
-    parser.add_argument("--file", "-f", type=str, required=True, help="Path to input CSV or Parquet file")
+    parser.add_argument(
+        "--file", "-f", type=str, required=True, help="Path to input CSV or Parquet file"
+    )
     parser.add_argument("--output", "-o", type=str, default=None, help="Path to output ranked CSV")
     parser.add_argument("--top-n", type=int, default=5, help="Number of top risk records to print")
 
