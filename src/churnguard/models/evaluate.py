@@ -25,10 +25,43 @@ from sklearn.metrics import (
 from churnguard.config import CFG
 
 
+def _expected_positives_at_k(y_true: np.ndarray, y_prob: np.ndarray, top_n: int) -> float:
+    """Compute expected true positives in top_n under uniform random tie-breaking.
+
+    When multiple items share the cutoff probability, fractional weighting is applied
+    so the metric value is deterministic and strictly row-order invariant.
+    """
+    n = len(y_true)
+    if n == 0 or top_n <= 0:
+        return 0.0
+    top_n = min(top_n, n)
+
+    # Sort descending
+    sorted_probs = np.sort(y_prob)[::-1]
+    cutoff_prob = sorted_probs[top_n - 1]
+
+    strictly_higher_mask = y_prob > cutoff_prob
+    tied_mask = y_prob == cutoff_prob
+
+    n_higher = int(np.sum(strictly_higher_mask))
+    n_tied = int(np.sum(tied_mask))
+
+    tp_higher = float(np.sum(y_true[strictly_higher_mask]))
+    tp_tied = float(np.sum(y_true[tied_mask]))
+
+    if n_tied == 0:
+        return tp_higher
+
+    slots_for_tied = top_n - n_higher
+    frac = slots_for_tied / n_tied
+    return tp_higher + (frac * tp_tied)
+
+
 def compute_lift_at_k(y_true: np.ndarray, y_prob: np.ndarray, k: float = 0.10) -> float:
-    """Calculate Lift in the top k fraction of ranked predictions.
+    """Calculate tie-aware Lift in the top k fraction of ranked predictions.
 
     Lift@k = (Precision in top k%) / (Baseline positive rate).
+    When ties occur at the boundary, expected precision under random tie-breaking is computed.
 
     Args:
         y_true: Ground truth binary labels (0 or 1).
@@ -45,21 +78,22 @@ def compute_lift_at_k(y_true: np.ndarray, y_prob: np.ndarray, k: float = 0.10) -
     if n == 0:
         return 0.0
 
-    base_rate = np.mean(y_true)
+    base_rate = float(np.mean(y_true))
     if base_rate == 0:
         return 0.0
 
     top_n = max(1, int(np.ceil(k * n)))
-    top_indices = np.argsort(y_prob)[::-1][:top_n]
-    top_precision = np.mean(y_true[top_indices])
+    expected_tp = _expected_positives_at_k(y_true, y_prob, top_n)
+    top_precision = expected_tp / top_n
 
     return float(top_precision / base_rate)
 
 
 def compute_recall_at_k(y_true: np.ndarray, y_prob: np.ndarray, k: float = 0.20) -> float:
-    """Calculate Recall in the top k fraction of ranked predictions.
+    """Calculate tie-aware Recall in the top k fraction of ranked predictions.
 
-    Recall@k = (True positives in top k%) / (Total true positives).
+    Recall@k = (Expected True Positives in top k%) / (Total true positives).
+    When ties occur at the boundary, fractional weighting is applied for row-order invariance.
 
     Args:
         y_true: Ground truth binary labels (0 or 1).
@@ -73,15 +107,20 @@ def compute_recall_at_k(y_true: np.ndarray, y_prob: np.ndarray, k: float = 0.20)
     y_prob = np.asarray(y_prob).astype(float)
     n = len(y_true)
 
-    total_positives = np.sum(y_true)
-    if total_positives == 0:
+    total_positives = float(np.sum(y_true))
+    if total_positives == 0 or n == 0:
         return 0.0
 
     top_n = max(1, int(np.ceil(k * n)))
-    top_indices = np.argsort(y_prob)[::-1][:top_n]
-    positives_in_top_k = np.sum(y_true[top_indices])
+    expected_tp = _expected_positives_at_k(y_true, y_prob, top_n)
 
-    return float(positives_in_top_k / total_positives)
+    return float(expected_tp / total_positives)
+
+
+def compute_n_unique_probs(y_prob: np.ndarray) -> int:
+    """Count the number of unique predicted probabilities."""
+    y_prob = np.asarray(y_prob).astype(float)
+    return int(len(np.unique(y_prob)))
 
 
 def compute_expected_profit(
@@ -160,6 +199,7 @@ def compute_all_metrics(
         "recall": float(recall_score(y_true, y_pred, zero_division=0)),
         "f1": float(f1_score(y_true, y_pred, zero_division=0)),
         "expected_profit_rm": float(compute_expected_profit(y_true, y_prob, threshold=threshold)),
+        "n_unique_probs": compute_n_unique_probs(y_prob),
     }
 
     return metrics
