@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -8,14 +8,17 @@ on:
 
 jobs:
   lint-and-test:
+    name: Code Quality & Test Suite
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
@@ -23,11 +26,74 @@ jobs:
           pip install -r requirements.txt
           pip install -e .
 
-      - name: Lint with ruff
+      - name: Lint and formatting checks (ruff)
         run: |
-          ruff check src/ tests/
-          ruff format --check src/ tests/
+          ruff check src/ api/ tests/
+          ruff format --check src/ api/ tests/
 
-      - name: Test with pytest and coverage gate
+      - name: Run test suite with coverage gate (>= 70%)
         run: |
-          pytest --cov=src/churnguard --cov-fail-under=70 tests/
+          pytest --cov=src/churnguard --cov=api --cov-report=term-missing --cov-fail-under=70 tests/
+
+  docker-build-smoke-test:
+    name: Docker Build & API Smoke Test
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t churnguard-api:test .
+
+      - name: Run container in background
+        run: |
+          docker run -d --name churnguard-service -p 8000:8000 churnguard-api:test
+
+      - name: Wait for service readiness and smoke test /health
+        run: |
+          echo "Waiting for container service to be ready..."
+          timeout 30s bash -c 'until curl -s -f http://localhost:8000/health; do sleep 2; done'
+          
+          echo "Testing GET /health:"
+          curl -s -f http://localhost:8000/health | grep '"status":"ok"'
+
+          echo "Testing GET /model-info:"
+          curl -s -f http://localhost:8000/model-info | grep '"model_name":"churnguard-champion"'
+
+          echo "Testing POST /predict:"
+          curl -s -f -X POST http://localhost:8000/predict \
+            -H "Content-Type: application/json" \
+            -d '{
+              "customerID": "7590-VHVEG",
+              "gender": "Female",
+              "SeniorCitizen": 0,
+              "Partner": "Yes",
+              "Dependents": "No",
+              "tenure": 1,
+              "PhoneService": "No",
+              "MultipleLines": "No phone service",
+              "InternetService": "DSL",
+              "OnlineSecurity": "No",
+              "OnlineBackup": "Yes",
+              "DeviceProtection": "No",
+              "TechSupport": "No",
+              "StreamingTV": "No",
+              "StreamingMovies": "No",
+              "Contract": "Month-to-month",
+              "PaperlessBilling": "Yes",
+              "PaymentMethod": "Electronic check",
+              "MonthlyCharges": 29.85,
+              "TotalCharges": 29.85
+            }' | grep '"risk_tier"'
+
+      - name: Container logs and cleanup
+        if: always()
+        run: |
+          docker logs churnguard-service || true
+          docker stop churnguard-service || true
+          docker rm churnguard-service || true

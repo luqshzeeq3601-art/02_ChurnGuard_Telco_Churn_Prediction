@@ -48,9 +48,9 @@
 - [x] **T5.6** Dockerfile (slim, non-root) + `make docker-build docker-run` | AC: container serves `/health`
 
 ## Phase 6: CI/CD + Deploy (W5)
-- [ ] **T6.1** GitHub Actions: lint + test + coverage gate | AC: green badge in README
-- [ ] **T6.2** Docker build + smoke test job | AC: passes on main
-- [ ] **T6.3** Deploy to GCP Cloud Run (manual first, then tag-triggered) | AC: public `/docs` URL works (EO4)
+- [x] **T6.1** GitHub Actions: lint + test + coverage gate | AC: green badge in README
+- [x] **T6.2** Docker build + smoke test job | AC: passes on main
+- [x] **T6.3** Deploy to GCP Cloud Run (manual first, then tag-triggered) | AC: public `/docs` URL works (EO4)
 
 ## Phase 7: Monitoring + Dashboard (W5-W6)
 - [ ] **T7.1** Simulate drifted batch | AC: script documented
