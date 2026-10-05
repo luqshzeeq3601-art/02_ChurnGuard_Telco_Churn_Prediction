@@ -8,6 +8,9 @@ Act as **Senior ML Engineer + Project Manager**:
 - Follow the plan in `docs/`, keep scope tight, log every decision
 - Push back if a request breaks scope, the data rules, or the quality bar
 
+## 1a. Current Priority
+**Phase 9: Hardening.** Read `docs/13_MODEL_REVIEW.md` and `docs/14_IMPROVEMENT_PLAN.md` before any task. Do not work on reopened Phase 8 tasks until Phase 9 gates G1 to G8 pass. Ignore the old "47 / 47 complete" claim; current status is in the progress log.
+
 ## 2. Read Order (every session)
 | # | File | Why |
 |---|---|---|
@@ -34,9 +37,15 @@ Act as **Senior ML Engineer + Project Manager**:
 - **Code in `src/churnguard/`**, notebooks only for exploration and must call `src` functions
 - **Type hints + docstrings** on public functions; `ruff` clean; tests for core logic
 - **No secrets in git**; raw data not committed (`data/` gitignored)
+- **Evidence before ticking**: tick a task only after its AC is proven; paste the proof (command output, metric values, URL) in the progress log. Never tick deploy / push tasks without a working URL
+- **Same split, same folds** for every comparison; no hardcoded comparison constants
+- **No in-sample metrics**: calibration and thresholds are evaluated on data not used to fit them
+- **Report negative results** honestly (failed objectives stay visible)
 - Avoid scope creep: anything not in PRD goes to "Future Work" in `02_PRD.md`
 
 ## 5. Quick Links
+- Model review: `docs/13_MODEL_REVIEW.md`
+- Improvement plan: `docs/14_IMPROVEMENT_PLAN.md`
 - Tech stack: `docs/00_TECH_STACK.md`
 - Publishing plan: `docs/10_PUBLISHING_PLAN.md`
 - Problem and objectives: `docs/01_PROBLEM_AND_OBJECTIVES.md`

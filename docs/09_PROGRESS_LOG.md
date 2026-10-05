@@ -5,10 +5,22 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | Complete / Production Ready (Phase 0–8) |
-| Next task | Portfolio Maintenance & Public Release |
-| Overall progress | **47 / 47 tasks (100%)** |
-| Health | Complete / Verified |
+| Current phase | **Phase 9: Hardening** (Sprint A: Repo integrity) |
+| Next task | **T9.2** Clean repo: duplicate files, Docker Python 3.11, rebuild image |
+| Overall progress | 37 / 61 tasks (11 reopened, 14 added) |
+| Health | In progress: Phase 9 Hardening started |
+
+---
+
+## 05 Oct 2026: Task T9.1 Completed (Phase 9 Sprint A)
+- **Done**:
+  - **T9.1**: Verified Phase 7 commit (`0eba781`). Ran test suite verifying all **73/73 tests pass** with **83.32% code coverage** (exceeding $\ge 70\%$ gate). Committed model review findings (`docs/13_MODEL_REVIEW.md`), hardening improvement plan (`docs/14_IMPROVEMENT_PLAN.md`), updated decisions log (`docs/08_DECISIONS_LOG.md` D-013 to D-016), updated experiment plan (`docs/06_EXPERIMENT_PLAN.md`), and updated `CLAUDE.md`. Verified clean working tree.
+- **Evidence**:
+  - `pytest` run output: `73 passed, 1063 warnings in 51.43s`, total coverage: 83.32% (exceeds 70% requirement).
+  - `ruff` check and format: all checks passed, 57 files formatted.
+  - `git log`: Commit `0eba781` verified.
+- **Next**: **T9.2** Clean repo: remove duplicate raw files and duplicate figures, Docker `python:3.11-slim`, `requires-python >=3.11`, rebuild image (F10).
+- **Blockers**: None.
 
 ---
 
@@ -41,6 +53,15 @@
 - **Next**: Phase 8 — Portfolio Packaging
 - **Blockers**: None
 - **Code Quality**: 73 passed tests, 84% test coverage, 0 ruff errors.
+
+---
+
+## 05 Oct 2026: Model Review + Improvement Plan (PM)
+- **Done**: Senior review of v1.0 (`13_MODEL_REVIEW.md`); test metrics independently recomputed; improvement plan written (`14_IMPROVEMENT_PLAN.md`); Phase 9 (14 tasks) added
+- **Findings**: not on GitHub / not deployed (F1); isotonic calibration collapsed scores to 32 levels (F2); in-sample calibration metrics (F3); wrong-split objective checks (F4); MO1 not met (F5); fairness gaps 0.078 / 0.144 on test (F6)
+- **Reopened**: T0.1, T6.1, T6.2, T6.3 (F1) and T8.2 to T8.8 (F11: nothing published yet; drafts only) (D-016)
+- **Next**: T9.1
+- **Blockers**: GCP billing account needed for T9.13 (fallback Render)
 
 ---
 

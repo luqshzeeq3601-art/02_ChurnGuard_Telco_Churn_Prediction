@@ -82,6 +82,10 @@ Objective: maximise mean CV PR-AUC.
 | E08 | 0.6706 ± 0.0217 | 0.8464 | Fairness ablation (without gender/SeniorCitizen, minimal drop) |
 | E09 | **0.6732 ± 0.0217** (CV) | **0.8468** (CV) | E07 + Isotonic Calibration on Val (Brier: 0.1542 -> 0.1293, MO3 met) |
 
+| E10 | | | Calibration redesign (cv=5 on train+val, OOF) |
+| E11 | | | LR vs LightGBM paired folds (champion re-decision) |
+| E12 | | | Fairness options M0 / M1 / M2 |
+
 ### Final Test Results (once)
 | Metric | Value | 95% CI |
 |---|---|---|
@@ -95,3 +99,15 @@ Objective: maximise mean CV PR-AUC.
 | Precision at tau* | 53.75% | [48.59%, 58.88%] |
 | Recall at tau* | 76.51% | [71.28%, 81.40%] |
 | F1 at tau* | 0.6314 | [0.5871, 0.6724] |
+
+### v1.1 Test Results (after Phase 9, D-015)
+| Metric | Champion | Runner-up | 95% CI (champion) |
+|---|---|---|---|
+| ROC-AUC | | | |
+| PR-AUC | | | |
+| Brier (calibrated vs uncalibrated) | | | |
+| Lift@10% (tie-aware) | | | |
+| Recall@20% (tie-aware) | | | |
+| Unique probabilities | | | |
+| Threshold (OOF) | | | |
+| Profit per 1k (RM) | | | |

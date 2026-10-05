@@ -3,7 +3,7 @@
 > Tick `[x]` when acceptance criteria are met. Work top to bottom within a phase.
 
 ## Phase 0: Setup (W1)
-- [x] **T0.1** Init git repo, `.gitignore` (data/, models/, mlruns/, .venv/, __pycache__/) | AC: first commit pushed to GitHub
+- [ ] **T0.1** Init git repo, `.gitignore` (data/, models/, mlruns/, .venv/, __pycache__/) | AC: first commit pushed to GitHub | **REOPENED 05 Oct (F1, see 13_MODEL_REVIEW.md)**
 - [x] **T0.2** `pyproject.toml` + `requirements.txt` (pinned versions) | AC: fresh venv installs cleanly
 - [x] **T0.3** Create folder structure per `04_TECHNICAL_DESIGN.md` section 3 with `__init__.py` | AC: `import churnguard` works
 - [x] **T0.4** `configs/config.yaml` (paths, seed, split ratios, cost assumptions) + `config.py` loader | AC: unit test loads config
@@ -48,9 +48,32 @@
 - [x] **T5.6** Dockerfile (slim, non-root) + `make docker-build docker-run` | AC: container serves `/health`
 
 ## Phase 6: CI/CD + Deploy (W5)
-- [x] **T6.1** GitHub Actions: lint + test + coverage gate | AC: green badge in README
-- [x] **T6.2** Docker build + smoke test job | AC: passes on main
-- [x] **T6.3** Deploy to GCP Cloud Run (manual first, then tag-triggered) | AC: public `/docs` URL works (EO4)
+- [ ] **T6.1** GitHub Actions: lint + test + coverage gate | AC: green badge in README | **REOPENED 05 Oct (F1, see 13_MODEL_REVIEW.md)**
+- [ ] **T6.2** Docker build + smoke test job | AC: passes on main | **REOPENED 05 Oct (F1, see 13_MODEL_REVIEW.md)**
+- [ ] **T6.3** Deploy to GCP Cloud Run (manual first, then tag-triggered) | AC: public `/docs` URL works (EO4) | **REOPENED 05 Oct (F1, see 13_MODEL_REVIEW.md)**
+
+## Phase 9: Hardening (EXECUTE NEXT, before reopened Phase 6 and Phase 8 tasks)
+> Plan and design: `14_IMPROVEMENT_PLAN.md`. Findings: `13_MODEL_REVIEW.md`. Tick only with evidence in progress log.
+
+### Sprint A: Repo integrity
+- [x] **T9.1** Verify Phase 7 commit (0eba781) and commit review docs; working tree clean | AC: `pytest` green; `git status` clean (F8)
+- [ ] **T9.2** Clean repo: remove duplicate raw files and duplicate figures, Docker `python:3.11-slim`, `requires-python >=3.11`, rebuild image | AC: Docker smoke test passes (F10)
+
+### Sprint B: Model integrity
+- [ ] **T9.3** Tie-aware `recall_at_k` / `lift_at_k` + `n_unique_probs` in `evaluate.py` | AC: test proves row-order invariance (F2)
+- [ ] **T9.4** E10 calibration redesign: uncalibrated vs sigmoid cv=5 vs isotonic cv=5 on train+val, OOF metrics | AC: rule in plan 4.2 applied; unique probs at least 200; OOF ECE reported; MLflow logged (F2, F3)
+- [ ] **T9.5** Re-optimise profit threshold on OOF calibrated probs + sensitivity | AC: `optimal_threshold.json` has `source: oof_train_val` (F7)
+- [ ] **T9.6** E11 champion re-decision: E02 vs E07 on identical folds, paired PR-AUC diff | AC: D-013 recorded with rule from plan 4.4; MO1 stated honestly (F5)
+- [ ] **T9.7** E12 fairness audit (M0 / M1 / M2) on OOF at chosen threshold | AC: trade-off table; D-014 recorded; gaps at most 0.05 or documented (F6)
+- [ ] **T9.8** Fix objective checks in `evaluate_test.py` (same-split, no hardcoded constants) | AC: unit tests; mapping in plan 4.6 (F4)
+- [ ] **T9.9** v1.1 final test evaluation (once), champion + runner-up; regenerate model, meta, metrics, scored.csv, figures | AC: D-015 discloses test reuse; API tests pass
+- [ ] **T9.10** `docs/MODEL_CARD.md`: intended use, data, metrics with CI, fairness table, limitations | AC: complete
+- [ ] **T9.11** Update `06_EXPERIMENT_PLAN.md` results (E10 to E12, v1.1), README results + limitations + "what did not work" | AC: no `__` left in results section (F9)
+
+### Sprint C: Visibility
+- [ ] **T9.12** Create GitHub repo, push, CI green on GitHub, badges in README; re-tick T0.1, T6.1, T6.2 | AC: Actions run URL in progress log (F1)
+- [ ] **T9.13** GCP project, Artifact Registry, service account secrets, budget alert RM5, deploy; re-tick T6.3 (fallback: Render) | AC: public `/docs` returns 200, `/predict` works (F1)
+- [ ] **T9.14** Readiness review: rescore rubric in `13_MODEL_REVIEW.md` section 6 | AC: all gates G1 to G8 pass; score at least 8/10
 
 ## Phase 7: Monitoring + Dashboard (W5-W6)
 - [x] **T7.1** Simulate drifted batch | AC: script documented
@@ -59,10 +82,10 @@
 
 ## Phase 8: Portfolio Packaging (W6)
 - [x] **T8.1** README: problem, results table, architecture diagram, how to run, limitations | AC: complete
-- [x] **T8.2** Demo GIF / screenshots of API + dashboard | AC: in README
-- [x] **T8.3** Clean repo, make public, pin repo on GitHub | AC: done
-- [x] **T8.4** LinkedIn post + add to CV and portfolio spreadsheet | AC: posted; tracker status = Done
-- [x] **T8.5** Deploy Streamlit demo to Hugging Face Spaces | AC: public Space URL loads and scores a sample
-- [x] **T8.6** Publish Kaggle notebook (EDA + model summary, link to GitHub) | AC: public notebook URL
-- [x] **T8.7** (Optional) Medium / dev.to write-up | AC: published, linked in README
-- [x] **T8.8** Run pre-publish checklist in `10_PUBLISHING_PLAN.md` section 3 | AC: all items ticked
+- [ ] **T8.2** Demo GIF / screenshots of API + dashboard | AC: in README | **REOPENED 05 Oct (F11: no GIF / screenshots yet)**
+- [ ] **T8.3** Clean repo, make public, pin repo on GitHub | AC: done | **REOPENED 05 Oct (F11: no git remote; repo not public)**
+- [ ] **T8.4** LinkedIn post + add to CV and portfolio spreadsheet | AC: posted; tracker status = Done | **REOPENED 05 Oct (F11: post drafted, not posted)**
+- [ ] **T8.5** Deploy Streamlit demo to Hugging Face Spaces | AC: public Space URL loads and scores a sample | **REOPENED 05 Oct (F11: entrypoint only; Space not deployed)**
+- [ ] **T8.6** Publish Kaggle notebook (EDA + model summary, link to GitHub) | AC: public notebook URL | **REOPENED 05 Oct (F11: notebook file only; not published on Kaggle)**
+- [ ] **T8.7** (Optional) Medium / dev.to write-up | AC: published, linked in README | **REOPENED 05 Oct (F11: article drafted, not published)**
+- [ ] **T8.8** Run pre-publish checklist in `10_PUBLISHING_PLAN.md` section 3 | AC: all items ticked | **REOPENED 05 Oct (F11: checklist needs live links)**
