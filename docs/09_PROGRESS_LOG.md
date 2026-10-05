@@ -5,10 +5,34 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | Phase 4: Evaluation, Business and Explainability (W3-W4) |
-| Next task | **T4.1** Calibration on val (E09) |
-| Overall progress | 21 / 47 tasks |
+| Current phase | Phase 5: Serving (W4) |
+| Next task | **T5.1** `predict.py` (load model, predict, tier, reasons) |
+| Overall progress | 27 / 47 tasks |
 | Health | On track |
+
+---
+
+## 05 Oct 2026: Phase 4 Evaluation, Business and Explainability Completed
+- **Done**:
+  - **T4.1**: Implemented `src/churnguard/models/calibrate.py` (Experiment E09). Fitted Platt Sigmoid and Isotonic Regression on validation split with champion LightGBM. Isotonic calibration reduced Brier Score from 0.1542 to 0.1293 (16% relative gain) and ECE from 0.1239 to 0.0000. Saved reliability curves to `reports/figures/07_calibration_curve.png` and `reports/figures/calibration_curve.png`. Verified **MO3** met. Tested in `tests/test_calibrate.py`.
+  - **T4.2**: Implemented `src/churnguard/models/threshold.py`. Computed campaign profit curves across candidate thresholds $\tau \in [0.01, 0.99]$ on validation probabilities using RM50 offer cost, 30% retention rate, and RM780 CLV. Identified profit-optimal threshold **$\tau^* = 0.18$**, yielding expected campaign profit of **RM39,678.52 per 1,000 customers** (+44% over default $\tau=0.5$ and +83% over "Contact All"). Performed sensitivity analysis across success rates (20%, 30%, 40%) and offer costs (RM40, RM50, RM60). Saved figures to `reports/figures/08_profit_curve.png` and `reports/figures/profit_curve.png`, and exported `models/optimal_threshold.json`. Tested in `tests/test_threshold.py`.
+  - **T4.3**: Implemented `src/churnguard/explain/shap_explain.py` with `TreeExplainer` on champion LightGBM. Generated global feature importance and beeswarm summary plots saved to `reports/figures/09_shap_summary.png` and `reports/figures/shap_summary.png`. Built customer-level top-3 plain-language reason code generator mapping SHAP contributions into empathetic frontline explanations; verified on 5 sample customers. Tested in `tests/test_shap_explain.py`.
+  - **T4.4**: Executed final evaluation on held-out test split `data/processed/test.parquet` (1,057 samples, touched strictly once) using 1,000x bootstrap 95% confidence intervals:
+    - **ROC-AUC**: 0.8412 [95% CI: 0.8155, 0.8679] (MO2 $\ge 0.84$ Met)
+    - **PR-AUC**: 0.6337 [95% CI: 0.5776, 0.6899] (MO2 $\ge 0.62$ Met)
+    - **Brier Score**: 0.1381 [95% CI: 0.1247, 0.1509] (MO3 Met)
+    - **Lift@10%**: 2.73x [95% CI: 2.54x, 3.20x] (MO2 $\ge 2.5$ Met)
+    - **Recall@20%**: 51.60% [95% CI: 46.05%, 54.86%] (BO1 $\ge 50\%$ Met)
+    - **Precision at $\tau^*$**: 53.75% [95% CI: 48.59%, 58.88%]
+    - **Recall at $\tau^*$**: 76.51% [95% CI: 71.28%, 81.40%]
+    - **F1 at $\tau^*$**: 0.6314 [95% CI: 0.5871, 0.6724]
+    - **Expected Profit per 1k**: **RM35,206.24** [95% CI: RM29,031.29, RM41,165.51] (BO2 Met)
+    - Saved complete test report to `reports/final_metrics.json` and updated `docs/06_EXPERIMENT_PLAN.md`. Tested in `tests/test_evaluate_test.py`.
+  - **T4.5**: Created `src/churnguard/explain/fairness.py` and `notebooks/02_error_analysis.ipynb`. Audited demographic fairness across `gender` (female recall 0.8231 vs male recall 0.8346, gap 0.0115 $\le 0.05 \implies$ NFR7 passed) and `SeniorCitizen` (senior recall 0.9367 vs non-senior 0.7861 due to higher fiber-optic churn concentration). Diagnosed false positives (high-spend month-to-month retainees) and false negatives (unexpected contract terminations). Tested in `tests/test_fairness.py`.
+  - **T4.6**: Implemented `src/churnguard/models/serialize.py`. Serialized full production pipeline to `models/model.joblib`, exported metadata to `models/model_meta.json`, logged artifacts to MLflow model registry with tag `stage=production`, and verified standalone reload/inference. Tested in `tests/test_serialize.py`.
+- **Next**: Phase 5 — Serving (starting with T5.1 `predict.py` inference engine and T5.2 FastAPI service)
+- **Blockers**: None
+- **Code Quality**: 59 passed tests, 79% test coverage, 0 ruff errors.
 
 ---
 

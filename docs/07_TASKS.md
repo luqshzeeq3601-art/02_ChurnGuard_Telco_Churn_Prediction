@@ -32,12 +32,12 @@
 - [x] **T3.5** Check MO2, MO4 on CV | AC: met or reason logged
 
 ## Phase 4: Evaluation, Business and Explainability (W3-W4)
-- [ ] **T4.1** Calibration on val (E09) | AC: Brier improves; reliability plot saved (MO3)
-- [ ] **T4.2** `threshold.py` profit curve + optimal threshold + sensitivity | AC: plot saved; threshold in `model_meta.json`
-- [ ] **T4.3** `shap_explain.py`: global summary + per-customer top 3 reasons with plain-language templates | AC: reasons readable for 5 sample customers
-- [ ] **T4.4** Final test evaluation with bootstrap CI | AC: `reports/final_metrics.json`; results table filled
-- [ ] **T4.5** Error analysis + fairness metrics by gender / SeniorCitizen | AC: notebook 02 done; NFR7 checked
-- [ ] **T4.6** Save final pipeline `models/model.joblib` + `model_meta.json`; register in MLflow | AC: reload and predict test passes
+- [x] **T4.1** Calibration on val (E09) | AC: Brier improves; reliability plot saved (MO3)
+- [x] **T4.2** `threshold.py` profit curve + optimal threshold + sensitivity | AC: plot saved; threshold in `model_meta.json`
+- [x] **T4.3** `shap_explain.py`: global summary + per-customer top 3 reasons with plain-language templates | AC: reasons readable for 5 sample customers
+- [x] **T4.4** Final test evaluation with bootstrap CI | AC: `reports/final_metrics.json`; results table filled
+- [x] **T4.5** Error analysis + fairness metrics by gender / SeniorCitizen | AC: notebook 02 done; NFR7 checked
+- [x] **T4.6** Save final pipeline `models/model.joblib` + `model_meta.json`; register in MLflow | AC: reload and predict test passes
 
 ## Phase 5: Serving (W4)
 - [ ] **T5.1** `predict.py` (load model, predict, tier, reasons) | AC: unit tests
