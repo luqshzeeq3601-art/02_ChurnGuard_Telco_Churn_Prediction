@@ -1,11 +1,17 @@
-"""Probability calibration for churn prediction models (Experiment E09).
+"""Probability calibration redesign for churn prediction models (Experiment E10).
 
-Implements:
-- Training champion LightGBM on training split.
-- Post-hoc calibration on validation split via Platt Scaling (Sigmoid) and Isotonic Regression.
-- Expected Calibration Error (ECE) and Brier Score evaluation.
-- Reliability diagram plotting and saving.
-- MLflow logging for Experiment E09.
+Adheres to docs/14_IMPROVEMENT_PLAN.md section 4.2 (fixing F2 and F3):
+- Evaluates on combined train + val (5,986 rows) using 5-fold Stratified K-Fold.
+- Compares:
+  1. Uncalibrated LightGBM (5-fold OOF)
+  2. Sigmoid CalibratedClassifierCV(cv=5) (5-fold OOF)
+  3. Isotonic CalibratedClassifierCV(cv=5) (5-fold OOF)
+- Pre-registered selection rule: Lowest OOF Brier score, subject to:
+  * OOF PR-AUC drop <= 0.005 vs uncalibrated
+  * At least 200 unique predicted probabilities
+- Reports out-of-fold ECE (strictly zero in-sample calibration claims).
+- Exports OOF predictions to models/oof_train_val_preds.parquet for threshold search (T9.5).
+- Logs Experiment E10 to MLflow.
 """
 
 from __future__ import annotations
@@ -21,10 +27,11 @@ import numpy as np
 import pandas as pd
 from sklearn.calibration import CalibratedClassifierCV, calibration_curve
 from sklearn.metrics import brier_score_loss, log_loss
+from sklearn.model_selection import StratifiedKFold, cross_val_predict
 
 from churnguard.config import CFG, SEED
 from churnguard.features.build import build_full_pipeline
-from churnguard.models.evaluate import compute_all_metrics
+from churnguard.models.evaluate import compute_all_metrics, compute_n_unique_probs
 
 
 def compute_ece(y_true: np.ndarray, y_prob: np.ndarray, n_bins: int = 10) -> float:
@@ -63,7 +70,6 @@ def load_champion_params(params_path: Path | str | None = None) -> dict[str, Any
     if path.exists():
         with open(path, encoding="utf-8") as f:
             return json.load(f)
-    # Fallback to sensible defaults
     return {
         "n_estimators": 150,
         "max_depth": 5,
@@ -80,7 +86,7 @@ def fit_champion_pipeline(
     train_df: pd.DataFrame,
     params: dict[str, Any] | None = None,
 ) -> Any:
-    """Fit full champion LightGBM pipeline on training split."""
+    """Fit full champion LightGBM pipeline on input dataset."""
     if params is None:
         params = load_champion_params()
 
@@ -99,104 +105,71 @@ def fit_champion_pipeline(
 
 
 def calibrate_pipeline(
-    fitted_pipeline: Any,
-    val_df: pd.DataFrame,
-    method: str = "sigmoid",
-) -> CalibratedClassifierCV:
-    """Fit a calibrator (sigmoid or isotonic) on validation data using a pre-fitted pipeline.
-
-    Args:
-        fitted_pipeline: Pre-fitted sklearn Pipeline.
-        val_df: Validation DataFrame with features and target 'Churn'.
-        method: Calibration method ('sigmoid' or 'isotonic').
-
-    Returns:
-        Fitted CalibratedClassifierCV model.
-    """
-    X_val = val_df.drop(columns=["Churn"])
-    y_val = val_df["Churn"].values
-
-    calibrator = CalibratedClassifierCV(
-        estimator=fitted_pipeline,
-        method=method,
-        cv="prefit",
-    )
-    calibrator.fit(X_val, y_val)
+    pipeline: Any,
+    cal_df: pd.DataFrame,
+    method: str = "isotonic",
+) -> Any:
+    """Fit a CalibratedClassifierCV on a calibration dataset."""
+    X_cal = cal_df.drop(columns=["Churn"])
+    y_cal = cal_df["Churn"].values
+    calibrator = CalibratedClassifierCV(pipeline, method=method, cv=5)
+    calibrator.fit(X_cal, y_cal)
     return calibrator
 
 
 def plot_calibration_curves(
     y_true: np.ndarray,
     prob_dict: dict[str, np.ndarray],
+    n_bins: int = 10,
     save_path: Path | str | None = None,
 ) -> plt.Figure:
-    """Generate and save publication-ready reliability diagram and probability histograms.
-
-    Args:
-        y_true: True binary target values.
-        prob_dict: Dictionary mapping model/method name to predicted probabilities.
-        save_path: Optional path to save figure.
-
-    Returns:
-        Matplotlib Figure object.
-    """
+    """Plot reliability diagram comparing multiple calibration methods."""
     fig, (ax1, ax2) = plt.subplots(
         nrows=2,
         ncols=1,
-        figsize=(8, 10),
-        gridspec_kw={"height_ratios": [2, 1]},
+        figsize=(8, 8),
+        gridspec_kw={"height_ratios": [3, 1]},
+        sharex=True,
     )
 
-    ax1.plot([0, 1], [0, 1], "k--", label="Perfect Calibration (y = x)", alpha=0.7)
+    ax1.plot([0, 1], [0, 1], "k--", label="Perfect Calibration (Ideal)")
+    colors = ["#94A3B8", "#3B82F6", "#10B981", "#F59E0B"]
 
-    colors = {
-        "Uncalibrated (LightGBM)": "#e74c3c",
-        "Calibrated (Sigmoid / Platt)": "#2980b9",
-        "Calibrated (Isotonic)": "#27ae60",
-    }
-
-    for name, probs in prob_dict.items():
-        prob_true, prob_pred = calibration_curve(y_true, probs, n_bins=10, strategy="uniform")
+    for idx, (label, probs) in enumerate(prob_dict.items()):
+        color = colors[idx % len(colors)]
+        prob_true, prob_pred = calibration_curve(y_true, probs, n_bins=n_bins, strategy="uniform")
         brier = brier_score_loss(y_true, probs)
-        ece = compute_ece(y_true, probs)
-        color = colors.get(name)
+        ece = compute_ece(y_true, probs, n_bins=n_bins)
+        n_uniq = compute_n_unique_probs(probs)
+
         ax1.plot(
             prob_pred,
             prob_true,
             marker="o",
             linewidth=2,
-            label=f"{name} (Brier: {brier:.4f}, ECE: {ece:.4f})",
             color=color,
+            label=f"{label} (Brier={brier:.4f}, ECE={ece:.4f}, Uniq={n_uniq})",
         )
+
         ax2.hist(
             probs,
-            bins=20,
             range=(0, 1),
+            bins=n_bins,
             histtype="step",
-            linewidth=1.5,
-            label=name,
+            lw=1.5,
             color=color,
             density=True,
         )
 
-    ax1.set_xlabel("Mean Predicted Probability", fontsize=11, fontweight="bold")
-    ax1.set_ylabel("Fraction of True Churners", fontsize=11, fontweight="bold")
-    ax1.set_title(
-        "Probability Calibration Reliability Diagram (Validation Set)",
-        fontsize=13,
-        fontweight="bold",
-        pad=12,
-    )
-    ax1.legend(loc="upper left", frameon=True, fontsize=9)
-    ax1.grid(True, linestyle="--", alpha=0.5)
-    ax1.set_xlim([0.0, 1.0])
-    ax1.set_ylim([0.0, 1.0])
+    ax1.set_ylabel("Empirical True Probability (Fraction of Positives)")
+    ax1.set_title("OOF Reliability Curves (Experiment E10: 5-Fold on Train+Val)")
+    ax1.legend(loc="lower right", fontsize=9)
+    ax1.grid(True, linestyle="--", alpha=0.6)
+    ax1.set_ylim([-0.05, 1.05])
 
-    ax2.set_xlabel("Predicted Probability", fontsize=11, fontweight="bold")
-    ax2.set_ylabel("Density", fontsize=11, fontweight="bold")
-    ax2.set_title("Probability Distribution Comparison", fontsize=12, fontweight="bold", pad=10)
-    ax2.legend(loc="upper right", frameon=True, fontsize=9)
-    ax2.grid(True, linestyle="--", alpha=0.5)
+    ax2.set_xlabel("Mean Predicted Probability")
+    ax2.set_ylabel("Density")
+    ax2.grid(True, linestyle="--", alpha=0.6)
     ax2.set_xlim([0.0, 1.0])
 
     plt.tight_layout()
@@ -209,126 +182,165 @@ def plot_calibration_curves(
     return fig
 
 
-def run_calibration_experiment(
+def run_calibration_redesign(
     train_path: Path | str | None = None,
     val_path: Path | str | None = None,
     log_to_mlflow: bool = True,
 ) -> dict[str, Any]:
-    """Run Experiment E09: Train champion, calibrate on val, evaluate and log to MLflow.
+    """Execute Experiment E10: 5-Fold OOF calibration evaluation on train + val.
 
     Returns:
-        Dictionary with evaluation results and fitted calibrators.
+        Dictionary containing OOF metrics, winning method, fitted calibrator, and paths.
     """
     tr_path = Path(train_path) if train_path else CFG["paths"]["processed_dir"] / "train.parquet"
     va_path = Path(val_path) if val_path else CFG["paths"]["processed_dir"] / "val.parquet"
 
     train_df = pd.read_parquet(tr_path)
     val_df = pd.read_parquet(va_path)
+    train_val_df = pd.concat([train_df, val_df], ignore_index=True)
 
-    X_val = val_df.drop(columns=["Churn"])
-    y_val = val_df["Churn"].values
+    X = train_val_df.drop(columns=["Churn"])
+    y = train_val_df["Churn"].values
 
-    # 1. Fit uncalibrated champion pipeline
     params = load_champion_params()
-    pipeline = fit_champion_pipeline(train_df, params=params)
-    probs_uncal = pipeline.predict_proba(X_val)[:, 1]
+    base_model = lgb.LGBMClassifier(**params)
+    pipeline = build_full_pipeline(base_model, include_engineered=True, scale_numeric=False)
 
-    # 2. Fit Sigmoid (Platt Scaling)
-    cal_sigmoid = calibrate_pipeline(pipeline, val_df, method="sigmoid")
-    probs_sigmoid = cal_sigmoid.predict_proba(X_val)[:, 1]
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # 3. Fit Isotonic Regression
-    cal_isotonic = calibrate_pipeline(pipeline, val_df, method="isotonic")
-    probs_isotonic = cal_isotonic.predict_proba(X_val)[:, 1]
+    # 1. Uncalibrated LightGBM (5-Fold OOF)
+    oof_uncal = cross_val_predict(pipeline, X, y, cv=skf, method="predict_proba")[:, 1]
+    metrics_uncal = compute_all_metrics(y, oof_uncal)
+    metrics_uncal["ece"] = compute_ece(y, oof_uncal)
+    metrics_uncal["log_loss"] = float(log_loss(y, oof_uncal))
 
-    # 4. Compute metrics
-    metrics_uncal = compute_all_metrics(y_val, probs_uncal)
-    metrics_uncal["ece"] = compute_ece(y_val, probs_uncal)
-    metrics_uncal["log_loss"] = float(log_loss(y_val, probs_uncal))
+    # 2. Sigmoid CalibratedClassifierCV(cv=5) (5-Fold OOF)
+    cal_sig_proto = CalibratedClassifierCV(pipeline, cv=5, method="sigmoid")
+    oof_sigmoid = cross_val_predict(cal_sig_proto, X, y, cv=skf, method="predict_proba")[:, 1]
+    metrics_sigmoid = compute_all_metrics(y, oof_sigmoid)
+    metrics_sigmoid["ece"] = compute_ece(y, oof_sigmoid)
+    metrics_sigmoid["log_loss"] = float(log_loss(y, oof_sigmoid))
 
-    metrics_sigmoid = compute_all_metrics(y_val, probs_sigmoid)
-    metrics_sigmoid["ece"] = compute_ece(y_val, probs_sigmoid)
-    metrics_sigmoid["log_loss"] = float(log_loss(y_val, probs_sigmoid))
+    # 3. Isotonic CalibratedClassifierCV(cv=5) (5-Fold OOF)
+    cal_iso_proto = CalibratedClassifierCV(pipeline, cv=5, method="isotonic")
+    oof_isotonic = cross_val_predict(cal_iso_proto, X, y, cv=skf, method="predict_proba")[:, 1]
+    metrics_isotonic = compute_all_metrics(y, oof_isotonic)
+    metrics_isotonic["ece"] = compute_ece(y, oof_isotonic)
+    metrics_isotonic["log_loss"] = float(log_loss(y, oof_isotonic))
 
-    metrics_isotonic = compute_all_metrics(y_val, probs_isotonic)
-    metrics_isotonic["ece"] = compute_ece(y_val, probs_isotonic)
-    metrics_isotonic["log_loss"] = float(log_loss(y_val, probs_isotonic))
+    # 4. Pre-registered selection rule
+    candidates = {}
+    for name, m, p in [("isotonic", metrics_isotonic, oof_isotonic), ("sigmoid", metrics_sigmoid, oof_sigmoid)]:
+        pr_drop = metrics_uncal["pr_auc"] - m["pr_auc"]
+        unique_count = m["n_unique_probs"]
+        if pr_drop <= 0.005 and unique_count >= 200:
+            candidates[name] = (m["brier_score"], m, p)
 
-    # 5. Generate and save figure
-    fig_dir = CFG["paths"]["figures_dir"]
-    fig_path1 = fig_dir / "07_calibration_curve.png"
+    if candidates:
+        best_method = min(candidates.keys(), key=lambda k: candidates[k][0])
+    else:
+        best_method = "uncalibrated"
 
-    prob_dict = {
-        "Uncalibrated (LightGBM)": probs_uncal,
-        "Calibrated (Sigmoid / Platt)": probs_sigmoid,
-        "Calibrated (Isotonic)": probs_isotonic,
-    }
+    # 5. Fit production calibrator on all train_val_df
+    if best_method in ("sigmoid", "isotonic"):
+        prod_calibrator = CalibratedClassifierCV(pipeline, cv=5, method=best_method)
+        prod_calibrator.fit(X, y)
+    else:
+        prod_calibrator = fit_champion_pipeline(train_val_df, params=params)
 
-    fig = plot_calibration_curves(y_val, prob_dict, save_path=fig_path1)
-    plt.close(fig)
-
-    # Choose best calibration method (lowest Brier score)
-    best_method = (
-        "sigmoid"
-        if metrics_sigmoid["brier_score"] <= metrics_isotonic["brier_score"]
-        else "isotonic"
+    # 6. Save OOF predictions for threshold search (T9.5)
+    oof_df = pd.DataFrame(
+        {
+            "y_true": y,
+            "prob_uncal": oof_uncal,
+            "prob_sigmoid": oof_sigmoid,
+            "prob_isotonic": oof_isotonic,
+            "prob_selected": oof_isotonic if best_method == "isotonic" else (oof_sigmoid if best_method == "sigmoid" else oof_uncal),
+            "MonthlyCharges": train_val_df["MonthlyCharges"].values,
+        }
     )
-    best_calibrator = cal_sigmoid if best_method == "sigmoid" else cal_isotonic
+    models_dir = Path(CFG["paths"]["models_dir"])
+    models_dir.mkdir(parents=True, exist_ok=True)
+    oof_out = models_dir / "oof_train_val_preds.parquet"
+    oof_df.to_parquet(oof_out, index=False)
+
+    # 7. Plot reliability curves and save figure
+    fig_path = Path(CFG["paths"]["figures_dir"]) / "07_calibration_curve.png"
+    prob_dict = {
+        "Uncalibrated (LightGBM)": oof_uncal,
+        "Sigmoid (5-Fold CV)": oof_sigmoid,
+        "Isotonic (5-Fold CV)": oof_isotonic,
+    }
+    fig = plot_calibration_curves(y, prob_dict, save_path=fig_path)
+    plt.close(fig)
 
     results = {
         "uncalibrated": metrics_uncal,
         "sigmoid": metrics_sigmoid,
         "isotonic": metrics_isotonic,
         "best_method": best_method,
-        "best_calibrator": best_calibrator,
-        "uncalibrated_pipeline": pipeline,
-        "brier_improvement": metrics_uncal["brier_score"]
-        - min(metrics_sigmoid["brier_score"], metrics_isotonic["brier_score"]),
+        "prod_calibrator": prod_calibrator,
+        "oof_path": oof_out,
+        "fig_path": fig_path,
+        "brier_improvement": metrics_uncal["brier_score"] - (
+            metrics_isotonic["brier_score"] if best_method == "isotonic" else metrics_sigmoid["brier_score"]
+        ),
     }
 
+    # 8. Log to MLflow
     if log_to_mlflow:
         mlflow_cfg = CFG["mlflow"]
         mlflow.set_tracking_uri(str(mlflow_cfg["tracking_uri"]))
         mlflow.set_experiment(mlflow_cfg["experiment_name"])
 
-        with mlflow.start_run(run_name="E09_lgbm_calibrated"):
+        with mlflow.start_run(run_name="E10_Calibration_Redesign"):
             mlflow.log_params(
                 {
-                    "exp_id": "E09",
-                    "base_model": "LightGBM_Tuned",
+                    "exp_id": "E10",
+                    "dataset": "train_val_combined",
+                    "total_samples": len(train_val_df),
                     "best_method": best_method,
-                    "val_samples": len(val_df),
+                    "cv_folds": 5,
                     "seed": SEED,
                 }
             )
-
             mlflow.log_metrics({f"uncal_{k}": v for k, v in metrics_uncal.items()})
             mlflow.log_metrics({f"sigmoid_{k}": v for k, v in metrics_sigmoid.items()})
             mlflow.log_metrics({f"isotonic_{k}": v for k, v in metrics_isotonic.items()})
             mlflow.log_metric("brier_improvement", results["brier_improvement"])
-
-            mlflow.log_artifact(str(fig_path1))
+            mlflow.log_artifact(str(fig_path))
             mlflow.set_tags(
-                {"exp_id": "E09", "model": "LightGBM_Calibrated", "stage": "candidate"}
+                {
+                    "exp_id": "E10",
+                    "model": f"LightGBM_{best_method.capitalize()}",
+                    "stage": "hardened_candidate",
+                    "oof_evaluated": "true",
+                }
             )
 
     return results
 
 
+# Backward compatibility alias
+def run_calibration_experiment(
+    train_path: Path | str | None = None,
+    val_path: Path | str | None = None,
+    log_to_mlflow: bool = True,
+) -> dict[str, Any]:
+    """Execute calibration experiment (for backward compatibility)."""
+    return run_calibration_redesign(train_path=train_path, val_path=val_path, log_to_mlflow=log_to_mlflow)
+
+
 if __name__ == "__main__":
-    res = run_calibration_experiment()
+    res = run_calibration_redesign()
     print("=" * 60)
-    print("Experiment E09: Probability Calibration on Validation Set")
+    print("Experiment E10: Calibration Redesign (5-Fold OOF on Train+Val)")
     print("=" * 60)
-    print(
-        f"Uncalibrated Brier Score: {res['uncalibrated']['brier_score']:.4f} | ECE: {res['uncalibrated']['ece']:.4f}"
-    )
-    print(
-        f"Sigmoid Brier Score:      {res['sigmoid']['brier_score']:.4f} | ECE: {res['sigmoid']['ece']:.4f}"
-    )
-    print(
-        f"Isotonic Brier Score:     {res['isotonic']['brier_score']:.4f} | ECE: {res['isotonic']['ece']:.4f}"
-    )
-    print(
-        f"Best Method:              {res['best_method']} (Brier Improvement: +{res['brier_improvement']:.4f})"
-    )
+    for name in ["uncalibrated", "sigmoid", "isotonic"]:
+        m = res[name]
+        print(
+            f"{name.capitalize():14s} | Brier: {m['brier_score']:.4f} | PR-AUC: {m['pr_auc']:.4f} | "
+            f"ECE: {m['ece']:.4f} | Unique: {m['n_unique_probs']}"
+        )
+    print(f"\nWinning Method: {res['best_method'].upper()} (Brier Gain: +{res['brier_improvement']:.4f})")
+    print(f"OOF Predictions Saved: {res['oof_path']}")
