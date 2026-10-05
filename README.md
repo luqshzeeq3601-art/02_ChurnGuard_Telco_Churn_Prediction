@@ -20,32 +20,57 @@ In mature telecom markets such as Malaysia (>50 million cellular subscriptions, 
 Most churn models fail in production because they rely on default `0.5` decision thresholds. In telecom operations, **losing a customer (RM 780 CLV) is 15 times more expensive than offering an RM 50 retention voucher**.
 
 **ChurnGuard** addresses this asymmetry:
-- **Calibrated LightGBM Classifier:** Isotonic calibration reduces Brier score from `0.1542` to `0.1293` (`0.1381` on held-out test).
-- **Profit-Optimal Cutoff ($\tau^* = 0.18$):** Delivers **RM 35,206 net campaign profit per 1,000 customers** (+44.2% gain over default threshold).
-- **High Targeting Efficiency:** Top 20% highest-risk customers capture **51.60% of all churners** (Recall@20%) with a **2.73x Top-Decile Lift**.
-- **Frontline SHAP Reason Codes:** Top 3 plain-language explanations per customer for retention call centers.
-- **Production Architecture:** Containerized FastAPI service (**3.27 ms p95 latency**), GitHub Actions CI/CD (85% coverage gate), and Evidently AI drift surveillance.
+- **Calibrated Champion Classifier (Logistic Regression M2):** 5-fold cross-validated probability calibration achieves a test Brier score of `0.1361` (calibrated test ECE: `0.0142`, 1,057 unique test probabilities). Selected over LightGBM per pre-registered Occam's razor criteria (Decision D-013).
+- **Fairness-Hardened (Option M2):** Protected attributes (`gender`, `SeniorCitizen`) dropped from the feature space (Decision D-014), shrinking demographic recall disparity without degrading campaign profitability.
+- **Profit-Optimal Cutoff ($\tau^* = 0.1882$):** Optimized on out-of-fold predictions to yield **RM 36,720 net campaign profit per 1,000 customers** (more than double the RM 18,193 baseline of contacting everyone).
+- **High Targeting Efficiency:** Captures **88.97% of all churners** at $\tau^*$, with a **2.84x Top-Decile Lift** and **48.40% Recall@20%**.
+- **Frontline SHAP Reason Codes:** Linear SHAP explanations deliver top 3 commercial reasons per customer for frontline retention agents.
+- **Production Architecture:** Containerized FastAPI service (**< 5 ms p95 latency**), GitHub Actions CI/CD (85% coverage gate), and Evidently AI drift surveillance.
 
 ---
 
 ## 📊 2. Final Evaluation Results (Held-Out Test Set)
 
-Evaluated strictly once on the held-out test split ($N = 1,057$) with **1,000-sample bootstrap 95% Confidence Intervals**:
+Evaluated on the held-out test split ($N = 1,057$, 281 churners, 26.58% prevalence) with **1,000-sample bootstrap 95% Confidence Intervals** (disclosed in D-015):
 
-| Metric | Target | Baseline (Logistic Reg) | Tuned LightGBM Champion | 95% Bootstrap Confidence Interval | Status |
+| Metric | Target / Benchmark | Champion (Logistic Regression M2) | 95% Bootstrap CI (Champion) | Runner-up (Tuned LightGBM) | Status |
 |---|---|---|---|---|---|
-| **ROC-AUC** | $\ge 0.84$ | 0.8442 | **0.8412** | `[0.8155, 0.8679]` | ✅ Met (MO2) |
-| **PR-AUC** | $\ge 0.62$ | 0.6587 | **0.6337** | `[0.5776, 0.6899]` | ✅ Met (MO2) |
-| **Brier Score** | $< 0.16$ | 0.1410 | **0.1381** | `[0.1247, 0.1509]` | ✅ Met (MO3) |
-| **Top-Decile Lift** | $\ge 2.5\times$ | $2.83\times$ | **$2.73\times$** | `[2.54x, 3.20x]` | ✅ Met (MO2) |
-| **Recall@20%** | $\ge 50\%$ | 50.31% | **51.60%** | `[46.05%, 54.86%]` | ✅ Met (BO1) |
-| **Expected Profit / 1k** | $> \text{RM } 25\text{k}$ | RM 24,110 | **RM 35,206.24** | `[RM 29,031, RM 41,165]` | ✅ Met (BO2) |
-| **Inference Latency (p95)** | $< 100\text{ ms}$ | — | **3.27 ms** | (Mean: 2.44 ms, p50: 2.33 ms) | ✅ Met (EO2) |
-| **Test Code Coverage** | $\ge 70\%$ | — | **85%** | (73 passing tests, 0 lints) | ✅ Met (EO3) |
+| **ROC-AUC** | $\ge 0.84$ | **0.8449** | `[0.8207, 0.8714]` | 0.8473 | ✅ Met (MO2) |
+| **PR-AUC** | $\ge 0.62$ | **0.6739** | `[0.6203, 0.7262]` | 0.6760 | ✅ Met (MO2) |
+| **Brier Score** | $< 0.16$ (Calibrated) | **0.1361** (vs 0.1472 uncal) | `[0.1236, 0.1476]` | 0.1340 | ✅ Met (MO3) |
+| **Top-Decile Lift** | $\ge 2.5\times$ (tie-aware) | **$2.84\times$** | `[2.52x, 3.18x]` | $2.98\times$ | ✅ Met (MO2) |
+| **Recall@20%** | $\ge 50\%$ (tie-aware) | **48.40%** | `[44.21%, 53.26%]` | 51.60% | ⚠️ Near-miss (BO1) |
+| **Expected Profit / 1k** | $>$ Contact All (RM 18,193) | **RM 36,720.15** | `[RM 30,064, RM 42,997]` | RM 37,613.72 | ✅ Met (BO2) |
+| **Unique Probabilities** | $\ge 200$ | **1,057** (full continuum) | — | 1,057 | ✅ Met (Gate G2) |
+| **Decision Threshold $\tau^*$** | Profit-optimal on OOF | **0.1882** | — | 0.1882 | ✅ Set |
+| **Precision at $\tau^*$** | — | **47.53%** | `[43.42%, 51.91%]` | 49.79% | Operational |
+| **Recall at $\tau^*$** | — | **88.97%** | `[85.00%, 92.44%]` | 85.41% | Operational |
+| **Inference Latency (p95)** | $< 100\text{ ms}$ | **< 4 ms** | — | 4.8 ms | ✅ Met (EO2) |
+| **Test Code Coverage** | $\ge 70\%$ | **85%** (75 tests) | — | — | ✅ Met (EO3) |
 
 ---
 
-## 🏗️ 3. System Architecture
+## 🔬 3. What Did Not Work & Negative Results
+
+Rigorous empirical iteration surfaced several approaches that failed or did not justify complexity:
+
+1. **SMOTE Oversampling (E04):** Synthesizing minority instances degraded cross-validated PR-AUC across all tested ratios (0.6482 vs 0.6587 baseline). Telecom churn boundaries in continuous tenure and monthly charge spaces are diffuse; synthetic interpolation diluted true decision boundaries.
+2. **Gradient Boosting Complexity Premium (E11 / D-013):** Tuned LightGBM achieved a mean paired PR-AUC gain of only $+0.0045 \pm 0.0078$ over regularized Logistic Regression across 5 folds. Because this gain fell well below 1 standard deviation, pre-registered Occam's razor rules designated Logistic Regression as the Champion.
+3. **In-Sample Prefit Calibration (E09):** Prefitting an isotonic calibrator on the small validation set ($N=1,056$) created extreme step-function plateaus (only 34 unique probabilities on test). This was resolved in E10 via 5-fold out-of-fold calibration on combined `train+val`, restoring 1,057 continuous probabilities.
+4. **Adversarial Debiasing / Complex Fairness Penalties (E12):** Post-hoc threshold shifting across demographic groups created operational complexity. Complete elimination of demographic features (Option M2) solved fairness parity without degrading business profit.
+
+---
+
+## ⚠️ 4. Key Limitations & Operational Assumptions
+
+1. **Static Cross-Sectional Framing:** Churn is modeled as a binary label on snapshot data rather than continuous-time survival analysis (time-to-event). Customer risk may shift before monthly batch refreshes.
+2. **Fixed Campaign Economics:** Economic optimization assumes constant campaign parameters ($C_{\text{contact}} = \text{RM 50}$, $\text{CLV} = \text{RM 780}$, $r_{\text{success}} = 20\%$). Heterogeneous voucher sizing or discount elasticity is not currently modeled.
+3. **Senior Citizen Base Rate Disparity:** Senior citizens exhibit higher observed churn (41.3% vs 23.6% for non-seniors), largely driven by high adoption of unbundled month-to-month fiber optic contracts. Feature-blind models still capture this through behavioral surrogates.
+4. **Single Telco Portfolio Context:** Trained on IBM Telco dataset framed for Malaysian market dynamics (NusaTel). Regional customer retention patterns require localized re-calibration.
+
+---
+
+## 🏗️ 5. System Architecture
 
 ```mermaid
 flowchart TD
@@ -88,7 +113,16 @@ flowchart TD
 
 ---
 
-## 🚀 5. Quickstart Guide
+## 🔍 6. Key Business Insights & Empirical Drivers
+
+1. **Contract Lock-in Effect:** Month-to-month contracts have a **42.9% churn rate** (driving 88.6% of all churners), compared to **10.9%** for 1-year and **3.0%** for 2-year commitments.
+2. **Fiber Optic Service Deficit:** Fiber optic users churn at **41.8%** (vs 19.2% DSL); this surges to **>48%** when Tech Support is absent.
+3. **Payment Friction:** Electronic check payment churn rate is **45.6%** vs ~15% for automatic bank/card payments.
+4. **Early Lifecycle Vulnerability:** Customers in months 0–6 on month-to-month contracts have a **53.1% churn rate**. Proactive onboarding interventions in the first 90 days are critical.
+
+---
+
+## 🚀 7. Quickstart Guide
 
 ### Prerequisites
 - Python 3.10+
@@ -137,7 +171,7 @@ make drift
 
 ---
 
-## 📡 6. API Reference
+## 📡 8. API Reference
 
 ### Endpoints Overview
 | Method | Endpoint | Description |
@@ -179,29 +213,29 @@ curl -X POST http://localhost:8000/predict \
 ```json
 {
   "customerID": "7590-VHVEG",
-  "churn_probability": 0.5283,
+  "churn_probability": 0.5412,
   "risk_tier": "High",
   "top_reasons": [
     "Month-to-month contract increases churn risk",
     "Tenure under 6 months in critical onboarding window",
     "Payment by electronic check increases friction"
   ],
-  "model_version": "1.0.0"
+  "model_version": "1.1.0"
 }
 ```
 
 ---
 
-## ⚖️ 7. Algorithmic Fairness & Ethical Safeguards
+## ⚖️ 9. Algorithmic Fairness & Ethical Safeguards
 
-Demographic fairness was evaluated across protected attributes:
-- **Gender Parity (NFR7):** Female Recall = `82.31%`, Male Recall = `83.46%`. Difference = **0.0115** ($\le 0.05 \implies$ **Passed**).
-- **Senior Citizen Audit:** Senior Recall = `93.67%`, Non-Senior Recall = `78.61%` (higher recall for seniors reflects disproportionate concentration in month-to-month fiber optic contracts).
-- **Fairness Ablation:** Removing demographic features caused only a 0.38% dip in PR-AUC (0.6732 $\to$ 0.6706), confirming predictions are driven by commercial behavioral features.
+Demographic fairness was evaluated across protected attributes with mitigation **Option M2** applied (Decision D-014):
+- **Feature Exclusion (M2):** Protected attributes (`gender`, `SeniorCitizen`) were removed entirely from the feature matrix. Campaign profit was fully preserved (RM 38,693 vs RM 38,660 per 1k on OOF).
+- **Gender Parity (NFR7):** Female Recall = `89.47%`, Male Recall = `88.36%`. Disparity gap = **0.0112** on test (0.0195 on OOF), comfortably meeting NFR7 ($\le 0.05 \implies$ **Passed**).
+- **Senior Citizen Audit:** Senior Recall = `96.15%`, Non-Senior Recall = `87.05%` (gap = **0.0911** on test, **0.0744** on OOF, reduced from 0.0893 in unmitigated M0). The remaining gap reflects base rate differences (senior churn rate 41.3% vs non-senior 23.6% driven by month-to-month contracts), not disparate algorithmic treatment.
 
 ---
 
-## 📁 8. Repository Structure
+## 📁 10. Repository Structure
 
 ```
 02_ChurnGuard_Telco_Churn_Prediction/
@@ -230,7 +264,7 @@ Demographic fairness was evaluated across protected attributes:
 
 ---
 
-## 📄 9. License & Data Credits
+## 📄 11. License & Data Credits
 
 - **License:** MIT License.
 - **Dataset:** IBM Telco Customer Churn dataset (Kaggle).

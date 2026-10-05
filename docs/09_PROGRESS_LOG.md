@@ -5,10 +5,23 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | **Phase 9: Hardening** (Sprint B: Model integrity) |
-| Next task | **T9.11** Update `06_EXPERIMENT_PLAN.md` results (E10 to E12, v1.1), README results + limitations |
-| Overall progress | 46 / 61 tasks |
-| Health | On track: Sprint B in progress |
+| Current phase | **Phase 9: Hardening** (Sprint C: Visibility) |
+| Next task | **T9.12** Create GitHub repo, push, CI green on GitHub, badges in README |
+| Overall progress | 47 / 61 tasks |
+| Health | On track: Sprint B complete, Sprint C in progress |
+
+---
+
+## 05 Oct 2026: Task T9.11 Completed (Phase 9 Sprint B Complete)
+- **Done**:
+  - **T9.11**: Updated [`docs/06_EXPERIMENT_PLAN.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/docs/06_EXPERIMENT_PLAN.md) and [`README.md`](file:///c:/Users/ZeeqRyz/Desktop/Ai-ML/Machine%20Learning%20Projects/02_ChurnGuard_Telco_Churn_Prediction/README.md) with final v1.1 evaluation results, bootstrap confidence intervals, negative results ("What Did Not Work"), and model limitations.
+  - Verified no placeholders (`__`) remain in results tables or experiment documentation.
+  - Documented negative results: SMOTE oversampling dilution, gradient boosting complexity premium (< 1 std over Logistic Regression), in-sample prefit calibration collapse, and fairness mitigation trade-offs.
+- **Evidence**:
+  - `python -c "assert '__' not in open('docs/06_EXPERIMENT_PLAN.md', encoding='utf-8').read(); assert '__' not in open('README.md', encoding='utf-8').read()"` passed cleanly.
+  - `README.md` and `docs/06_EXPERIMENT_PLAN.md` synced with `reports/final_metrics.json`.
+- **Next**: **T9.12** Create GitHub repo, push, CI green on GitHub, badges in README; re-tick T0.1, T6.1, T6.2 (F1).
+- **Blockers**: None.
 
 ---
 
