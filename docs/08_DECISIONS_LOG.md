@@ -8,9 +8,9 @@
 | D-002 | 05 Oct 2026 | PR-AUC as primary metric | Imbalanced target; ranking churners matters most | Accepted |
 | D-003 | 05 Oct 2026 | Blank `TotalCharges` -> 0 | All blanks have tenure = 0 (not yet billed) | Accepted |
 | D-004 | 05 Oct 2026 | Keep "No internet / phone service" as separate category | Carries signal; avoids collapsing into "No" | Accepted |
-| D-005 | 05 Oct 2026 | Default imbalance handling = class weights + threshold tuning; SMOTE only as experiment E06 | Simpler, no synthetic data in serving path | Accepted (revisit after E06) |
-| D-006 | 05 Oct 2026 | Keep `gender` and `SeniorCitizen` in v1, run ablation E08 | Decide based on performance and fairness evidence | Pending E08 |
-| D-007 | 05 Oct 2026 | LightGBM as expected champion, final choice by CV | Strong on tabular data, fast, common in postings | Pending E05/E07 |
+| D-005 | 05 Oct 2026 | Default imbalance handling = scale_pos_weight / class weights; rejected SMOTE | SMOTE experiment (E06: 0.6537) degraded PR-AUC vs baseline (E05: 0.6598) and added training complexity | Accepted (Confirmed after E06) |
+| D-006 | 05 Oct 2026 | Keep `gender` and `SeniorCitizen` in v1 feature set | E08 ablation confirmed minimal impact on PR-AUC (0.6732 -> 0.6706); retained for fairness slicing and auditing (NFR7) | Accepted (Confirmed after E08) |
+| D-007 | 05 Oct 2026 | Select LightGBM (Optuna-tuned) as Champion model | Achieved top CV PR-AUC (0.6732), ROC-AUC (0.8468), Lift@10% (2.92x), and stable CV std (0.0217 <= 0.03) | Accepted (Confirmed after E07) |
 | D-008 | 05 Oct 2026 | Deploy to GCP Cloud Run | Free tier; GCP appears in AirAsia and PetBacker postings | Accepted |
 | D-009 | 05 Oct 2026 | Profit-based threshold, not 0.5 | Aligns model with retention budget decision | Accepted |
 | D-010 | 05 Oct 2026 | Hybrid data: IBM Telco for modelling + data.gov.my for Malaysia context | No public customer-level Malaysian churn data (PDPA 2010) | Accepted |

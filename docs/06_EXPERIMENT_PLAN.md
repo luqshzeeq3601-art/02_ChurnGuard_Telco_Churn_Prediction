@@ -74,13 +74,13 @@ Objective: maximise mean CV PR-AUC.
 | E00 | 0.2690 ± 0.0024 | 0.5089 | Dummy stratified floor |
 | E01 | 0.6587 ± 0.0220 | 0.8442 | Logistic Regression baseline (raw features) |
 | E02 | 0.6611 ± 0.0124 | 0.8458 | Logistic Regression (raw + engineered features, lower variance) |
-| E03 | | | |
-| E04 | | | |
-| E05 | | | |
-| E06 | | | |
-| E07 | | | |
-| E08 | | | |
-| E09 | | | |
+| E03 | 0.6629 ± 0.0172 | 0.8462 | Random Forest (class_weight=balanced, engineered features) |
+| E04 | 0.6631 ± 0.0266 | 0.8437 | XGBoost (scale_pos_weight=2.77, engineered features) |
+| E05 | 0.6598 ± 0.0251 | 0.8409 | LightGBM untuned (scale_pos_weight=2.77, engineered features) |
+| E06 | 0.6537 ± 0.0274 | 0.8417 | LightGBM with SMOTE in CV (degraded PR-AUC -> rejected per D-005) |
+| E07 | **0.6732 ± 0.0217** | **0.8468** | **Champion: LightGBM + Optuna tuned (MO1/MO2/MO4 met)** |
+| E08 | 0.6706 ± 0.0217 | 0.8464 | Fairness ablation (without gender/SeniorCitizen, minimal drop) |
+| E09 | | | Pending Phase 4 (Calibration on val) |
 
 ### Final Test Results (once)
 | Metric | Value | 95% CI |

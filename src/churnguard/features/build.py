@@ -98,7 +98,10 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
         return df
 
 
-def get_feature_lists(include_engineered: bool = True) -> tuple[list[str], list[str]]:
+def get_feature_lists(
+    include_engineered: bool = True,
+    drop_cols: Optional[list[str]] = None,
+) -> tuple[list[str], list[str]]:
     """Return numeric and categorical feature column names."""
     base_numeric = ["tenure", "MonthlyCharges", "TotalCharges"]
     base_categorical = [
@@ -121,41 +124,50 @@ def get_feature_lists(include_engineered: bool = True) -> tuple[list[str], list[
     ]
 
     if not include_engineered:
-        return base_numeric, base_categorical
+        num = base_numeric
+        cat = base_categorical
+    else:
+        engineered_numeric = [
+            "avg_monthly_spend",
+            "charge_increase_ratio",
+            "num_services",
+        ]
+        engineered_categorical = [
+            "tenure_bucket",
+            "has_protection_bundle",
+            "is_auto_pay",
+            "is_month_to_month",
+            "fiber_no_support",
+        ]
+        num = base_numeric + engineered_numeric
+        cat = base_categorical + engineered_categorical
 
-    engineered_numeric = [
-        "avg_monthly_spend",
-        "charge_increase_ratio",
-        "num_services",
-    ]
-    engineered_categorical = [
-        "tenure_bucket",
-        "has_protection_bundle",
-        "is_auto_pay",
-        "is_month_to_month",
-        "fiber_no_support",
-    ]
+    if drop_cols:
+        num = [c for c in num if c not in drop_cols]
+        cat = [c for c in cat if c not in drop_cols]
 
-    numeric_cols = base_numeric + engineered_numeric
-    categorical_cols = base_categorical + engineered_categorical
-
-    return numeric_cols, categorical_cols
+    return num, cat
 
 
 def build_preprocessor(
     include_engineered: bool = True,
     scale_numeric: bool = False,
+    drop_cols: Optional[list[str]] = None,
 ) -> ColumnTransformer:
     """Build scikit-learn ColumnTransformer for preprocessing.
 
     Args:
         include_engineered: Whether to include engineered feature columns.
         scale_numeric: If True, applies StandardScaler to numeric features (for Logistic Regression).
+        drop_cols: Optional list of columns to exclude (e.g. for fairness ablation).
 
     Returns:
         ColumnTransformer instance.
     """
-    numeric_cols, categorical_cols = get_feature_lists(include_engineered=include_engineered)
+    numeric_cols, categorical_cols = get_feature_lists(
+        include_engineered=include_engineered,
+        drop_cols=drop_cols,
+    )
 
     num_steps = [("imputer", SimpleImputer(strategy="median"))]
     if scale_numeric:
@@ -185,6 +197,7 @@ def build_full_pipeline(
     model: BaseEstimator,
     include_engineered: bool = True,
     scale_numeric: bool = False,
+    drop_cols: Optional[list[str]] = None,
 ) -> Pipeline:
     """Combine FeatureEngineer, ColumnTransformer, and estimator into one end-to-end Pipeline.
 
@@ -192,6 +205,7 @@ def build_full_pipeline(
         model: Scikit-learn compatible classifier.
         include_engineered: Whether to use engineered features.
         scale_numeric: Whether to scale numeric features.
+        drop_cols: Optional columns to exclude.
 
     Returns:
         End-to-end Pipeline.
@@ -200,6 +214,7 @@ def build_full_pipeline(
     preprocessor = build_preprocessor(
         include_engineered=include_engineered,
         scale_numeric=scale_numeric,
+        drop_cols=drop_cols,
     )
 
     return Pipeline(
