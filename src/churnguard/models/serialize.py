@@ -33,35 +33,60 @@ def save_final_model_artifacts(
     models_dir: Path | str | None = None,
     log_to_mlflow: bool = True,
 ) -> tuple[Path, Path]:
-    """Train, calibrate, serialize, and register final production model.
+    """Train, calibrate, serialize, and register final production model (v1.1).
 
     Returns:
         Tuple of (model_joblib_path, meta_json_path).
     """
+    from lightgbm import LGBMClassifier
+    from sklearn.calibration import CalibratedClassifierCV
+    from sklearn.linear_model import LogisticRegression
+
+    from churnguard.models.train import build_pipeline_with_options
+
     out_dir = Path(models_dir) if models_dir else Path(CFG["paths"]["models_dir"])
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Load data splits
+    # 1. Load data splits and combine train + val (5,986 samples)
     train_df = pd.read_parquet(CFG["paths"]["processed_dir"] / "train.parquet")
     val_df = pd.read_parquet(CFG["paths"]["processed_dir"] / "val.parquet")
+    train_val_df = pd.concat([train_df, val_df], ignore_index=True)
+    X_train_val = train_val_df.drop(columns=["Churn"])
+    y_train_val = train_val_df["Churn"].values
 
-    # 2. Fit base champion pipeline on train
+    # 2. Fit Champion pipeline (Logistic Regression M2: drop gender & SeniorCitizen, sigmoid cv=5)
+    champion_base = build_pipeline_with_options(
+        model=LogisticRegression(max_iter=1000, random_state=SEED, class_weight="balanced"),
+        include_engineered=True,
+        scale_numeric=True,
+        drop_cols=["gender", "SeniorCitizen"],
+    )
+    champion_calibrated = CalibratedClassifierCV(estimator=champion_base, method="sigmoid", cv=5)
+    champion_calibrated.fit(X_train_val, y_train_val)
+
+    # 3. Fit Runner-up pipeline (LightGBM Optuna-tuned, isotonic cv=5)
     params = load_champion_params()
-    base_pipeline = fit_champion_pipeline(train_df, params=params)
+    runner_up_base = build_pipeline_with_options(
+        model=LGBMClassifier(**params),
+        include_engineered=True,
+        scale_numeric=False,
+    )
+    runner_up_calibrated = CalibratedClassifierCV(estimator=runner_up_base, method="isotonic", cv=5)
+    runner_up_calibrated.fit(X_train_val, y_train_val)
 
-    # 3. Fit isotonic calibrator on val
-    calibrated_pipeline = calibrate_pipeline(base_pipeline, val_df, method="isotonic")
-
-    # 4. Save joblib artifact
+    # 4. Save joblib artifacts
     model_path = out_dir / "model.joblib"
-    joblib.dump(calibrated_pipeline, model_path)
+    joblib.dump(champion_calibrated, model_path)
+
+    runner_up_path = out_dir / "runner_up_model.joblib"
+    joblib.dump(runner_up_calibrated, runner_up_path)
 
     # 5. Load threshold and test metrics metadata
     threshold_file = out_dir / "optimal_threshold.json"
     if threshold_file.exists():
         with open(threshold_file, encoding="utf-8") as f:
             thresh_data = json.load(f)
-            optimal_tau = thresh_data.get("optimal_threshold", 0.18)
+            optimal_tau = thresh_data.get("optimal_threshold", 0.1882)
     else:
         opt_res = run_threshold_optimization(save_artifacts=False)
         optimal_tau = opt_res["optimal_res"]["optimal_threshold"]
@@ -78,8 +103,14 @@ def save_final_model_artifacts(
     # 6. Construct metadata dictionary
     meta = {
         "model_name": "churnguard-champion",
-        "model_version": "1.0.0",
-        "model_class": "CalibratedClassifierCV(LGBMClassifier, method='isotonic')",
+        "model_version": "1.1.0",
+        "model_class": "CalibratedClassifierCV(LogisticRegression, method='sigmoid', cv=5)",
+        "runner_up_model": "CalibratedClassifierCV(LGBMClassifier, method='isotonic', cv=5)",
+        "fairness_mitigation": "Option M2 (dropped gender, SeniorCitizen)",
+        "test_reuse_disclosure": (
+            "Test set was reused exactly once for v1.1 evaluation after calibration redesign (E10) "
+            "and champion re-decision (E11), as recorded in D-015."
+        ),
         "created_at": datetime.utcnow().isoformat() + "Z",
         "seed": SEED,
         "optimal_threshold": float(optimal_tau),
@@ -116,18 +147,20 @@ def save_final_model_artifacts(
         mlflow.set_tracking_uri(str(mlflow_cfg["tracking_uri"]))
         mlflow.set_experiment(mlflow_cfg["experiment_name"])
 
-        with mlflow.start_run(run_name="Final_Model_Registration"):
+        with mlflow.start_run(run_name="Final_Model_Registration_v1.1"):
             mlflow.log_params(
                 {
-                    "model_version": "1.0.0",
-                    "algorithm": "LightGBM + Isotonic Calibration",
+                    "model_version": "1.1.0",
+                    "champion": "Logistic Regression + Sigmoid cv=5 (M2)",
+                    "runner_up": "LightGBM + Isotonic cv=5",
                     "optimal_threshold": optimal_tau,
                     "seed": SEED,
                 }
             )
             mlflow.log_artifact(str(model_path))
+            mlflow.log_artifact(str(runner_up_path))
             mlflow.log_artifact(str(meta_path))
-            mlflow.set_tags({"stage": "production", "model": "churnguard-champion"})
+            mlflow.set_tags({"stage": "production", "model": "churnguard-champion", "version": "1.1.0"})
 
     return model_path, meta_path
 

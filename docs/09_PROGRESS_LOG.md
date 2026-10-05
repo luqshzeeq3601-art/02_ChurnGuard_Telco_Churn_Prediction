@@ -6,9 +6,40 @@
 | Item | Value |
 |---|---|
 | Current phase | **Phase 9: Hardening** (Sprint B: Model integrity) |
-| Next task | **T9.9** v1.1 final test evaluation (once), champion + runner-up |
-| Overall progress | 44 / 61 tasks |
+| Next task | **T9.10** `docs/MODEL_CARD.md`: intended use, data, metrics with CI, fairness table, limitations |
+| Overall progress | 45 / 61 tasks |
 | Health | On track: Sprint B in progress |
+
+---
+
+## 05 Oct 2026: Task T9.9 Completed (Phase 9 Sprint B)
+- **Done**:
+  - **T9.9**: Executed v1.1 final test evaluation on held-out test split (1,057 samples, touched strictly once per D-015 disclosure) using Champion (Logistic Regression M2 + Sigmoid cv=5) and Runner-up (Optuna-tuned LightGBM + Isotonic cv=5) fit on `train + val` (5,986 samples).
+  - Saved regenerated production model artifacts:
+    - `models/model.joblib`: Champion pipeline serialized.
+    - `models/runner_up_model.joblib`: Runner-up pipeline serialized.
+    - `models/model_meta.json`: Full v1.1 production metadata with disclosure.
+    - `reports/final_metrics.json`: Side-by-side Champion & Runner-up metrics with 1,000x bootstrap 95% CIs.
+    - `reports/scored.csv`: Ranked test predictions.
+    - `reports/figures/09_shap_summary.png`: SHAP summary plot.
+  - Verified API integration test suite passes completely.
+- **Evidence**:
+  - **Champion Test Performance (v1.1)**:
+    - **ROC-AUC**: **0.8449** [95% CI: 0.8207, 0.8714] (MO2 Met)
+    - **PR-AUC**: **0.6739** [95% CI: 0.6203, 0.7262] (MO2 Met, lower bound $\ge 0.62$)
+    - **Brier Score**: **0.1361** [95% CI: 0.1236, 0.1476] (MO3 Met)
+    - **Lift@10%**: **2.84x** [95% CI: 2.52x, 3.18x] (MO2 Met, lower bound $\ge 2.5$)
+    - **Recall@20%**: 48.40% [95% CI: 44.21%, 53.26%]
+    - **Precision at $\tau^*$ (0.19)**: 47.53% [95% CI: 43.42%, 51.91%]
+    - **Recall at $\tau^*$ (0.19)**: **88.97%** [95% CI: 85.00%, 92.44%]
+    - **Expected Profit per 1k**: **RM36,720.15** [95% CI: RM30,063.54, RM42,997.04] (BO2 Met, beats Contact All RM18,193.09 & Contact None RM0.00)
+  - **Runner-Up Test Performance (LightGBM)**:
+    - ROC-AUC: 0.8473, PR-AUC: 0.6760, Brier: 0.1340, Lift@10%: 2.98x, Profit/1k: RM37,613.72
+  - `pytest tests/test_api.py`: 6/6 passed.
+  - `pytest tests/test_predict.py`: 3/3 passed.
+  - `pytest tests/test_serialize.py`: 1/1 passed.
+- **Next**: **T9.10** `docs/MODEL_CARD.md`: intended use, data, metrics with CI, fairness table, limitations.
+- **Blockers**: None.
 
 ---
 

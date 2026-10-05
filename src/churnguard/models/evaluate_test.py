@@ -379,13 +379,71 @@ def run_final_test_evaluation(
         optimal_tau=optimal_tau,
     )
 
+    # 7. Runner-up evaluation (LightGBM) on identical test rows
+    runner_up_path = CFG["paths"]["models_dir"] / "runner_up_model.joblib"
+    if runner_up_path.exists():
+        import joblib
+
+        ru_model = joblib.load(runner_up_path)
+        ru_prob = ru_model.predict_proba(X_test)[:, 1]
+        ru_pred_tau = (ru_prob >= optimal_tau).astype(int)
+        ru_profit_res = compute_profit_for_threshold(
+            y_true=y_test,
+            y_prob=ru_prob,
+            threshold=optimal_tau,
+            clv_values=clv_test,
+        )
+        runner_up_metrics = {
+            "model_name": "LightGBM + Isotonic Calibration (cv=5)",
+            "roc_auc": round(float(roc_auc_score(y_test, ru_prob)), 4),
+            "pr_auc": round(float(average_precision_score(y_test, ru_prob)), 4),
+            "brier_score": round(float(brier_score_loss(y_test, ru_prob)), 4),
+            "lift_at_10": round(float(compute_lift_at_k(y_test, ru_prob, k=0.10)), 4),
+            "recall_at_20": round(float(compute_recall_at_k(y_test, ru_prob, k=0.20)), 4),
+            "precision_at_tau": round(
+                float(precision_score(y_test, ru_pred_tau, zero_division=0)), 4
+            ),
+            "recall_at_tau": round(
+                float(recall_score(y_test, ru_pred_tau, zero_division=0)), 4
+            ),
+            "f1_at_tau": round(float(f1_score(y_test, ru_pred_tau, zero_division=0)), 4),
+            "profit_per_1k_customers_rm": round(
+                float(ru_profit_res["profit_per_1k_customers_rm"]), 2
+            ),
+        }
+    else:
+        runner_up_metrics = None
+
+    # 8. Export scored.csv
+    scored_df = test_df[["customerID", "Churn", "MonthlyCharges"]].copy()
+    scored_df["churn_probability"] = np.round(y_prob, 4)
+    scored_df["churn_predicted"] = y_pred_tau
+
+    def assign_tier(p: float) -> str:
+        if p >= optimal_tau:
+            return "High"
+        elif p >= 0.5 * optimal_tau:
+            return "Medium"
+        return "Low"
+
+    scored_df["risk_tier"] = scored_df["churn_probability"].apply(assign_tier)
+    scored_path = Path(CFG["paths"]["reports_dir"]) / "scored.csv"
+    scored_path.parent.mkdir(parents=True, exist_ok=True)
+    scored_df.sort_values(by="churn_probability", ascending=False).to_csv(
+        scored_path, index=False
+    )
+
     # Combine into comprehensive report
     final_report = {
         "dataset": "IBM Telco Churn (Held-out Test Split)",
+        "test_reuse_disclosure": (
+            "Test set was evaluated once for v1.1 release following calibration redesign (E10) "
+            "and champion re-decision (E11), as recorded in D-015."
+        ),
         "n_samples": len(test_df),
         "n_churners": int(np.sum(y_test)),
         "churn_rate": round(float(np.mean(y_test) * 100), 2),
-        "champion_model": "Calibrated Churn Pipeline",
+        "champion_model": "Logistic Regression (M2: drop gender, SeniorCitizen) + Sigmoid cv=5",
         "optimal_threshold": point_estimates["optimal_threshold"],
         "metrics": {
             k: {
@@ -405,6 +463,7 @@ def run_final_test_evaluation(
                 "profit_per_1k_customers_rm",
             ]
         },
+        "runner_up_metrics": runner_up_metrics,
         "operational_summary": {
             "pct_contacted": point_estimates["pct_contacted_at_tau"],
             "churner_capture_rate": point_estimates["churner_capture_rate_at_tau"],

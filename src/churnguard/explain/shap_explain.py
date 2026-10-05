@@ -40,7 +40,16 @@ class ChurnExplainer:
             self.model = self.model.calibrated_classifiers_[0].estimator
 
         self.feature_names = list(self.preprocessor.get_feature_names_out())
-        self.explainer = shap.TreeExplainer(self.model)
+
+        from sklearn.linear_model import LogisticRegression
+
+        if isinstance(self.model, LogisticRegression):
+            self.explainer = shap.LinearExplainer(
+                self.model,
+                masker=shap.maskers.Independent(np.zeros((1, len(self.feature_names)))),
+            )
+        else:
+            self.explainer = shap.TreeExplainer(self.model)
 
     def transform_data(self, df: pd.DataFrame) -> tuple[np.ndarray, pd.DataFrame]:
         """Run feature engineering and preprocessing on raw input DataFrame."""
