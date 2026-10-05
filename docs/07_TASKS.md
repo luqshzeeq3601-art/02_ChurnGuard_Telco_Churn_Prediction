@@ -60,7 +60,7 @@
 - [x] **T9.2** Clean repo: remove duplicate raw files and duplicate figures, Docker `python:3.11-slim`, `requires-python >=3.11`, rebuild image | AC: Docker smoke test passes (F10)
 
 ### Sprint B: Model integrity
-- [ ] **T9.3** Tie-aware `recall_at_k` / `lift_at_k` + `n_unique_probs` in `evaluate.py` | AC: test proves row-order invariance (F2)
+- [x] **T9.3** Tie-aware `recall_at_k` / `lift_at_k` + `n_unique_probs` in `evaluate.py` | AC: test proves row-order invariance (F2)
 - [ ] **T9.4** E10 calibration redesign: uncalibrated vs sigmoid cv=5 vs isotonic cv=5 on train+val, OOF metrics | AC: rule in plan 4.2 applied; unique probs at least 200; OOF ECE reported; MLflow logged (F2, F3)
 - [ ] **T9.5** Re-optimise profit threshold on OOF calibrated probs + sensitivity | AC: `optimal_threshold.json` has `source: oof_train_val` (F7)
 - [ ] **T9.6** E11 champion re-decision: E02 vs E07 on identical folds, paired PR-AUC diff | AC: D-013 recorded with rule from plan 4.4; MO1 stated honestly (F5)

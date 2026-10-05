@@ -6,9 +6,21 @@
 | Item | Value |
 |---|---|
 | Current phase | **Phase 9: Hardening** (Sprint B: Model integrity) |
-| Next task | **T9.3** Tie-aware recall_at_k / lift_at_k + n_unique_probs in evaluate.py |
-| Overall progress | 38 / 61 tasks (Sprint A complete) |
-| Health | On track: Sprint A finished, starting Sprint B |
+| Next task | **T9.4** E10 calibration redesign (OOF train+val, uncal vs sigmoid vs isotonic) |
+| Overall progress | 39 / 61 tasks |
+| Health | On track: Sprint B in progress |
+
+---
+
+## 05 Oct 2026: Task T9.3 Completed (Phase 9 Sprint B)
+- **Done**:
+  - **T9.3**: Implemented tie-aware ranking metrics (`compute_lift_at_k`, `compute_recall_at_k`) and `compute_n_unique_probs` in `src/churnguard/models/evaluate.py`. Replaced naive top-K indexing with fractional expectation calculation over items sharing the cutoff probability. Added unit tests in `tests/test_evaluate.py` proving analytical correctness and row-order invariance across 20 random row permutations (fixing F2).
+- **Evidence**:
+  - `pytest tests/test_evaluate.py`: 6/6 passed in 0.97s.
+  - `test_tie_aware_row_order_invariance`: proved deterministic equality ($|\Delta| < 10^{-12}$) across 20 permutations of tied scores at boundary.
+  - `test_tie_aware_analytical_fraction`: analytically matched theoretical expectation ($5/9$).
+- **Next**: **T9.4** E10 calibration redesign: uncalibrated vs sigmoid cv=5 vs isotonic cv=5 on train+val, OOF metrics (F2, F3).
+- **Blockers**: None.
 
 ---
 
