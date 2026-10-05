@@ -127,15 +127,6 @@ flowchart TD
 
 ---
 
-## 🔍 4. Key Business Insights & Empirical Drivers
-
-1. **Contract Lock-in Effect:** Month-to-month contracts have a **42.9% churn rate** (driving 88.6% of all churners), compared to **10.9%** for 1-year and **3.0%** for 2-year commitments.
-2. **Fiber Optic Service Deficit:** Fiber optic users churn at **41.8%** (vs 19.2% DSL); this surges to **>48%** when Tech Support is absent.
-3. **Payment Friction:** Electronic check payment churn rate is **45.6%** vs ~15% for automatic bank/card payments.
-4. **Early Lifecycle Vulnerability:** Customers in months 0–6 on month-to-month contracts have a **53.1% churn rate**. Proactive onboarding interventions in the first 90 days are critical.
-
----
-
 ## 🔍 6. Key Business Insights & Empirical Drivers
 
 1. **Contract Lock-in Effect:** Month-to-month contracts have a **42.9% churn rate** (driving 88.6% of all churners), compared to **10.9%** for 1-year and **3.0%** for 2-year commitments.
@@ -266,9 +257,9 @@ Demographic fairness was evaluated across protected attributes with mitigation *
 ├── api/                       # FastAPI serving layer (main.py, schemas.py)
 ├── app/                       # Streamlit retention cockpit (streamlit_app.py)
 ├── configs/                   # YAML configuration parameters (config.yaml)
-├── data/                      # Raw and processed datasets (gitignored)
+├── data/                      # Raw benchmark datasets and reproducible parquet splits
 ├── docs/                      # PRD, Architecture, Tasks, Progress & Decisions Logs
-├── models/                    # Serialized pipeline (model.joblib, model_meta.json)
+├── models/                    # Serialized models (model.joblib, runner_up_model.joblib)
 ├── notebooks/                 # Jupyter notebooks (01_eda.ipynb, 02_error_analysis.ipynb)
 ├── reports/                   # Figures, metrics, drift reports, batch scored CSVs
 ├── scripts/                   # GCP deployment automation scripts (bash, powershell)
@@ -280,7 +271,9 @@ Demographic fairness was evaluated across protected attributes with mitigation *
 │   ├── explain/               # SHAP explainer & demographic fairness auditing
 │   └── monitoring/            # Evidently drift detection & synthetic drift generator
 ├── tests/                     # Unit, integration, and latency benchmark test suite
+├── .env.example               # Template environment configuration
 ├── Dockerfile                 # Slim non-root production container
+├── LICENSE                    # MIT License
 ├── Makefile                   # Developer CLI targets
 └── pyproject.toml             # Project metadata and dependencies
 ```
