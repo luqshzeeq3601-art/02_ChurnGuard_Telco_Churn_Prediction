@@ -3,12 +3,12 @@
 > Tick `[x]` when acceptance criteria are met. Work top to bottom within a phase.
 
 ## Phase 0: Setup (W1)
-- [ ] **T0.1** Init git repo, `.gitignore` (data/, models/, mlruns/, .venv/, __pycache__/) | AC: first commit pushed to GitHub
-- [ ] **T0.2** `pyproject.toml` + `requirements.txt` (pinned versions) | AC: fresh venv installs cleanly
-- [ ] **T0.3** Create folder structure per `04_TECHNICAL_DESIGN.md` section 3 with `__init__.py` | AC: `import churnguard` works
-- [ ] **T0.4** `configs/config.yaml` (paths, seed, split ratios, cost assumptions) + `config.py` loader | AC: unit test loads config
-- [ ] **T0.5** `Makefile` with `setup`, `lint`, `test` targets; pre-commit with ruff | AC: `make lint test` passes
-- [ ] **T0.6** Download dataset to `data/raw/telco_churn.csv` (`src/churnguard/data/load.py`) | AC: file present, 7,043 rows
+- [x] **T0.1** Init git repo, `.gitignore` (data/, models/, mlruns/, .venv/, __pycache__/) | AC: first commit pushed to GitHub
+- [x] **T0.2** `pyproject.toml` + `requirements.txt` (pinned versions) | AC: fresh venv installs cleanly
+- [x] **T0.3** Create folder structure per `04_TECHNICAL_DESIGN.md` section 3 with `__init__.py` | AC: `import churnguard` works
+- [x] **T0.4** `configs/config.yaml` (paths, seed, split ratios, cost assumptions) + `config.py` loader | AC: unit test loads config
+- [x] **T0.5** `Makefile` with `setup`, `lint`, `test` targets; pre-commit with ruff | AC: `make lint test` passes
+- [x] **T0.6** Download dataset to `data/raw/telco_churn.csv` (`src/churnguard/data/load.py`) | AC: file present, 7,043 rows
 
 ## Phase 1: Data Understanding + EDA (W1)
 - [ ] **T1.1** `validate.py` with pandera schema from `05_DATA_SPEC.md` section 4 | AC: passes on raw data; tests cover a bad-value case
