@@ -67,7 +67,7 @@
 - [x] **T9.7** E12 fairness audit (M0 / M1 / M2) on OOF at chosen threshold | AC: trade-off table; D-014 recorded; gaps at most 0.05 or documented (F6)
 - [x] **T9.8** Fix objective checks in `evaluate_test.py` (same-split, no hardcoded constants) | AC: unit tests; mapping in plan 4.6 (F4)
 - [x] **T9.9** v1.1 final test evaluation (once), champion + runner-up; regenerate model, meta, metrics, scored.csv, figures | AC: D-015 discloses test reuse; API tests pass
-- [ ] **T9.10** `docs/MODEL_CARD.md`: intended use, data, metrics with CI, fairness table, limitations | AC: complete
+- [x] **T9.10** `docs/MODEL_CARD.md`: intended use, data, metrics with CI, fairness table, limitations | AC: complete
 - [ ] **T9.11** Update `06_EXPERIMENT_PLAN.md` results (E10 to E12, v1.1), README results + limitations + "what did not work" | AC: no `__` left in results section (F9)
 
 ### Sprint C: Visibility
