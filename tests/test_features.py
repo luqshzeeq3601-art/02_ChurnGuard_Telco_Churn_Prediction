@@ -160,3 +160,43 @@ def test_full_pipeline_end_to_end(sample_df):
     assert len(preds) == len(X)
     assert probs.shape == (len(X), 2)
     assert np.all((probs >= 0.0) & (probs <= 1.0))
+
+
+def test_feature_engineer_interactions_v2(sample_df):
+    """Verify v2.0 interaction terms are engineered accurately."""
+    fe = FeatureEngineer(include_engineered=True, include_interactions=True)
+    df_out = fe.fit_transform(sample_df)
+
+    # 1. contract_x_charges: MonthlyCharges for Month-to-month, 0 otherwise
+    assert "contract_x_charges" in df_out.columns
+    assert list(df_out["contract_x_charges"]) == [30.0, 95.0, 0.0, 0.0]
+
+    # 2. fiber_service_deficit: Fiber optic with neither TechSupport nor OnlineSecurity
+    assert "fiber_service_deficit" in df_out.columns
+    # Row 1 is Fiber optic, TechSupport No, OnlineSecurity No -> 1
+    assert list(df_out["fiber_service_deficit"]) == [0, 1, 0, 0]
+
+    # 3. payment_friction_index: Electronic check and PaperlessBilling
+    assert "payment_friction_index" in df_out.columns
+    assert list(df_out["payment_friction_index"]) == [1, 0, 0, 0]
+
+    # 4. tenure_charge_acceleration: MonthlyCharges / (TotalCharges + 1.0)
+    assert "tenure_charge_acceleration" in df_out.columns
+    expected_acc = [30.0 / 31.0, 95.0 / 951.0, 60.0 / 1441.0, 20.0 / 1201.0]
+    np.testing.assert_allclose(df_out["tenure_charge_acceleration"], expected_acc)
+
+
+def test_full_pipeline_with_interactions(sample_df):
+    """Verify end-to-end pipeline with interactions enabled."""
+    X = sample_df.drop(columns=["Churn"])
+    y = sample_df["Churn"]
+
+    pipe = build_full_pipeline(
+        model=LogisticRegression(solver="liblinear"),
+        include_engineered=True,
+        include_interactions=True,
+        scale_numeric=True,
+    )
+    pipe.fit(X, y)
+    probs = pipe.predict_proba(X)
+    assert probs.shape == (len(X), 2)

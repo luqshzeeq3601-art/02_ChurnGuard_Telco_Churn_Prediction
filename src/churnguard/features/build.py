@@ -30,7 +30,7 @@ SERVICE_COLUMNS = [
 class FeatureEngineer(BaseEstimator, TransformerMixin):
     """Custom Scikit-Learn transformer to engineer telco churn domain features.
 
-    Engineered features (per 05_DATA_SPEC.md section 5):
+    Engineered features (v1.0 + v2.0 interactions):
     - tenure_bucket: (0-6m, 7-12m, 13-24m, 25-48m, 49-72m)
     - avg_monthly_spend: TotalCharges / max(tenure, 1)
     - charge_increase_ratio: MonthlyCharges / avg_monthly_spend
@@ -39,16 +39,27 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
     - is_auto_pay: 1 if PaymentMethod contains 'automatic' else 0
     - is_month_to_month: 1 if Contract == 'Month-to-month' else 0
     - fiber_no_support: 1 if InternetService == 'Fiber optic' and TechSupport == 'No' else 0
+
+    v2.0 Interactions (when include_interactions=True):
+    - contract_x_charges: MonthlyCharges * (Contract == 'Month-to-month')
+    - fiber_service_deficit: 1 if Fiber optic and neither TechSupport nor OnlineSecurity
+    - payment_friction_index: 1 if Electronic check and PaperlessBilling
+    - tenure_charge_acceleration: MonthlyCharges / (TotalCharges + 1.0)
     """
 
-    def __init__(self, include_engineered: bool = True) -> None:
+    def __init__(
+        self,
+        include_engineered: bool = True,
+        include_interactions: bool = False,
+    ) -> None:
         self.include_engineered = include_engineered
+        self.include_interactions = include_interactions
 
     def fit(self, X: pd.DataFrame, y: pd.Series | None = None) -> FeatureEngineer:
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
-        if not self.include_engineered:
+        if not getattr(self, "include_engineered", True):
             return X.copy()
 
         df = X.copy()
@@ -95,11 +106,36 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
                 (df["InternetService"] == "Fiber optic") & (df["TechSupport"] == "No")
             ).astype(int)
 
+        # v2.0 Interaction terms
+        if getattr(self, "include_interactions", False):
+            if "MonthlyCharges" in df.columns and "Contract" in df.columns:
+                df["contract_x_charges"] = (
+                    df["MonthlyCharges"].values
+                    * (df["Contract"] == "Month-to-month").astype(int).values
+                )
+            if "InternetService" in df.columns:
+                sec_no = (
+                    (df["OnlineSecurity"] == "No") if "OnlineSecurity" in df.columns else False
+                )
+                tech_no = (df["TechSupport"] == "No") if "TechSupport" in df.columns else False
+                df["fiber_service_deficit"] = (
+                    (df["InternetService"] == "Fiber optic") & tech_no & sec_no
+                ).astype(int)
+            if "PaymentMethod" in df.columns and "PaperlessBilling" in df.columns:
+                df["payment_friction_index"] = (
+                    (df["PaymentMethod"] == "Electronic check") & (df["PaperlessBilling"] == "Yes")
+                ).astype(int)
+            if "MonthlyCharges" in df.columns and "TotalCharges" in df.columns:
+                df["tenure_charge_acceleration"] = df["MonthlyCharges"].values / (
+                    df["TotalCharges"].values + 1.0
+                )
+
         return df
 
 
 def get_feature_lists(
     include_engineered: bool = True,
+    include_interactions: bool = False,
     drop_cols: list[str] | None = None,
 ) -> tuple[list[str], list[str]]:
     """Return numeric and categorical feature column names."""
@@ -139,6 +175,10 @@ def get_feature_lists(
             "is_month_to_month",
             "fiber_no_support",
         ]
+        if include_interactions:
+            engineered_numeric.extend(["contract_x_charges", "tenure_charge_acceleration"])
+            engineered_categorical.extend(["fiber_service_deficit", "payment_friction_index"])
+
         num = base_numeric + engineered_numeric
         cat = base_categorical + engineered_categorical
 
@@ -151,6 +191,7 @@ def get_feature_lists(
 
 def build_preprocessor(
     include_engineered: bool = True,
+    include_interactions: bool = False,
     scale_numeric: bool = False,
     drop_cols: list[str] | None = None,
 ) -> ColumnTransformer:
@@ -158,6 +199,7 @@ def build_preprocessor(
 
     Args:
         include_engineered: Whether to include engineered feature columns.
+        include_interactions: Whether to include v2.0 interaction feature columns.
         scale_numeric: If True, applies StandardScaler to numeric features (for Logistic Regression).
         drop_cols: Optional list of columns to exclude (e.g. for fairness ablation).
 
@@ -166,6 +208,7 @@ def build_preprocessor(
     """
     numeric_cols, categorical_cols = get_feature_lists(
         include_engineered=include_engineered,
+        include_interactions=include_interactions,
         drop_cols=drop_cols,
     )
 
@@ -196,6 +239,7 @@ def build_preprocessor(
 def build_full_pipeline(
     model: BaseEstimator,
     include_engineered: bool = True,
+    include_interactions: bool = False,
     scale_numeric: bool = False,
     drop_cols: list[str] | None = None,
 ) -> Pipeline:
@@ -204,15 +248,20 @@ def build_full_pipeline(
     Args:
         model: Scikit-learn compatible classifier.
         include_engineered: Whether to use engineered features.
+        include_interactions: Whether to use v2.0 interaction features.
         scale_numeric: Whether to scale numeric features.
         drop_cols: Optional columns to exclude.
 
     Returns:
         End-to-end Pipeline.
     """
-    fe = FeatureEngineer(include_engineered=include_engineered)
+    fe = FeatureEngineer(
+        include_engineered=include_engineered,
+        include_interactions=include_interactions,
+    )
     preprocessor = build_preprocessor(
         include_engineered=include_engineered,
+        include_interactions=include_interactions,
         scale_numeric=scale_numeric,
         drop_cols=drop_cols,
     )
