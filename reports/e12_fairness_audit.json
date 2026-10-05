@@ -1,0 +1,131 @@
+{
+  "experiment": "E12_Fairness_Audit",
+  "threshold": 0.1882,
+  "selected_option": "M2",
+  "selected_details": {
+    "description": "Drop gender + SeniorCitizen",
+    "profit_per_1k_rm": 38693.48813899097,
+    "gender": {
+      "recall_male": 0.8706030150753769,
+      "recall_female": 0.8901515151515151,
+      "precision_male": 0.4544262295081967,
+      "precision_female": 0.4696868754163891,
+      "contact_rate_male": 0.5078255078255078,
+      "contact_rate_female": 0.5031847133757962,
+      "recall_gap": 0.019548500076138287
+    },
+    "senior": {
+      "recall_senior": 0.9358024691358025,
+      "recall_non_senior": 0.8613693998309383,
+      "precision_senior": 0.5293296089385475,
+      "precision_non_senior": 0.44112554112554114,
+      "contact_rate_senior": 0.7298674821610601,
+      "contact_rate_non_senior": 0.46153846153846156,
+      "recall_gap": 0.07443306930486415
+    },
+    "max_recall_gap": 0.07443306930486415
+  },
+  "all_options": {
+    "M0": {
+      "description": "Current features",
+      "profit_per_1k_rm": 38660.320748412974,
+      "gender": {
+        "recall_male": 0.871859296482412,
+        "recall_female": 0.8914141414141414,
+        "precision_male": 0.4527071102413568,
+        "precision_female": 0.47003994673768307,
+        "contact_rate_male": 0.5104895104895105,
+        "contact_rate_female": 0.5035199463627221,
+        "recall_gap": 0.01955484493172943
+      },
+      "senior": {
+        "recall_senior": 0.9481481481481482,
+        "recall_non_senior": 0.8588334742180896,
+        "precision_senior": 0.5140562248995983,
+        "precision_non_senior": 0.44405594405594406,
+        "contact_rate_senior": 0.7614678899082569,
+        "contact_rate_non_senior": 0.45714285714285713,
+        "recall_gap": 0.08931467393005854
+      },
+      "max_recall_gap": 0.08931467393005854
+    },
+    "M1": {
+      "description": "Drop gender",
+      "profit_per_1k_rm": 38771.27297026394,
+      "gender": {
+        "recall_male": 0.871859296482412,
+        "recall_female": 0.8939393939393939,
+        "precision_male": 0.4550819672131148,
+        "precision_female": 0.4691848906560636,
+        "contact_rate_male": 0.5078255078255078,
+        "contact_rate_female": 0.5058665772712034,
+        "recall_gap": 0.022080097456981918
+      },
+      "senior": {
+        "recall_senior": 0.9506172839506173,
+        "recall_non_senior": 0.8596787827557059,
+        "precision_senior": 0.5153949129852744,
+        "precision_non_senior": 0.44468736335811104,
+        "contact_rate_senior": 0.7614678899082569,
+        "contact_rate_non_senior": 0.4569430569430569,
+        "recall_gap": 0.09093850119491143
+      },
+      "max_recall_gap": 0.09093850119491143
+    },
+    "M2": {
+      "description": "Drop gender + SeniorCitizen",
+      "profit_per_1k_rm": 38693.48813899097,
+      "gender": {
+        "recall_male": 0.8706030150753769,
+        "recall_female": 0.8901515151515151,
+        "precision_male": 0.4544262295081967,
+        "precision_female": 0.4696868754163891,
+        "contact_rate_male": 0.5078255078255078,
+        "contact_rate_female": 0.5031847133757962,
+        "recall_gap": 0.019548500076138287
+      },
+      "senior": {
+        "recall_senior": 0.9358024691358025,
+        "recall_non_senior": 0.8613693998309383,
+        "precision_senior": 0.5293296089385475,
+        "precision_non_senior": 0.44112554112554114,
+        "contact_rate_senior": 0.7298674821610601,
+        "contact_rate_non_senior": 0.46153846153846156,
+        "recall_gap": 0.07443306930486415
+      },
+      "max_recall_gap": 0.07443306930486415
+    }
+  },
+  "trade_off_table": [
+    {
+      "Option": "M0",
+      "Description": "Current features",
+      "Profit/1k (RM)": "RM38,660.32",
+      "Gender Recall Gap": "0.0196",
+      "Senior Recall Gap": "0.0893",
+      "Max Recall Gap": "0.0893"
+    },
+    {
+      "Option": "M1",
+      "Description": "Drop gender",
+      "Profit/1k (RM)": "RM38,771.27",
+      "Gender Recall Gap": "0.0221",
+      "Senior Recall Gap": "0.0909",
+      "Max Recall Gap": "0.0909"
+    },
+    {
+      "Option": "M2",
+      "Description": "Drop gender + SeniorCitizen",
+      "Profit/1k (RM)": "RM38,693.49",
+      "Gender Recall Gap": "0.0195",
+      "Senior Recall Gap": "0.0744",
+      "Max Recall Gap": "0.0744"
+    }
+  ],
+  "base_rates": {
+    "female": 0.2655045256453235,
+    "male": 0.2650682650682651,
+    "senior": 0.41284403669724773,
+    "non_senior": 0.23636363636363636
+  }
+}
