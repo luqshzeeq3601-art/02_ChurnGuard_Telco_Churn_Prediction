@@ -1,0 +1,50 @@
+# ===== Data =====
+data/
+*.csv
+
+# ===== Model artifacts =====
+models/
+*.joblib
+*.pkl
+
+# ===== MLflow =====
+mlruns/
+mlartifacts/
+
+# ===== Python =====
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ===== Testing / Coverage =====
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+
+# ===== Environment =====
+.env
+*.env
+
+# ===== Reports (keep structure, ignore heavy outputs) =====
+reports/drift/*.html

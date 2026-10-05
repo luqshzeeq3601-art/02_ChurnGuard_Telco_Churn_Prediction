@@ -1,0 +1,44 @@
+# ChurnGuard Configuration
+# All paths relative to project root
+
+project:
+  name: churnguard
+  version: "1.0.0"
+  seed: 42
+
+paths:
+  raw_data: data/raw/telco_churn.csv
+  raw_my_data: data/raw/my_cellular_subscribers.csv
+  processed_dir: data/processed
+  models_dir: models
+  reports_dir: reports
+  figures_dir: reports/figures
+
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+  stratify_col: Churn
+
+target:
+  column: Churn
+  positive_label: "Yes"
+
+cost:
+  # Business assumptions for profit-based threshold (RM)
+  retention_offer_cost: 50      # cost of contacting + offering deal
+  avg_monthly_revenue: 65       # avg revenue per customer per month
+  avg_customer_lifetime_months: 12  # avg remaining months if retained
+  clv_if_retained: 780          # 65 * 12
+  profit_per_tp: 730            # clv_if_retained - retention_offer_cost
+  cost_per_fp: 50               # wasted offer
+  cost_per_fn: 780              # lost customer (full CLV)
+
+mlflow:
+  tracking_uri: mlruns
+  experiment_name: churnguard
+
+model:
+  id_col: customerID
+  drop_cols:
+    - customerID
