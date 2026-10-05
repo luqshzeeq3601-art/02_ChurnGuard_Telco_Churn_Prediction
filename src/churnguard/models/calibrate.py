@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 import lightgbm as lgb
 import matplotlib.pyplot as plt
@@ -45,7 +45,9 @@ def compute_ece(y_true: np.ndarray, y_prob: np.ndarray, n_bins: int = 10) -> flo
     n = len(y_true)
 
     for i in range(n_bins):
-        bin_mask = (y_prob >= bin_edges[i]) & (y_prob < bin_edges[i + 1] if i < n_bins - 1 else y_prob <= bin_edges[i + 1])
+        bin_mask = (y_prob >= bin_edges[i]) & (
+            y_prob < bin_edges[i + 1] if i < n_bins - 1 else y_prob <= bin_edges[i + 1]
+        )
         bin_count = np.sum(bin_mask)
         if bin_count > 0:
             bin_acc = np.mean(y_true[bin_mask])
@@ -55,11 +57,11 @@ def compute_ece(y_true: np.ndarray, y_prob: np.ndarray, n_bins: int = 10) -> flo
     return float(ece)
 
 
-def load_champion_params(params_path: Optional[Path | str] = None) -> dict[str, Any]:
+def load_champion_params(params_path: Path | str | None = None) -> dict[str, Any]:
     """Load tuned hyperparameters from models/best_params.json."""
     path = Path(params_path) if params_path else CFG["paths"]["models_dir"] / "best_params.json"
     if path.exists():
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     # Fallback to sensible defaults
     return {
@@ -76,7 +78,7 @@ def load_champion_params(params_path: Optional[Path | str] = None) -> dict[str, 
 
 def fit_champion_pipeline(
     train_df: pd.DataFrame,
-    params: Optional[dict[str, Any]] = None,
+    params: dict[str, Any] | None = None,
 ) -> Any:
     """Fit full champion LightGBM pipeline on training split."""
     if params is None:
@@ -125,8 +127,8 @@ def calibrate_pipeline(
 
 def plot_calibration_curves(
     y_true: np.ndarray,
-    prob_dict: Dict[str, np.ndarray],
-    save_path: Optional[Path | str] = None,
+    prob_dict: dict[str, np.ndarray],
+    save_path: Path | str | None = None,
 ) -> plt.Figure:
     """Generate and save publication-ready reliability diagram and probability histograms.
 
@@ -157,7 +159,7 @@ def plot_calibration_curves(
         prob_true, prob_pred = calibration_curve(y_true, probs, n_bins=10, strategy="uniform")
         brier = brier_score_loss(y_true, probs)
         ece = compute_ece(y_true, probs)
-        color = colors.get(name, None)
+        color = colors.get(name)
         ax1.plot(
             prob_pred,
             prob_true,
@@ -179,7 +181,12 @@ def plot_calibration_curves(
 
     ax1.set_xlabel("Mean Predicted Probability", fontsize=11, fontweight="bold")
     ax1.set_ylabel("Fraction of True Churners", fontsize=11, fontweight="bold")
-    ax1.set_title("Probability Calibration Reliability Diagram (Validation Set)", fontsize=13, fontweight="bold", pad=12)
+    ax1.set_title(
+        "Probability Calibration Reliability Diagram (Validation Set)",
+        fontsize=13,
+        fontweight="bold",
+        pad=12,
+    )
     ax1.legend(loc="upper left", frameon=True, fontsize=9)
     ax1.grid(True, linestyle="--", alpha=0.5)
     ax1.set_xlim([0.0, 1.0])
@@ -203,10 +210,10 @@ def plot_calibration_curves(
 
 
 def run_calibration_experiment(
-    train_path: Optional[Path | str] = None,
-    val_path: Optional[Path | str] = None,
+    train_path: Path | str | None = None,
+    val_path: Path | str | None = None,
     log_to_mlflow: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Run Experiment E09: Train champion, calibrate on val, evaluate and log to MLflow.
 
     Returns:
@@ -263,7 +270,11 @@ def run_calibration_experiment(
     plt.close(fig)
 
     # Choose best calibration method (lowest Brier score)
-    best_method = "sigmoid" if metrics_sigmoid["brier_score"] <= metrics_isotonic["brier_score"] else "isotonic"
+    best_method = (
+        "sigmoid"
+        if metrics_sigmoid["brier_score"] <= metrics_isotonic["brier_score"]
+        else "isotonic"
+    )
     best_calibrator = cal_sigmoid if best_method == "sigmoid" else cal_isotonic
 
     results = {
@@ -273,7 +284,8 @@ def run_calibration_experiment(
         "best_method": best_method,
         "best_calibrator": best_calibrator,
         "uncalibrated_pipeline": pipeline,
-        "brier_improvement": metrics_uncal["brier_score"] - min(metrics_sigmoid["brier_score"], metrics_isotonic["brier_score"]),
+        "brier_improvement": metrics_uncal["brier_score"]
+        - min(metrics_sigmoid["brier_score"], metrics_isotonic["brier_score"]),
     }
 
     if log_to_mlflow:
@@ -298,7 +310,9 @@ def run_calibration_experiment(
             mlflow.log_metric("brier_improvement", results["brier_improvement"])
 
             mlflow.log_artifact(str(fig_path1))
-            mlflow.set_tags({"exp_id": "E09", "model": "LightGBM_Calibrated", "stage": "candidate"})
+            mlflow.set_tags(
+                {"exp_id": "E09", "model": "LightGBM_Calibrated", "stage": "candidate"}
+            )
 
     return results
 
@@ -308,7 +322,15 @@ if __name__ == "__main__":
     print("=" * 60)
     print("Experiment E09: Probability Calibration on Validation Set")
     print("=" * 60)
-    print(f"Uncalibrated Brier Score: {res['uncalibrated']['brier_score']:.4f} | ECE: {res['uncalibrated']['ece']:.4f}")
-    print(f"Sigmoid Brier Score:      {res['sigmoid']['brier_score']:.4f} | ECE: {res['sigmoid']['ece']:.4f}")
-    print(f"Isotonic Brier Score:     {res['isotonic']['brier_score']:.4f} | ECE: {res['isotonic']['ece']:.4f}")
-    print(f"Best Method:              {res['best_method']} (Brier Improvement: +{res['brier_improvement']:.4f})")
+    print(
+        f"Uncalibrated Brier Score: {res['uncalibrated']['brier_score']:.4f} | ECE: {res['uncalibrated']['ece']:.4f}"
+    )
+    print(
+        f"Sigmoid Brier Score:      {res['sigmoid']['brier_score']:.4f} | ECE: {res['sigmoid']['ece']:.4f}"
+    )
+    print(
+        f"Isotonic Brier Score:     {res['isotonic']['brier_score']:.4f} | ECE: {res['isotonic']['ece']:.4f}"
+    )
+    print(
+        f"Best Method:              {res['best_method']} (Brier Improvement: +{res['brier_improvement']:.4f})"
+    )

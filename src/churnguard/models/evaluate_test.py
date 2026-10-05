@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -27,7 +27,6 @@ from sklearn.metrics import (
 )
 
 from churnguard.config import CFG, SEED
-from churnguard.models.calibrate import run_calibration_experiment
 from churnguard.models.evaluate import compute_lift_at_k, compute_recall_at_k
 from churnguard.models.threshold import compute_profit_for_threshold, run_threshold_optimization
 
@@ -39,7 +38,7 @@ def compute_bootstrap_ci(
     clv_values: np.ndarray,
     n_bootstrap: int = 1000,
     seed: int = SEED,
-) -> Dict[str, Dict[str, float]]:
+) -> dict[str, dict[str, float]]:
     """Compute 95% percentile bootstrap confidence intervals for all test metrics.
 
     Args:
@@ -56,7 +55,7 @@ def compute_bootstrap_ci(
     rng = np.random.default_rng(seed)
     n = len(y_true)
 
-    boot_metrics: Dict[str, list[float]] = {
+    boot_metrics: dict[str, list[float]] = {
         "roc_auc": [],
         "pr_auc": [],
         "brier_score": [],
@@ -85,8 +84,12 @@ def compute_bootstrap_ci(
         boot_metrics["brier_score"].append(float(brier_score_loss(y_tr_b, y_pr_b)))
         boot_metrics["lift_at_10"].append(float(compute_lift_at_k(y_tr_b, y_pr_b, k=0.10)))
         boot_metrics["recall_at_20"].append(float(compute_recall_at_k(y_tr_b, y_pr_b, k=0.20)))
-        boot_metrics["precision_at_tau"].append(float(precision_score(y_tr_b, y_pred_b, zero_division=0)))
-        boot_metrics["recall_at_tau"].append(float(recall_score(y_tr_b, y_pred_b, zero_division=0)))
+        boot_metrics["precision_at_tau"].append(
+            float(precision_score(y_tr_b, y_pred_b, zero_division=0))
+        )
+        boot_metrics["recall_at_tau"].append(
+            float(recall_score(y_tr_b, y_pred_b, zero_division=0))
+        )
         boot_metrics["f1_at_tau"].append(float(f1_score(y_tr_b, y_pred_b, zero_division=0)))
 
         profit_res = compute_profit_for_threshold(
@@ -111,9 +114,9 @@ def compute_bootstrap_ci(
 
 
 def run_final_test_evaluation(
-    test_path: Optional[Path | str] = None,
+    test_path: Path | str | None = None,
     save_json: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Execute final evaluation on the test set (touched strictly once)."""
     # 1. Fit & calibrate champion model on train and val
     opt_output = run_threshold_optimization(save_artifacts=True)
@@ -205,7 +208,9 @@ def run_final_test_evaluation(
             "MO2_lift_ge_25": bool(point_estimates["lift_at_10"] >= 2.5),
             "MO3_brier_calibrated": bool(point_estimates["brier_score"] < 0.1542),
             "BO1_recall_at_20_ge_50": bool(point_estimates["recall_at_20"] >= 0.50),
-            "BO2_profit_beats_all_and_none": bool(point_estimates["profit_per_1k_customers_rm"] > 21614.0),
+            "BO2_profit_beats_all_and_none": bool(
+                point_estimates["profit_per_1k_customers_rm"] > 21614.0
+            ),
         },
     }
 
@@ -223,11 +228,17 @@ if __name__ == "__main__":
     print("=" * 65)
     print("Task T4.4: Final Held-out Test Evaluation with 1,000x Bootstrap CI")
     print("=" * 65)
-    print(f"Test Samples: {report['n_samples']} | Churners: {report['n_churners']} ({report['churn_rate']}%)")
+    print(
+        f"Test Samples: {report['n_samples']} | Churners: {report['n_churners']} ({report['churn_rate']}%)"
+    )
     print(f"Optimal Threshold: {report['optimal_threshold']:.2f}")
     print("-" * 65)
     for k, v in report["metrics"].items():
-        ci_str = f"[{v['ci_95_lower']:.4f}, {v['ci_95_upper']:.4f}]" if v["ci_95_lower"] is not None else ""
+        ci_str = (
+            f"[{v['ci_95_lower']:.4f}, {v['ci_95_upper']:.4f}]"
+            if v["ci_95_lower"] is not None
+            else ""
+        )
         print(f"  {k:<28}: {v['point_estimate']:<10} 95% CI: {ci_str}")
     print("-" * 65)
     print("SMART Objectives Verification:")

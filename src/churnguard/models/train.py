@@ -10,20 +10,19 @@ Implements:
 
 from __future__ import annotations
 
-from typing import Any, Optional
-from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline as ImbPipeline
+from typing import Any
+
 import lightgbm as lgb
 import mlflow
 import numpy as np
 import pandas as pd
+import xgboost as xgb
+from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.base import BaseEstimator
-from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
-import xgboost as xgb
 
 from churnguard.config import CFG, SEED
 from churnguard.features.build import FeatureEngineer, build_preprocessor
@@ -35,7 +34,7 @@ def build_pipeline_with_options(
     include_engineered: bool = True,
     scale_numeric: bool = False,
     use_smote: bool = False,
-    drop_cols: Optional[list[str]] = None,
+    drop_cols: list[str] | None = None,
 ) -> Pipeline | ImbPipeline:
     """Construct an end-to-end sklearn or imblearn Pipeline with preprocessing and model."""
     fe = FeatureEngineer(include_engineered=include_engineered)
@@ -66,9 +65,9 @@ def run_cv_experiment(
     include_engineered: bool = True,
     scale_numeric: bool = False,
     use_smote: bool = False,
-    drop_cols: Optional[list[str]] = None,
+    drop_cols: list[str] | None = None,
     n_splits: int = 5,
-    train_path: Optional[str] = None,
+    train_path: str | None = None,
     log_to_mlflow: bool = True,
 ) -> dict[str, Any]:
     """Run cross-validation for a given model and feature configuration, logging to MLflow."""
@@ -86,7 +85,7 @@ def run_cv_experiment(
     oof_probs = np.zeros(len(train_df))
     fold_metrics: list[dict[str, float]] = []
 
-    for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
+    for _fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
         X_tr, y_tr = X.iloc[train_idx], y[train_idx]
         X_va, y_val = X.iloc[val_idx], y[val_idx]
 
@@ -107,7 +106,9 @@ def run_cv_experiment(
 
     # Compute mean and std across folds
     metric_keys = fold_metrics[0].keys()
-    mean_metrics = {f"cv_{k}_mean": float(np.mean([m[k] for m in fold_metrics])) for k in metric_keys}
+    mean_metrics = {
+        f"cv_{k}_mean": float(np.mean([m[k] for m in fold_metrics])) for k in metric_keys
+    }
     std_metrics = {f"cv_{k}_std": float(np.std([m[k] for m in fold_metrics])) for k in metric_keys}
 
     # Compute out-of-fold pooled metrics

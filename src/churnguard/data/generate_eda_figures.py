@@ -12,7 +12,9 @@ Adheres to docs/05_DATA_SPEC.md section 6:
 from __future__ import annotations
 
 from pathlib import Path
+
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -67,7 +69,7 @@ def generate_all_eda_figures(output_dir: Path | str | None = None) -> list[Path]
     colors = ["#2ecc71", "#e74c3c"]
 
     bars = ax.bar(labels, counts, color=colors, width=0.5, edgecolor="black", linewidth=1.2)
-    for bar, pct in zip(bars, percentages):
+    for bar, pct in zip(bars, percentages, strict=False):
         yval = bar.get_height()
         ax.text(
             bar.get_x() + bar.get_width() / 2.0,
@@ -78,7 +80,9 @@ def generate_all_eda_figures(output_dir: Path | str | None = None) -> list[Path]
             fontweight="bold",
         )
 
-    ax.set_title("Target Distribution (Training Set: N = 4,930)", fontsize=14, fontweight="bold", pad=15)
+    ax.set_title(
+        "Target Distribution (Training Set: N = 4,930)", fontsize=14, fontweight="bold", pad=15
+    )
     ax.set_ylabel("Customer Count", fontsize=12)
     ax.set_ylim(0, max(counts) * 1.15)
     f1 = out_path / "01_target_distribution.png"
@@ -124,7 +128,7 @@ def generate_all_eda_figures(output_dir: Path | str | None = None) -> list[Path]
             alpha=0.8,
         )
 
-        for bar, row in zip(bars, rate_df.itertuples()):
+        for bar, row in zip(bars, rate_df.itertuples(), strict=False):
             yval = bar.get_height()
             ax.text(
                 bar.get_x() + bar.get_width() / 2.0,
@@ -142,7 +146,9 @@ def generate_all_eda_figures(output_dir: Path | str | None = None) -> list[Path]
         if idx == 0:
             ax.legend(loc="upper right", fontsize=9)
 
-    plt.suptitle("Churn Rates across Key Categorical Segments", fontsize=16, fontweight="bold", y=1.02)
+    plt.suptitle(
+        "Churn Rates across Key Categorical Segments", fontsize=16, fontweight="bold", y=1.02
+    )
     f2 = out_path / "02_categorical_churn_rates.png"
     plt.savefig(f2, dpi=300)
     plt.close()
@@ -177,7 +183,9 @@ def generate_all_eda_figures(output_dir: Path | str | None = None) -> list[Path]
         ax.set_xlabel("Status", fontsize=11)
         ax.set_ylabel(label, fontsize=11)
 
-    plt.suptitle("Numeric Feature Distributions by Churn Status", fontsize=15, fontweight="bold", y=1.03)
+    plt.suptitle(
+        "Numeric Feature Distributions by Churn Status", fontsize=15, fontweight="bold", y=1.03
+    )
     f3 = out_path / "03_numeric_distributions.png"
     plt.savefig(f3, dpi=300)
     plt.close()
@@ -224,7 +232,9 @@ def generate_all_eda_figures(output_dir: Path | str | None = None) -> list[Path]
         ax=ax,
         linewidths=0.5,
     )
-    ax.set_title("Categorical Feature Associations (Cramer's V)", fontsize=15, fontweight="bold", pad=15)
+    ax.set_title(
+        "Categorical Feature Associations (Cramer's V)", fontsize=15, fontweight="bold", pad=15
+    )
     f4 = out_path / "04_cramers_v_association.png"
     plt.savefig(f4, dpi=300)
     plt.close()
@@ -279,7 +289,9 @@ def generate_all_eda_figures(output_dir: Path | str | None = None) -> list[Path]
         ax=ax,
         linewidths=1.0,
     )
-    ax.set_title("Churn Rate by Contract Type × Tenure Bucket", fontsize=14, fontweight="bold", pad=15)
+    ax.set_title(
+        "Churn Rate by Contract Type × Tenure Bucket", fontsize=14, fontweight="bold", pad=15
+    )
     ax.set_ylabel("Contract Type", fontsize=12)
     ax.set_xlabel("Tenure Bucket", fontsize=12)
     f5 = out_path / "05_tenure_contract_heatmap.png"
@@ -297,13 +309,40 @@ def generate_all_eda_figures(output_dir: Path | str | None = None) -> list[Path]
 
     fig, ax = plt.subplots(figsize=(10, 6))
     if "postpaid" in my_pivot.columns:
-        ax.plot(my_pivot.index, my_pivot["postpaid"], marker="o", linewidth=2.5, label="Postpaid", color="#2980b9")
+        ax.plot(
+            my_pivot.index,
+            my_pivot["postpaid"],
+            marker="o",
+            linewidth=2.5,
+            label="Postpaid",
+            color="#2980b9",
+        )
     if "prepaid" in my_pivot.columns:
-        ax.plot(my_pivot.index, my_pivot["prepaid"], marker="s", linewidth=2.5, label="Prepaid", color="#e67e22")
+        ax.plot(
+            my_pivot.index,
+            my_pivot["prepaid"],
+            marker="s",
+            linewidth=2.5,
+            label="Prepaid",
+            color="#e67e22",
+        )
     if "total" in my_pivot.columns:
-        ax.plot(my_pivot.index, my_pivot["total"], marker="^", linewidth=2.0, linestyle="--", label="Total", color="#2c3e50")
+        ax.plot(
+            my_pivot.index,
+            my_pivot["total"],
+            marker="^",
+            linewidth=2.0,
+            linestyle="--",
+            label="Total",
+            color="#2c3e50",
+        )
 
-    ax.set_title("Malaysia Cellular Subscriptions Trend (2000 - 2021, data.gov.my)", fontsize=14, fontweight="bold", pad=15)
+    ax.set_title(
+        "Malaysia Cellular Subscriptions Trend (2000 - 2021, data.gov.my)",
+        fontsize=14,
+        fontweight="bold",
+        pad=15,
+    )
     ax.set_ylabel("Subscriptions (Millions)", fontsize=12)
     ax.set_xlabel("Year", fontsize=12)
     ax.legend(fontsize=11)

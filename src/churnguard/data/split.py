@@ -7,7 +7,6 @@ with fixed seed=42, and saves splits to data/processed/.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Tuple
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -24,7 +23,7 @@ def split_data(
     test_ratio: float | None = None,
     stratify_col: str | None = None,
     seed: int | None = None,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Split dataset into stratified train, validation, and test subsets.
 
     Args:

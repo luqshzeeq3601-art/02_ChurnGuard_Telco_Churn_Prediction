@@ -12,7 +12,6 @@ Implements all primary, secondary, business, and calibration metrics per docs/06
 
 from __future__ import annotations
 
-from typing import Any, Dict
 import numpy as np
 from sklearn.metrics import (
     average_precision_score,
@@ -113,7 +112,11 @@ def compute_expected_profit(
         Net expected profit in RM.
     """
     cost_cfg = CFG["cost"]
-    offer_cost = retention_offer_cost if retention_offer_cost is not None else cost_cfg["retention_offer_cost"]
+    offer_cost = (
+        retention_offer_cost
+        if retention_offer_cost is not None
+        else cost_cfg["retention_offer_cost"]
+    )
     clv = clv_saved if clv_saved is not None else cost_cfg["clv_if_retained"]
 
     y_true = np.asarray(y_true).astype(int)
@@ -132,7 +135,7 @@ def compute_all_metrics(
     y_true: np.ndarray,
     y_prob: np.ndarray,
     threshold: float = 0.5,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Calculate all standard and business metrics for model evaluation.
 
     Args:

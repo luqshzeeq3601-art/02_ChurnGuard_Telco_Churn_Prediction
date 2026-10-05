@@ -10,27 +10,29 @@ Implements:
 
 from __future__ import annotations
 
-from datetime import datetime
 import json
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
 
 import joblib
 import mlflow
 import numpy as np
 import pandas as pd
-from sklearn.calibration import CalibratedClassifierCV
 
 from churnguard.config import CFG, SEED
 from churnguard.features.build import get_feature_lists
-from churnguard.models.calibrate import calibrate_pipeline, fit_champion_pipeline, load_champion_params
+from churnguard.models.calibrate import (
+    calibrate_pipeline,
+    fit_champion_pipeline,
+    load_champion_params,
+)
 from churnguard.models.threshold import run_threshold_optimization
 
 
 def save_final_model_artifacts(
-    models_dir: Optional[Path | str] = None,
+    models_dir: Path | str | None = None,
     log_to_mlflow: bool = True,
-) -> Tuple[Path, Path]:
+) -> tuple[Path, Path]:
     """Train, calibrate, serialize, and register final production model.
 
     Returns:
@@ -57,7 +59,7 @@ def save_final_model_artifacts(
     # 5. Load threshold and test metrics metadata
     threshold_file = out_dir / "optimal_threshold.json"
     if threshold_file.exists():
-        with open(threshold_file, "r", encoding="utf-8") as f:
+        with open(threshold_file, encoding="utf-8") as f:
             thresh_data = json.load(f)
             optimal_tau = thresh_data.get("optimal_threshold", 0.18)
     else:
@@ -66,7 +68,7 @@ def save_final_model_artifacts(
 
     metrics_file = Path(CFG["paths"]["reports_dir"]) / "final_metrics.json"
     if metrics_file.exists():
-        with open(metrics_file, "r", encoding="utf-8") as f:
+        with open(metrics_file, encoding="utf-8") as f:
             test_metrics_data = json.load(f)
     else:
         test_metrics_data = {}
@@ -83,8 +85,16 @@ def save_final_model_artifacts(
         "optimal_threshold": float(optimal_tau),
         "risk_tiers": {
             "high": {"min_prob": float(optimal_tau), "max_prob": 1.0, "label": "High Risk"},
-            "medium": {"min_prob": float(round(0.5 * optimal_tau, 4)), "max_prob": float(optimal_tau), "label": "Medium Risk"},
-            "low": {"min_prob": 0.0, "max_prob": float(round(0.5 * optimal_tau, 4)), "label": "Low Risk"},
+            "medium": {
+                "min_prob": float(round(0.5 * optimal_tau, 4)),
+                "max_prob": float(optimal_tau),
+                "label": "Medium Risk",
+            },
+            "low": {
+                "min_prob": 0.0,
+                "max_prob": float(round(0.5 * optimal_tau, 4)),
+                "label": "Low Risk",
+            },
         },
         "features": {
             "numeric_features": num_cols,
@@ -124,7 +134,7 @@ def save_final_model_artifacts(
 
 def load_model_and_predict(
     sample_df: pd.DataFrame,
-    models_dir: Optional[Path | str] = None,
+    models_dir: Path | str | None = None,
 ) -> pd.DataFrame:
     """Load serialized model and metadata, returning predicted probabilities and risk tiers."""
     out_dir = Path(models_dir) if models_dir else Path(CFG["paths"]["models_dir"])
@@ -132,10 +142,12 @@ def load_model_and_predict(
     meta_path = out_dir / "model_meta.json"
 
     if not model_path.exists():
-        raise FileNotFoundError(f"Model artifact not found at {model_path}. Run save_final_model_artifacts first.")
+        raise FileNotFoundError(
+            f"Model artifact not found at {model_path}. Run save_final_model_artifacts first."
+        )
 
     model = joblib.load(model_path)
-    with open(meta_path, "r", encoding="utf-8") as f:
+    with open(meta_path, encoding="utf-8") as f:
         meta = json.load(f)
 
     threshold = meta["optimal_threshold"]
@@ -172,4 +184,6 @@ if __name__ == "__main__":
     scored = load_model_and_predict(test_sample)
     print("\nStandalone Reload & Scoring Smoke Test (First 3 Customers):")
     for _, row in scored.iterrows():
-        print(f"  ID: {row.get('customerID', 'N/A')} -> Prob: {row['churn_probability']:.4f} | Tier: {row['risk_tier']}")
+        print(
+            f"  ID: {row.get('customerID', 'N/A')} -> Prob: {row['churn_probability']:.4f} | Tier: {row['risk_tier']}"
+        )

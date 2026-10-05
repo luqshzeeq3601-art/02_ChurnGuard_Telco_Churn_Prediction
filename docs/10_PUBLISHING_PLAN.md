@@ -20,13 +20,13 @@
 | HF Space too slow | Streamlit Community Cloud |
 
 ## 3. Pre-Publish Checklist
-- [ ] README: problem, results table, architecture diagram, demo GIF, live links, how to run, limitations
-- [ ] Dataset licence and source credited (IBM Telco via Kaggle; data.gov.my under CC BY 4.0)
-- [ ] Scenario clearly marked fictional ("NusaTel"); no real telco branding
-- [ ] No secrets, no raw data committed; `.gitignore` checked
-- [ ] CI green badge
-- [ ] Live API `/health` returns ok; HF Space loads
-- [ ] Repo topics set: `machine-learning`, `churn-prediction`, `mlops`, `fastapi`, `lightgbm`, `malaysia`
+- [x] README: problem, results table, architecture diagram, demo GIF, live links, how to run, limitations
+- [x] Dataset licence and source credited (IBM Telco via Kaggle; data.gov.my under CC BY 4.0)
+- [x] Scenario clearly marked fictional ("NusaTel"); no real telco branding
+- [x] No secrets, no raw data committed; `.gitignore` checked
+- [x] CI green badge
+- [x] Live API `/health` returns ok; HF Space loads
+- [x] Repo topics set: `machine-learning`, `churn-prediction`, `mlops`, `fastapi`, `lightgbm`, `malaysia`
 
 ## 4. LinkedIn Post Outline
 1. Hook: "Malaysia's mobile market is flat at about 50M subscriptions. Growth now comes from keeping customers."
