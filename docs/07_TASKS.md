@@ -3,7 +3,7 @@
 > Tick `[x]` when acceptance criteria are met. Work top to bottom within a phase.
 
 ## Phase 0: Setup (W1)
-- [ ] **T0.1** Init git repo, `.gitignore` (data/, models/, mlruns/, .venv/, __pycache__/) | AC: first commit pushed to GitHub | **REOPENED 05 Oct (F1, see 13_MODEL_REVIEW.md)**
+- [x] **T0.1** Init git repo, `.gitignore` (data/, models/, mlruns/, .venv/, __pycache__/) | AC: first commit pushed to GitHub | **RESOLVED 05 Oct (Repo public on GitHub)**
 - [x] **T0.2** `pyproject.toml` + `requirements.txt` (pinned versions) | AC: fresh venv installs cleanly
 - [x] **T0.3** Create folder structure per `04_TECHNICAL_DESIGN.md` section 3 with `__init__.py` | AC: `import churnguard` works
 - [x] **T0.4** `configs/config.yaml` (paths, seed, split ratios, cost assumptions) + `config.py` loader | AC: unit test loads config
@@ -48,8 +48,8 @@
 - [x] **T5.6** Dockerfile (slim, non-root) + `make docker-build docker-run` | AC: container serves `/health`
 
 ## Phase 6: CI/CD + Deploy (W5)
-- [ ] **T6.1** GitHub Actions: lint + test + coverage gate | AC: green badge in README | **REOPENED 05 Oct (F1, see 13_MODEL_REVIEW.md)**
-- [ ] **T6.2** Docker build + smoke test job | AC: passes on main | **REOPENED 05 Oct (F1, see 13_MODEL_REVIEW.md)**
+- [x] **T6.1** GitHub Actions: lint + test + coverage gate | AC: green badge in README | **RESOLVED 05 Oct (Run #37287259278)**
+- [x] **T6.2** Docker build + smoke test job | AC: passes on main | **RESOLVED 05 Oct (Run #37287259278)**
 - [ ] **T6.3** Deploy to GCP Cloud Run (manual first, then tag-triggered) | AC: public `/docs` URL works (EO4) | **REOPENED 05 Oct (F1, see 13_MODEL_REVIEW.md)**
 
 ## Phase 9: Hardening (EXECUTE NEXT, before reopened Phase 6 and Phase 8 tasks)
@@ -71,7 +71,7 @@
 - [x] **T9.11** Update `06_EXPERIMENT_PLAN.md` results (E10 to E12, v1.1), README results + limitations + "what did not work" | AC: no `__` left in results section (F9)
 
 ### Sprint C: Visibility
-- [ ] **T9.12** Create GitHub repo, push, CI green on GitHub, badges in README; re-tick T0.1, T6.1, T6.2 | AC: Actions run URL in progress log (F1)
+- [x] **T9.12** Create GitHub repo, push, CI green on GitHub, badges in README; re-tick T0.1, T6.1, T6.2 | AC: Actions run URL in progress log (F1)
 - [ ] **T9.13** GCP project, Artifact Registry, service account secrets, budget alert RM5, deploy; re-tick T6.3 (fallback: Render) | AC: public `/docs` returns 200, `/predict` works (F1)
 - [ ] **T9.14** Readiness review: rescore rubric in `13_MODEL_REVIEW.md` section 6 | AC: all gates G1 to G8 pass; score at least 8/10
 

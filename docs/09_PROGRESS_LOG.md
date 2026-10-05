@@ -6,9 +6,25 @@
 | Item | Value |
 |---|---|
 | Current phase | **Phase 9: Hardening** (Sprint C: Visibility) |
-| Next task | **T9.12** Create GitHub repo, push, CI green on GitHub, badges in README |
-| Overall progress | 47 / 61 tasks |
-| Health | On track: Sprint B complete, Sprint C in progress |
+| Next task | **T9.13** Deploy API to Cloud Run / Render; re-tick T6.3 |
+| Overall progress | 51 / 61 tasks |
+| Health | On track: Sprint C in progress |
+
+---
+
+## 05 Oct 2026: Task T9.12 Completed (Phase 9 Sprint C)
+- **Done**:
+  - **T9.12**: Created public GitHub repository at [luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction).
+  - Renamed branch to `main`, pushed complete codebase, tracked model artifacts (`model.joblib`, `model_meta.json`, `optimal_threshold.json`, `best_params.json`), data splits (`.parquet`), and benchmark datasets.
+  - Configured GitHub branch protection rules on `main` requiring strict PR status checks (`Code Quality & Test Suite` and `Docker Build & API Smoke Test`).
+  - Executed and verified GitHub Actions CI/CD Pipeline: [Run #37287259278](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction/actions/runs/37287259278) **completed with 100% success** (both `Code Quality & Test Suite` in 1m51s and `Docker Build & API Smoke Test` in 1m55s).
+  - Re-ticked reopened tasks `T0.1`, `T6.1`, and `T6.2`.
+- **Evidence**:
+  - GitHub Actions Workflow Run URL: `https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction/actions/runs/37287259278`
+  - GitHub Repository URL: `https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction`
+  - CI Results: 81 tests passed with 82.2% code coverage, 0 ruff errors/warnings, Docker container builds and passes `/health`, `/model-info`, `/predict` smoke tests on Ubuntu runner.
+- **Next**: **T9.13** GCP project, Artifact Registry, service account secrets, budget alert RM5, deploy; re-tick T6.3 (fallback: Render) (F1).
+- **Blockers**: None.
 
 ---
 
