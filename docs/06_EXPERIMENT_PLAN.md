@@ -71,9 +71,9 @@ Objective: maximise mean CV PR-AUC.
 ## 8. Results Table (fill as you go)
 | Exp ID | CV PR-AUC (mean plus or minus std) | CV ROC-AUC | Notes |
 |---|---|---|---|
-| E00 | | | |
-| E01 | | | |
-| E02 | | | |
+| E00 | 0.2690 ± 0.0024 | 0.5089 | Dummy stratified floor |
+| E01 | 0.6587 ± 0.0220 | 0.8442 | Logistic Regression baseline (raw features) |
+| E02 | 0.6611 ± 0.0124 | 0.8458 | Logistic Regression (raw + engineered features, lower variance) |
 | E03 | | | |
 | E04 | | | |
 | E05 | | | |

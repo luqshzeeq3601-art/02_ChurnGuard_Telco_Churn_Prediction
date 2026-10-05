@@ -19,10 +19,10 @@
 - [x] **T1.6** Malaysia context: load data.gov.my subscribers CSV, plot postpaid vs prepaid trend | AC: chart in `reports/figures/`, used in README
 
 ## Phase 2: Baseline (W2)
-- [ ] **T2.1** `FeatureEngineer` transformer (features in `05_DATA_SPEC.md` section 5) | AC: unit tests per feature
-- [ ] **T2.2** `ColumnTransformer` preprocessing in `features/build.py` | AC: fit on train only; output shape test
-- [ ] **T2.3** `evaluate.py` metrics (PR-AUC, ROC-AUC, Brier, Lift@10, Recall@20) | AC: tested on toy arrays
-- [ ] **T2.4** `train.py` with CV + MLflow logging | AC: E00, E01, E02 logged; results table updated
+- [x] **T2.1** `FeatureEngineer` transformer (features in `05_DATA_SPEC.md` section 5) | AC: unit tests per feature
+- [x] **T2.2** `ColumnTransformer` preprocessing in `features/build.py` | AC: fit on train only; output shape test
+- [x] **T2.3** `evaluate.py` metrics (PR-AUC, ROC-AUC, Brier, Lift@10, Recall@20) | AC: tested on toy arrays
+- [x] **T2.4** `train.py` with CV + MLflow logging | AC: E00, E01, E02 logged; results table updated
 
 ## Phase 3: Modelling + Tuning (W2-W3)
 - [ ] **T3.1** Run E03, E04, E05 | AC: logged; results table updated
