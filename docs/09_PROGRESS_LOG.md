@@ -6,9 +6,37 @@
 | Item | Value |
 |---|---|
 | Current phase | **Phase 9: Hardening** (Sprint B: Model integrity) |
-| Next task | **T9.6** E11 champion re-decision: E02 vs E07 on identical folds, paired PR-AUC diff |
-| Overall progress | 41 / 61 tasks |
+| Next task | **T9.7** E12 fairness audit (M0 / M1 / M2) on OOF at chosen threshold |
+| Overall progress | 42 / 61 tasks |
 | Health | On track: Sprint B in progress |
+
+---
+
+## 05 Oct 2026: Task T9.6 Completed (Phase 9 Sprint B)
+- **Done**:
+  - **T9.6**: Executed Experiment E11 (Champion Re-Decision) comparing E02 (Logistic Regression with engineered features) against E07 (Optuna-tuned LightGBM) on identical 5 folds of `train + val` (5,986 samples).
+  - Evaluated paired per-fold PR-AUC differences:
+    - Fold 1: LR = 0.6741, LightGBM = 0.6694 ($\Delta = -0.0046$)
+    - Fold 2: LR = 0.6520, LightGBM = 0.6540 ($\Delta = +0.0020$)
+    - Fold 3: LR = 0.6437, LightGBM = 0.6625 ($\Delta = +0.0187$)
+    - Fold 4: LR = 0.6878, LightGBM = 0.6892 ($\Delta = +0.0014$)
+    - Fold 5: LR = 0.6413, LightGBM = 0.6463 ($\Delta = +0.0050$)
+    - **Mean paired difference**: **+0.0045** (std: **0.0078**).
+  - Pre-registered decision rule applied (`14_IMPROVEMENT_PLAN.md` section 4.4):
+    - Condition: requires mean gain $\ge$ 1 std (0.0078) AND mean gain $\ge 0.01$.
+    - Result: $+0.0045 < 0.0078$ and $+0.0045 < 0.01$. Condition not met.
+    - Decision: **Logistic Regression is selected as Champion** (simpler, highly interpretable, zero boosting overhead), and **LightGBM is designated as Runner-up**.
+    - Updated **D-013** in `docs/08_DECISIONS_LOG.md`.
+    - **MO1 Status**: Reported honestly as **NOT MET** (LightGBM PR-AUC 0.6643 vs baseline 0.6587 is +0.0056 gain, short of +0.03 target).
+  - Saved full results to `reports/e11_champion_decision.json` and logged to MLflow run `E11_Champion_ReDecision`.
+  - Added unit test in `tests/test_champion_decision.py`.
+- **Evidence**:
+  - `LR PR-AUC`: $0.6598 \pm 0.0182$
+  - `LightGBM PR-AUC`: $0.6643 \pm 0.0147$
+  - `Paired PR-AUC Diff`: $+0.0045 \pm 0.0078$
+  - `pytest tests/test_champion_decision.py`: 2/2 passed in 1.94s.
+- **Next**: **T9.7** E12 fairness audit (M0 / M1 / M2) on OOF at chosen threshold (F6).
+- **Blockers**: None.
 
 ---
 
