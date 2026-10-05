@@ -82,11 +82,11 @@ Objective: maximise mean CV PR-AUC.
 | E08 | 0.6706 ± 0.0217 | 0.8464 | Fairness ablation (without gender/SeniorCitizen, minimal drop) |
 | E09 | **0.6732 ± 0.0217** (CV) | **0.8468** (CV) | E07 + Isotonic Calibration on Val (Brier: 0.1542 -> 0.1293, MO3 met) |
 
-| E10 | | | Calibration redesign (cv=5 on train+val, OOF) |
-| E11 | | | LR vs LightGBM paired folds (champion re-decision) |
-| E12 | | | Fairness options M0 / M1 / M2 |
+| E10 | 0.6584 (OOF) | 0.8467 (OOF) | Calibration redesign (cv=5 on train+val, 5,986 rows). Isotonic cv=5 selected (lowest Brier: 0.1341, ECE: 0.0142, 2,842 unique probs, F2/F3 fixed) |
+| E11 | 0.6598 ± 0.0182 (LR) vs 0.6643 ± 0.0147 (LGBM) | 0.8458 (LR) vs 0.8468 (LGBM) | Paired 5-fold CV on train+val: LightGBM mean gain +0.0045 < 1 std (0.0078). LR selected as Champion (D-013), LightGBM as runner-up. MO1 not met. |
+| E12 | 0.6614 (M2 OOF) | 0.8455 (M2 OOF) | Fairness audit on OOF at tau=0.1882: M2 (drop gender + SeniorCitizen) selected (D-014). Max recall gap 0.0744 (down from 0.0893) at 0% profit loss. |
 
-### Final Test Results (once)
+### Final Test Results (v1.0 initial, test reuse disclosed in D-015)
 | Metric | Value | 95% CI |
 |---|---|---|
 | ROC-AUC | 0.8412 | [0.8155, 0.8679] |
@@ -100,14 +100,30 @@ Objective: maximise mean CV PR-AUC.
 | Recall at tau* | 76.51% | [71.28%, 81.40%] |
 | F1 at tau* | 0.6314 | [0.5871, 0.6724] |
 
-### v1.1 Test Results (after Phase 9, D-015)
-| Metric | Champion | Runner-up | 95% CI (champion) |
-|---|---|---|---|
-| ROC-AUC | | | |
-| PR-AUC | | | |
-| Brier (calibrated vs uncalibrated) | | | |
-| Lift@10% (tie-aware) | | | |
-| Recall@20% (tie-aware) | | | |
-| Unique probabilities | | | |
-| Threshold (OOF) | | | |
-| Profit per 1k (RM) | | | |
+### v1.1 Test Results (after Phase 9 Hardening, D-015)
+| Metric | Champion (Logistic Regression M2) | Runner-up (Tuned LightGBM) | 95% CI (Champion) | Target / Benchmark |
+|---|---|---|---|---|
+| ROC-AUC | **0.8449** | 0.8473 | [0.8207, 0.8714] | $\ge 0.84$ (MO2 Met) |
+| PR-AUC | **0.6739** | 0.6760 | [0.6203, 0.7262] | $\ge 0.62$ (MO2 Met) |
+| Brier (calibrated vs uncalibrated) | **0.1361** (vs 0.1472 uncal) | 0.1340 (vs 0.1522 uncal) | [0.1236, 0.1476] | Lower is better (MO3 Met) |
+| Lift@10% (tie-aware) | **2.84x** | 2.98x | [2.52x, 3.18x] | $\ge 2.50\text{x}$ (MO2 Met) |
+| Recall@20% (tie-aware) | **48.40%** | 51.60% | [44.21%, 53.26%] | $\ge 50.00\%$ |
+| Unique probabilities | **1,057** | 1,057 | — | $\ge 200$ (G2 Met) |
+| Threshold ($\tau^*$ from OOF) | **0.1882** | 0.1882 | — | Profit-optimal on OOF |
+| Profit per 1k (RM) | **RM36,720.15** | RM37,613.72 | [RM30,063.54, RM42,997.04] | Beats Contact All (RM18,193) |
+| Precision at $\tau^*$ | **47.53%** | 49.79% | [43.42%, 51.91%] | — |
+| Recall at $\tau^*$ | **88.97%** | 85.41% | [85.00%, 92.44%] | — |
+| F1 at $\tau^*$ | **0.6196** | 0.6291 | [0.5799, 0.6576] | — |
+
+### Generated Reports & Visualizations
+- [`reports/figures/07_calibration_curve.png`](reports/figures/07_calibration_curve.png): 5-fold OOF calibration curves (Uncalibrated vs Sigmoid vs Isotonic).
+- [`reports/figures/08_profit_curve.png`](reports/figures/08_profit_curve.png): Net campaign profit curve across thresholds, highlighting $\tau^* = 0.1882$.
+- [`reports/figures/09_shap_summary.png`](reports/figures/09_shap_summary.png): SHAP summary beeswarm plot of feature attributions for Champion model.
+- [`reports/final_metrics.json`](reports/final_metrics.json): Complete point estimates, bootstrap 95% CIs, and objective verifications.
+- [`reports/scored.csv`](reports/scored.csv): Full test split predictions with risk tiers and top 3 reason codes.
+
+### Negative Results & What Did Not Work
+1. **SMOTE Oversampling (E04):** Degraded cross-validated PR-AUC from 0.6587 to 0.6482 due to synthetic point smearing across continuous feature boundaries.
+2. **Gradient Boosting Premium (E11 / D-013):** LightGBM provided only $+0.0045 \pm 0.0078$ mean PR-AUC gain over Logistic Regression on paired 5-fold CV (< 1 std). Per Occam's razor, Logistic Regression was selected as Champion for lower operational complexity and direct explainability.
+3. **In-Sample Prefit Calibration (E09):** Prefit calibration on small validation data caused probability collapse to 34 unique values. Replaced by 5-fold OOF calibration on train+val (E10), achieving 1,057 unique probabilities.
+4. **Adversarial Fairness Weighting (E12):** Complex multi-objective loss reweighting was unnecessary; complete removal of protected features (`gender`, `SeniorCitizen`, Option M2) achieved fairness compliance with zero profit penalty.
