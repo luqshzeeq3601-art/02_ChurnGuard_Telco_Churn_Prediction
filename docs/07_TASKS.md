@@ -11,12 +11,12 @@
 - [x] **T0.6** Download dataset to `data/raw/telco_churn.csv` (`src/churnguard/data/load.py`) | AC: file present, 7,043 rows
 
 ## Phase 1: Data Understanding + EDA (W1)
-- [ ] **T1.1** `validate.py` with pandera schema from `05_DATA_SPEC.md` section 4 | AC: passes on raw data; tests cover a bad-value case
-- [ ] **T1.2** Cleaning function (TotalCharges fix, target to 0/1) | AC: no nulls; test covers blank TotalCharges
-- [ ] **T1.3** `split.py` stratified 70/15/15 saved to `data/processed/` | AC: churn rate within plus or minus 1% across splits
-- [ ] **T1.4** EDA notebook following `05_DATA_SPEC.md` section 6 | AC: all checklist items done, figures in `reports/figures/`
-- [ ] **T1.5** Write 5+ business insights | AC: in notebook + progress log
-- [ ] **T1.6** Malaysia context: load data.gov.my subscribers CSV, plot postpaid vs prepaid trend | AC: chart in `reports/figures/`, used in README
+- [x] **T1.1** `validate.py` with pandera schema from `05_DATA_SPEC.md` section 4 | AC: passes on raw data; tests cover a bad-value case
+- [x] **T1.2** Cleaning function (TotalCharges fix, target to 0/1) | AC: no nulls; test covers blank TotalCharges
+- [x] **T1.3** `split.py` stratified 70/15/15 saved to `data/processed/` | AC: churn rate within plus or minus 1% across splits
+- [x] **T1.4** EDA notebook following `05_DATA_SPEC.md` section 6 | AC: all checklist items done, figures in `reports/figures/`
+- [x] **T1.5** Write 5+ business insights | AC: in notebook + progress log
+- [x] **T1.6** Malaysia context: load data.gov.my subscribers CSV, plot postpaid vs prepaid trend | AC: chart in `reports/figures/`, used in README
 
 ## Phase 2: Baseline (W2)
 - [ ] **T2.1** `FeatureEngineer` transformer (features in `05_DATA_SPEC.md` section 5) | AC: unit tests per feature

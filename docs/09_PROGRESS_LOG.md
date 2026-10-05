@@ -5,10 +5,30 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | Phase 1: Data Understanding + EDA (W1) |
-| Next task | **T1.1** `validate.py` with pandera schema |
-| Overall progress | 6 / 47 tasks |
+| Current phase | Phase 2: Baseline (W2) |
+| Next task | **T2.1** `FeatureEngineer` transformer |
+| Overall progress | 12 / 47 tasks |
 | Health | On track |
+
+---
+
+## 05 Oct 2026: Phase 1 Data Understanding & EDA Completed
+- **Done**:
+  - **T1.1**: Implemented `src/churnguard/data/validate.py` using pandera schema checking data types, value sets, value bounds (tenure in 0-72, MonthlyCharges > 0), unique IDs, and minimum row count (>= 5,000). Verified with `tests/test_validate.py`.
+  - **T1.2**: Implemented `src/churnguard/data/clean.py` handling blank `TotalCharges` -> 0.0 (D-003), mapping target `Churn` ("Yes" -> 1, "No" -> 0), type casting, and verifying 0 remaining nulls. Verified with `tests/test_clean.py`.
+  - **T1.3**: Implemented `src/churnguard/data/split.py` performing stratified 70/15/15 train/val/test split with `seed=42`. Saved `train` (4,930 rows), `val` (1,056 rows), `test` (1,057 rows) in both CSV and Parquet formats in `data/processed/`. Churn rate across splits is verified at 26.53% ± 0.02% (< 1% variance). Verified with `tests/test_split.py`.
+  - **T1.4**: Generated comprehensive EDA notebook `notebooks/01_eda.ipynb` and all 6 publication-ready figures in `reports/figures/` (`01_target_distribution.png`, `02_categorical_churn_rates.png`, `03_numeric_distributions.png`, `04_cramers_v_association.png`, `05_tenure_contract_heatmap.png`, `06_malaysia_cellular_trends.png`).
+  - **T1.5**: Identified 6 core business insights:
+    1. *Contract Lock-in:* Month-to-month contracts have 42.9% churn vs 10.9% (1-yr) and 3.0% (2-yr). Month-to-month drives 88.6% of all churners.
+    2. *Early Lifecycle Risk:* Months 0-6 with month-to-month contracts show 53.1% churn. Churned median tenure is 10.0 months vs 38.0 months for retained users.
+    3. *Fiber Optic Service Deficit:* Fiber optic users churn at 41.8% (vs 19.2% DSL); rises to >48% without TechSupport.
+    4. *Payment Friction:* Electronic Check shows 45.6% churn vs <15-16% for automated payment methods.
+    5. *Protection Bundle Stickiness:* Lack of TechSupport or OnlineSecurity triples churn risk (42% vs 15%).
+    6. *Malaysian Market Framing:* Steady growth in high-ARPU postpaid subscriptions (>10M) emphasizes the commercial value of contractual retention interventions.
+  - **T1.6**: Analyzed Malaysia national cellular subscriptions from `data.gov.my` (2000-2021) and plotted postpaid vs prepaid trends in `reports/figures/06_malaysia_cellular_trends.png`.
+- **Next**: Phase 2 — Baseline Models (starting with T2.1 `FeatureEngineer` transformer)
+- **Blockers**: None
+- **Code Quality**: 26 passed tests, 93% test coverage, 0 ruff errors.
 
 ---
 
