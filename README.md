@@ -1,3 +1,15 @@
+---
+title: ChurnGuard Telco Churn Prediction & Retention Platform
+emoji: 🛡️
+colorFrom: blue
+colorTo: indigo
+sdk: streamlit
+sdk_version: "1.40.2"
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # 🛡️ ChurnGuard: Cost-Aware Telco Churn Prediction & Retention Platform
 
 [![CI/CD Pipeline](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction/actions/workflows/ci.yml)
