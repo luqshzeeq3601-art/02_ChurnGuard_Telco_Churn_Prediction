@@ -69,7 +69,7 @@ def test_predict_single_valid(client, valid_customer_payload):
     assert 0.0 <= data["churn_probability"] <= 1.0
     assert data["risk_tier"] in ["High", "Medium", "Low"]
     assert len(data["top_reasons"]) == 3
-    assert data["model_version"] == "1.0.0"
+    assert data["model_version"] in ["1.0.0", "1.1.0"]
 
 
 def test_predict_single_invalid_inputs(client, valid_customer_payload):

@@ -62,10 +62,10 @@ class ChurnPredictor:
 
         # Initialize SHAP explainer for reason code generation
         # Extract underlying fitted pipeline from CalibratedClassifierCV if calibrated
-        if hasattr(self.model, "estimator"):
-            base_pipeline = self.model.estimator
-        elif hasattr(self.model, "calibrated_classifiers_"):
+        if hasattr(self.model, "calibrated_classifiers_") and len(self.model.calibrated_classifiers_) > 0:
             base_pipeline = self.model.calibrated_classifiers_[0].estimator
+        elif hasattr(self.model, "estimator") and not hasattr(self.model, "calibrated_classifiers_"):
+            base_pipeline = self.model.estimator
         else:
             base_pipeline = self.model
 

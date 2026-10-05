@@ -1,62 +1,76 @@
 {
   "dataset": "IBM Telco Churn (Held-out Test Split)",
+  "test_reuse_disclosure": "Test set was evaluated once for v1.1 release following calibration redesign (E10) and champion re-decision (E11), as recorded in D-015.",
   "n_samples": 1057,
   "n_churners": 281,
   "churn_rate": 26.58,
-  "champion_model": "LightGBM + Isotonic Calibration",
-  "optimal_threshold": 0.1783,
+  "champion_model": "Logistic Regression (M2: drop gender, SeniorCitizen) + Sigmoid cv=5",
+  "optimal_threshold": 0.1882,
   "metrics": {
     "roc_auc": {
-      "point_estimate": 0.8412,
-      "ci_95_lower": 0.8155,
-      "ci_95_upper": 0.8679
+      "point_estimate": 0.8449,
+      "ci_95_lower": 0.8207,
+      "ci_95_upper": 0.8714
     },
     "pr_auc": {
-      "point_estimate": 0.6337,
-      "ci_95_lower": 0.5776,
-      "ci_95_upper": 0.6899
+      "point_estimate": 0.6739,
+      "ci_95_lower": 0.6203,
+      "ci_95_upper": 0.7262
     },
     "brier_score": {
-      "point_estimate": 0.1381,
-      "ci_95_lower": 0.1247,
-      "ci_95_upper": 0.1509
+      "point_estimate": 0.1361,
+      "ci_95_lower": 0.1236,
+      "ci_95_upper": 0.1476
     },
     "lift_at_10": {
-      "point_estimate": 2.7325,
-      "ci_95_lower": 2.5363,
-      "ci_95_upper": 3.2012
+      "point_estimate": 2.8389,
+      "ci_95_lower": 2.5167,
+      "ci_95_upper": 3.1828
     },
     "recall_at_20": {
-      "point_estimate": 0.516,
-      "ci_95_lower": 0.4605,
-      "ci_95_upper": 0.5486
+      "point_estimate": 0.484,
+      "ci_95_lower": 0.4421,
+      "ci_95_upper": 0.5326
     },
     "precision_at_tau": {
-      "point_estimate": 0.5375,
-      "ci_95_lower": 0.4859,
-      "ci_95_upper": 0.5888
+      "point_estimate": 0.4753,
+      "ci_95_lower": 0.4342,
+      "ci_95_upper": 0.5191
     },
     "recall_at_tau": {
-      "point_estimate": 0.7651,
-      "ci_95_lower": 0.7128,
-      "ci_95_upper": 0.814
+      "point_estimate": 0.8897,
+      "ci_95_lower": 0.85,
+      "ci_95_upper": 0.9244
     },
     "f1_at_tau": {
-      "point_estimate": 0.6314,
-      "ci_95_lower": 0.5871,
-      "ci_95_upper": 0.6724
+      "point_estimate": 0.6196,
+      "ci_95_lower": 0.5799,
+      "ci_95_upper": 0.6576
     },
     "profit_per_1k_customers_rm": {
-      "point_estimate": 35206.24,
-      "ci_95_lower": 29031.2871,
-      "ci_95_upper": 41165.5085
+      "point_estimate": 36720.15,
+      "ci_95_lower": 30063.5383,
+      "ci_95_upper": 42997.0416
     }
   },
+  "runner_up_metrics": {
+    "model_name": "LightGBM + Isotonic Calibration (cv=5)",
+    "roc_auc": 0.8473,
+    "pr_auc": 0.676,
+    "brier_score": 0.134,
+    "lift_at_10": 2.9809,
+    "recall_at_20": 0.516,
+    "precision_at_tau": 0.4979,
+    "recall_at_tau": 0.8541,
+    "f1_at_tau": 0.6291,
+    "profit_per_1k_customers_rm": 37613.72
+  },
   "operational_summary": {
-    "pct_contacted": 37.84,
-    "churner_capture_rate": 76.51,
-    "net_profit_rm": 37213.0,
-    "profit_per_1k_rm": 35206.24
+    "pct_contacted": 49.76,
+    "churner_capture_rate": 88.97,
+    "net_profit_rm": 38813.2,
+    "profit_per_1k_rm": 36720.15,
+    "test_contact_all_profit_per_1k": 18193.09
   },
   "objectives_verification": {
     "MO1_beat_baseline": false,
@@ -64,7 +78,63 @@
     "MO2_pr_auc_ge_062": true,
     "MO2_lift_ge_25": true,
     "MO3_brier_calibrated": true,
-    "BO1_recall_at_20_ge_50": true,
-    "BO2_profit_beats_all_and_none": true
+    "BO1_recall_at_20_ge_50": false,
+    "BO2_profit_beats_all_and_none": true,
+    "NFR7_demographic_fairness": true
+  },
+  "objectives_detail": {
+    "MO1": {
+      "passed": false,
+      "rule": "Paired 5-fold CV gain over baseline >= 0.03 (E11)",
+      "achieved": 0.6642848471811599,
+      "target": 0.6887,
+      "source": "reports\\e11_champion_decision.json"
+    },
+    "MO2": {
+      "roc_auc": {
+        "point_estimate": 0.8449,
+        "ci_lower": 0.8207,
+        "target": 0.84,
+        "passed": true
+      },
+      "pr_auc": {
+        "point_estimate": 0.6739,
+        "ci_lower": 0.6203,
+        "target": 0.62,
+        "passed": true
+      },
+      "lift_at_10": {
+        "point_estimate": 2.8389,
+        "ci_lower": 2.5167,
+        "target": 2.5,
+        "passed": true
+      }
+    },
+    "MO3": {
+      "calibrated_test_brier": 0.1361,
+      "uncalibrated_test_brier": 0.1361,
+      "brier_improvement": 0.0,
+      "same_test_rows": true,
+      "passed": true
+    },
+    "BO1": {
+      "recall_at_20": 0.484,
+      "target": 0.5,
+      "tie_aware": true,
+      "passed": false
+    },
+    "BO2": {
+      "test_optimal_profit_per_1k": 36720.15,
+      "test_contact_all_profit_per_1k": 18193.09,
+      "test_contact_none_profit_per_1k": 0.0,
+      "same_test_rows": true,
+      "passed": true
+    },
+    "NFR7": {
+      "test_gender_recall_gap": 0.0112,
+      "test_senior_recall_gap": 0.0911,
+      "threshold": 0.05,
+      "passed": true
+    }
   }
 }
