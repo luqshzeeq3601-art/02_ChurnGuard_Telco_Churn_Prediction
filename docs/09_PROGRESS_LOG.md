@@ -5,10 +5,28 @@
 ## Current Status
 | Item | Value |
 |---|---|
-| Current phase | Phase 5: Serving (W4) |
-| Next task | **T5.1** `predict.py` (load model, predict, tier, reasons) |
-| Overall progress | 27 / 47 tasks |
+| Current phase | Phase 6: CI/CD + Deploy (W5) |
+| Next task | **T6.1** GitHub Actions: lint + test + coverage gate |
+| Overall progress | 33 / 47 tasks |
 | Health | On track |
+
+---
+
+## 05 Oct 2026: Phase 5 Serving Completed
+- **Done**:
+  - **T5.1**: Implemented `src/churnguard/models/predict.py` featuring `ChurnPredictor` inference engine. Loads champion pipeline `models/model.joblib` and metadata `models/model_meta.json`, outputs calibrated probabilities, maps risk tiers (`High`, `Medium`, `Low`), and generates top 3 plain-language SHAP reason codes. Tested in `tests/test_predict.py`.
+  - **T5.2**: Built production FastAPI service in `api/main.py` and strict Pydantic data contracts in `api/schemas.py`. Endpoints implemented:
+    - `GET /health`: Health status and loaded model version.
+    - `GET /model-info`: Production model architecture, optimal threshold $\tau^*=0.18$, risk tier boundaries, feature lists, and test set performance.
+    - `POST /predict`: Single-customer prediction with calibrated probability, risk tier, and top 3 reasons (422 validation on invalid payloads).
+    - `POST /predict/batch`: High-throughput batch prediction returning risk-ranked customer list with tier counts.
+  - **T5.3**: Built batch scoring CLI command `python -m churnguard.models.predict --file $(FILE)` (`make score FILE=...`). Tested on `data/processed/test.parquet` (1,057 customers), exported ranked CSV to `reports/scored.csv`.
+  - **T5.4**: Implemented comprehensive integration test suite with `TestClient` in `tests/test_api.py`. Tested status codes, payload contracts, validation errors (422), and batch sorting. Verified **EO3 met** (overall code coverage at **85%**, above $\ge 70\%$ requirement).
+  - **T5.5**: Implemented latency benchmark in `tests/test_latency.py` (100 requests). Achieved **p95 latency of 3.27 ms** (mean 2.44 ms, p50 2.33 ms, p99 3.53 ms), substantially exceeding the **EO2 target ($p95 < 100$ ms)**.
+  - **T5.6**: Built production-grade slim Dockerfile (`python:3.10-slim`, non-root `appuser` UID 1000, multi-layer caching, healthcheck probe on `/health`, exposed port 8000) and `.dockerignore`.
+- **Next**: Phase 6 — CI/CD + Deploy (starting with T6.1 GitHub Actions workflow and T6.2 container build)
+- **Blockers**: None
+- **Code Quality**: 69 passed tests, 85% test coverage, 0 ruff errors.
 
 ---
 

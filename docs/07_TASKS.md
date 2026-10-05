@@ -40,12 +40,12 @@
 - [x] **T4.6** Save final pipeline `models/model.joblib` + `model_meta.json`; register in MLflow | AC: reload and predict test passes
 
 ## Phase 5: Serving (W4)
-- [ ] **T5.1** `predict.py` (load model, predict, tier, reasons) | AC: unit tests
-- [ ] **T5.2** FastAPI `api/main.py` + `schemas.py` (endpoints per design section 7) | AC: `/docs` works; invalid input returns 422
-- [ ] **T5.3** Batch CLI `make score FILE=...` | AC: ranked CSV output
-- [ ] **T5.4** API tests with TestClient | AC: coverage at least 70% overall (EO3)
-- [ ] **T5.5** Latency check (100 requests) | AC: p95 under 100 ms (EO2)
-- [ ] **T5.6** Dockerfile (slim, non-root) + `make docker-build docker-run` | AC: container serves `/health`
+- [x] **T5.1** `predict.py` (load model, predict, tier, reasons) | AC: unit tests
+- [x] **T5.2** FastAPI `api/main.py` + `schemas.py` (endpoints per design section 7) | AC: `/docs` works; invalid input returns 422
+- [x] **T5.3** Batch CLI `make score FILE=...` | AC: ranked CSV output
+- [x] **T5.4** API tests with TestClient | AC: coverage at least 70% overall (EO3)
+- [x] **T5.5** Latency check (100 requests) | AC: p95 under 100 ms (EO2)
+- [x] **T5.6** Dockerfile (slim, non-root) + `make docker-build docker-run` | AC: container serves `/health`
 
 ## Phase 6: CI/CD + Deploy (W5)
 - [ ] **T6.1** GitHub Actions: lint + test + coverage gate | AC: green badge in README
