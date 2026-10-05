@@ -54,7 +54,7 @@ app = FastAPI(
         "Production REST API for telco customer churn propensity scoring, "
         "profit-optimal budget targeting, and frontline SHAP reason codes."
     ),
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
