@@ -230,7 +230,10 @@ def run_calibration_redesign(
 
     # 4. Pre-registered selection rule
     candidates = {}
-    for name, m, p in [("isotonic", metrics_isotonic, oof_isotonic), ("sigmoid", metrics_sigmoid, oof_sigmoid)]:
+    for name, m, p in [
+        ("isotonic", metrics_isotonic, oof_isotonic),
+        ("sigmoid", metrics_sigmoid, oof_sigmoid),
+    ]:
         pr_drop = metrics_uncal["pr_auc"] - m["pr_auc"]
         unique_count = m["n_unique_probs"]
         if pr_drop <= 0.005 and unique_count >= 200:
@@ -255,7 +258,9 @@ def run_calibration_redesign(
             "prob_uncal": oof_uncal,
             "prob_sigmoid": oof_sigmoid,
             "prob_isotonic": oof_isotonic,
-            "prob_selected": oof_isotonic if best_method == "isotonic" else (oof_sigmoid if best_method == "sigmoid" else oof_uncal),
+            "prob_selected": oof_isotonic
+            if best_method == "isotonic"
+            else (oof_sigmoid if best_method == "sigmoid" else oof_uncal),
             "MonthlyCharges": train_val_df["MonthlyCharges"].values,
         }
     )
@@ -282,8 +287,11 @@ def run_calibration_redesign(
         "prod_calibrator": prod_calibrator,
         "oof_path": oof_out,
         "fig_path": fig_path,
-        "brier_improvement": metrics_uncal["brier_score"] - (
-            metrics_isotonic["brier_score"] if best_method == "isotonic" else metrics_sigmoid["brier_score"]
+        "brier_improvement": metrics_uncal["brier_score"]
+        - (
+            metrics_isotonic["brier_score"]
+            if best_method == "isotonic"
+            else metrics_sigmoid["brier_score"]
         ),
     }
 
@@ -328,7 +336,9 @@ def run_calibration_experiment(
     log_to_mlflow: bool = True,
 ) -> dict[str, Any]:
     """Execute calibration experiment (for backward compatibility)."""
-    return run_calibration_redesign(train_path=train_path, val_path=val_path, log_to_mlflow=log_to_mlflow)
+    return run_calibration_redesign(
+        train_path=train_path, val_path=val_path, log_to_mlflow=log_to_mlflow
+    )
 
 
 if __name__ == "__main__":
@@ -342,5 +352,7 @@ if __name__ == "__main__":
             f"{name.capitalize():14s} | Brier: {m['brier_score']:.4f} | PR-AUC: {m['pr_auc']:.4f} | "
             f"ECE: {m['ece']:.4f} | Unique: {m['n_unique_probs']}"
         )
-    print(f"\nWinning Method: {res['best_method'].upper()} (Brier Gain: +{res['brier_improvement']:.4f})")
+    print(
+        f"\nWinning Method: {res['best_method'].upper()} (Brier Gain: +{res['brier_improvement']:.4f})"
+    )
     print(f"OOF Predictions Saved: {res['oof_path']}")

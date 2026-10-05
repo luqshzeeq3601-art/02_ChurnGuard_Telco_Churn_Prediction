@@ -22,8 +22,6 @@ import pandas as pd
 from churnguard.config import CFG, SEED
 from churnguard.features.build import get_feature_lists
 from churnguard.models.calibrate import (
-    calibrate_pipeline,
-    fit_champion_pipeline,
     load_champion_params,
 )
 from churnguard.models.threshold import run_threshold_optimization
@@ -71,7 +69,9 @@ def save_final_model_artifacts(
         include_engineered=True,
         scale_numeric=False,
     )
-    runner_up_calibrated = CalibratedClassifierCV(estimator=runner_up_base, method="isotonic", cv=5)
+    runner_up_calibrated = CalibratedClassifierCV(
+        estimator=runner_up_base, method="isotonic", cv=5
+    )
     runner_up_calibrated.fit(X_train_val, y_train_val)
 
     # 4. Save joblib artifacts
@@ -160,7 +160,9 @@ def save_final_model_artifacts(
             mlflow.log_artifact(str(model_path))
             mlflow.log_artifact(str(runner_up_path))
             mlflow.log_artifact(str(meta_path))
-            mlflow.set_tags({"stage": "production", "model": "churnguard-champion", "version": "1.1.0"})
+            mlflow.set_tags(
+                {"stage": "production", "model": "churnguard-champion", "version": "1.1.0"}
+            )
 
     return model_path, meta_path
 

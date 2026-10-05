@@ -49,7 +49,7 @@ def run_e11_experiment(
 
     params_path = CFG["paths"]["models_dir"] / "best_params.json"
     if params_path.exists():
-        with open(params_path, "r", encoding="utf-8") as f:
+        with open(params_path, encoding="utf-8") as f:
             best_params = json.load(f)
     else:
         best_params = {
@@ -147,10 +147,7 @@ def run_e11_experiment(
         "fold_details": fold_results,
     }
 
-    if save_path:
-        out_path = Path(save_path)
-    else:
-        out_path = Path("reports") / "e11_champion_decision.json"
+    out_path = Path(save_path) if save_path else Path("reports") / "e11_champion_decision.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(decision_summary, f, indent=2)
@@ -192,4 +189,6 @@ if __name__ == "__main__":
     print(f"Rule Condition:  {res['rule_thresholds']}")
     print(f"Champion:        {res['selected_champion']}")
     print(f"Runner-up:       {res['runner_up']}")
-    print(f"MO1 Status:      {'MET' if res['mo1_met'] else 'NOT MET'} (LGBM {res['mo1_achieved']:.4f} vs target {res['mo1_target']:.4f})")
+    print(
+        f"MO1 Status:      {'MET' if res['mo1_met'] else 'NOT MET'} (LGBM {res['mo1_achieved']:.4f} vs target {res['mo1_target']:.4f})"
+    )
