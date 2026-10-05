@@ -62,7 +62,7 @@
 ### Sprint B: Model integrity
 - [x] **T9.3** Tie-aware `recall_at_k` / `lift_at_k` + `n_unique_probs` in `evaluate.py` | AC: test proves row-order invariance (F2)
 - [x] **T9.4** E10 calibration redesign: uncalibrated vs sigmoid cv=5 vs isotonic cv=5 on train+val, OOF metrics | AC: rule in plan 4.2 applied; unique probs at least 200; OOF ECE reported; MLflow logged (F2, F3)
-- [ ] **T9.5** Re-optimise profit threshold on OOF calibrated probs + sensitivity | AC: `optimal_threshold.json` has `source: oof_train_val` (F7)
+- [x] **T9.5** Re-optimise profit threshold on OOF calibrated probs + sensitivity | AC: `optimal_threshold.json` has `source: oof_train_val` (F7)
 - [ ] **T9.6** E11 champion re-decision: E02 vs E07 on identical folds, paired PR-AUC diff | AC: D-013 recorded with rule from plan 4.4; MO1 stated honestly (F5)
 - [ ] **T9.7** E12 fairness audit (M0 / M1 / M2) on OOF at chosen threshold | AC: trade-off table; D-014 recorded; gaps at most 0.05 or documented (F6)
 - [ ] **T9.8** Fix objective checks in `evaluate_test.py` (same-split, no hardcoded constants) | AC: unit tests; mapping in plan 4.6 (F4)

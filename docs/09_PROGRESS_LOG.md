@@ -6,9 +6,30 @@
 | Item | Value |
 |---|---|
 | Current phase | **Phase 9: Hardening** (Sprint B: Model integrity) |
-| Next task | **T9.5** Re-optimise profit threshold on OOF calibrated probs + sensitivity |
-| Overall progress | 40 / 61 tasks |
+| Next task | **T9.6** E11 champion re-decision: E02 vs E07 on identical folds, paired PR-AUC diff |
+| Overall progress | 41 / 61 tasks |
 | Health | On track: Sprint B in progress |
+
+---
+
+## 05 Oct 2026: Task T9.5 Completed (Phase 9 Sprint B)
+- **Done**:
+  - **T9.5**: Re-optimised campaign profit threshold on out-of-fold calibrated probabilities across `train + val` (5,986 samples) instead of the smaller validation set. Evaluated net profit across decision thresholds [0.01, 0.99] and computed multi-parameter sensitivity analysis (success rate in {0.2, 0.3, 0.4}, offer cost in {RM40, RM50, RM60}).
+  - Updated `src/churnguard/models/threshold.py` to prioritize `models/oof_train_val_preds.parquet`, accept individual CLV values in profit curve visualization, and record `"source": "oof_train_val"` in `models/optimal_threshold.json`.
+  - Regenerated `reports/figures/08_profit_curve.png`.
+  - Added unit test `test_optimal_threshold_json_has_oof_source` in `tests/test_threshold.py`.
+- **Evidence**:
+  - `models/optimal_threshold.json`:
+    - `source`: `"oof_train_val"`
+    - `n_samples`: 5,986
+    - `optimal_threshold`: **0.1882**
+    - `expected_profit_per_1k_rm`: **RM39,481.98** (vs default $\tau=0.5$ of RM29,830.03, Contact All of RM21,632.30, Contact None RM0.00)
+    - `pct_customers_contacted`: 48.51%
+    - `churner_capture_rate`: 87.28%
+  - Sensitivity analysis confirms robust positive expected profit across all 9 scenarios (RM15,479 to RM66,172 per 1k).
+  - `pytest tests/test_threshold.py`: 5/5 passed in 2.93s.
+- **Next**: **T9.6** E11 champion re-decision: E02 vs E07 on identical folds, paired PR-AUC diff (F5).
+- **Blockers**: None.
 
 ---
 

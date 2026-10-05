@@ -226,6 +226,7 @@ def plot_profit_curves(
     y_prob: np.ndarray,
     optimal_res: dict[str, Any],
     sensitivity_df: pd.DataFrame,
+    clv_values: np.ndarray | None = None,
     save_path: Path | str | None = None,
 ) -> plt.Figure:
     """Generate publication-ready profit curve and sensitivity chart."""
@@ -243,6 +244,7 @@ def plot_profit_curves(
                 threshold=t,
                 offer_cost=50.0,
                 success_rate=sr,
+                clv_values=clv_values,
             )["profit_per_1k_customers_rm"]
             for t in thresholds
         ]
@@ -314,20 +316,45 @@ def plot_profit_curves(
 
 def run_threshold_optimization(
     val_path: Path | str | None = None,
+    oof_path: Path | str | None = None,
     save_artifacts: bool = True,
 ) -> dict[str, Any]:
-    """Execute complete threshold optimization and sensitivity workflow on validation set."""
-    cal_res = run_calibration_experiment(log_to_mlflow=False)
-    best_calibrator = cal_res["best_calibrator"]
+    """Execute complete threshold optimization and sensitivity workflow on OOF or validation set."""
+    models_dir = CFG["paths"]["models_dir"]
+    target_oof = Path(oof_path) if oof_path else models_dir / "oof_train_val_preds.parquet"
 
-    va_path = Path(val_path) if val_path else CFG["paths"]["processed_dir"] / "val.parquet"
-    val_df = pd.read_parquet(va_path)
-
-    X_val = val_df.drop(columns=["Churn"])
-    y_val = val_df["Churn"].values
-
-    probs_val = best_calibrator.predict_proba(X_val)[:, 1]
-    clv_val = 12.0 * val_df["MonthlyCharges"].values
+    best_calibrator = None
+    if val_path is not None:
+        va_path = Path(val_path)
+        val_df = pd.read_parquet(va_path)
+        cal_res = run_calibration_experiment(log_to_mlflow=False)
+        best_calibrator = cal_res["best_calibrator"]
+        X_val = val_df.drop(columns=["Churn"])
+        y_val = val_df["Churn"].values
+        probs_val = best_calibrator.predict_proba(X_val)[:, 1]
+        clv_val = 12.0 * val_df["MonthlyCharges"].values
+        source_label = "val"
+    elif target_oof.exists():
+        oof_df = pd.read_parquet(target_oof)
+        y_val = oof_df["y_true"].values
+        prob_col = (
+            "prob_selected"
+            if "prob_selected" in oof_df.columns
+            else ("prob_isotonic" if "prob_isotonic" in oof_df.columns else oof_df.columns[1])
+        )
+        probs_val = oof_df[prob_col].values
+        clv_val = 12.0 * oof_df["MonthlyCharges"].values
+        source_label = "oof_train_val"
+    else:
+        va_path = CFG["paths"]["processed_dir"] / "val.parquet"
+        val_df = pd.read_parquet(va_path)
+        cal_res = run_calibration_experiment(log_to_mlflow=False)
+        best_calibrator = cal_res["best_calibrator"]
+        X_val = val_df.drop(columns=["Churn"])
+        y_val = val_df["Churn"].values
+        probs_val = best_calibrator.predict_proba(X_val)[:, 1]
+        clv_val = 12.0 * val_df["MonthlyCharges"].values
+        source_label = "val"
 
     # Find optimal threshold
     opt_res = find_optimal_threshold(
@@ -354,13 +381,15 @@ def run_threshold_optimization(
             y_prob=probs_val,
             optimal_res=opt_res,
             sensitivity_df=sens_df,
+            clv_values=clv_val,
             save_path=fig_path1,
         )
         plt.close(fig)
 
         # Save optimal threshold summary to models/optimal_threshold.json
-        models_dir = CFG["paths"]["models_dir"]
         threshold_meta = {
+            "source": source_label,
+            "n_samples": int(len(y_val)),
             "optimal_threshold": round(opt_res["optimal_threshold"], 4),
             "expected_profit_per_1k_rm": round(
                 opt_res["optimal_metrics"]["profit_per_1k_customers_rm"], 2
