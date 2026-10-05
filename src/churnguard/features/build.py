@@ -7,7 +7,6 @@ Implements:
 
 from __future__ import annotations
 
-from typing import List, Optional
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -15,7 +14,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-
 
 SERVICE_COLUMNS = [
     "PhoneService",
@@ -46,7 +44,7 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
     def __init__(self, include_engineered: bool = True) -> None:
         self.include_engineered = include_engineered
 
-    def fit(self, X: pd.DataFrame, y: Optional[pd.Series] = None) -> "FeatureEngineer":
+    def fit(self, X: pd.DataFrame, y: pd.Series | None = None) -> FeatureEngineer:
         return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
@@ -100,7 +98,7 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
         return df
 
 
-def get_feature_lists(include_engineered: bool = True) -> tuple[List[str], List[str]]:
+def get_feature_lists(include_engineered: bool = True) -> tuple[list[str], list[str]]:
     """Return numeric and categorical feature column names."""
     base_numeric = ["tenure", "MonthlyCharges", "TotalCharges"]
     base_categorical = [

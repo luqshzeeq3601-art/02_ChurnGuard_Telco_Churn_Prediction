@@ -11,7 +11,6 @@ from churnguard.features.build import (
     FeatureEngineer,
     build_full_pipeline,
     build_preprocessor,
-    get_feature_lists,
 )
 
 
