@@ -6,9 +6,34 @@
 | Item | Value |
 |---|---|
 | Current phase | **Phase 9: Hardening** (Sprint B: Model integrity) |
-| Next task | **T9.7** E12 fairness audit (M0 / M1 / M2) on OOF at chosen threshold |
-| Overall progress | 42 / 61 tasks |
+| Next task | **T9.8** Fix objective checks in `evaluate_test.py` (same-split, no hardcoded constants) |
+| Overall progress | 43 / 61 tasks |
 | Health | On track: Sprint B in progress |
+
+---
+
+## 05 Oct 2026: Task T9.7 Completed (Phase 9 Sprint B)
+- **Done**:
+  - **T9.7**: Executed Experiment E12 (Fairness Audit and Mitigation) evaluating demographic fairness across `gender` and `SeniorCitizen` on out-of-fold calibrated predictions at $\tau^* = 0.1882$.
+  - Evaluated M0 (current features), M1 (drop `gender`), and M2 (drop `gender` and `SeniorCitizen`).
+  - Pre-registered selection rule applied (`14_IMPROVEMENT_PLAN.md` section 4.5):
+    - Trade-off matrix:
+      | Option | Description | Profit/1k (RM) | Gender Recall Gap | Senior Recall Gap | Max Recall Gap |
+      |---|---|---|---|---|---|
+      | M0 | Current features | RM38,660.32 | 0.0196 | 0.0893 | 0.0893 |
+      | M1 | Drop gender | RM38,771.27 | 0.0221 | 0.0909 | 0.0909 |
+      | M2 | Drop gender + SeniorCitizen | **RM38,693.49** | **0.0195** | **0.0744** | **0.0744** |
+    - Selected **Option M2** (lowest max recall gap of 0.0744, 0% profit loss vs M0).
+    - Gender gap is 0.0195 (satisfies NFR7 $\le 0.05$).
+    - Remaining SeniorCitizen recall gap (0.0744) is documented in **D-014** as a known limitation driven by underlying churn base rate disparity (seniors churn at 41.3% vs non-seniors at 23.6%, a 1.75x ratio). Group-specific thresholds were rejected.
+  - Saved full results to `reports/e12_fairness_audit.json` and logged run to MLflow experiment `E12_Fairness_Audit`.
+  - Added unit test in `tests/test_fairness_audit.py`.
+- **Evidence**:
+  - Smallest max recall gap: 0.0744 (achieved by M2).
+  - Profit impact: RM38,693.49 (+0.08% vs M0 RM38,660.32, well within $\le 5\%$ tolerance).
+  - `pytest tests/test_fairness_audit.py`: 2/2 passed in 3.34s.
+- **Next**: **T9.8** Fix objective checks in `evaluate_test.py` (same-split, no hardcoded constants) (F4).
+- **Blockers**: None.
 
 ---
 
