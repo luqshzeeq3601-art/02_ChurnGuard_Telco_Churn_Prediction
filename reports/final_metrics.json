@@ -1,0 +1,70 @@
+{
+  "dataset": "IBM Telco Churn (Held-out Test Split)",
+  "n_samples": 1057,
+  "n_churners": 281,
+  "churn_rate": 26.58,
+  "champion_model": "LightGBM + Isotonic Calibration",
+  "optimal_threshold": 0.1783,
+  "metrics": {
+    "roc_auc": {
+      "point_estimate": 0.8412,
+      "ci_95_lower": 0.8155,
+      "ci_95_upper": 0.8679
+    },
+    "pr_auc": {
+      "point_estimate": 0.6337,
+      "ci_95_lower": 0.5776,
+      "ci_95_upper": 0.6899
+    },
+    "brier_score": {
+      "point_estimate": 0.1381,
+      "ci_95_lower": 0.1247,
+      "ci_95_upper": 0.1509
+    },
+    "lift_at_10": {
+      "point_estimate": 2.7325,
+      "ci_95_lower": 2.5363,
+      "ci_95_upper": 3.2012
+    },
+    "recall_at_20": {
+      "point_estimate": 0.516,
+      "ci_95_lower": 0.4605,
+      "ci_95_upper": 0.5486
+    },
+    "precision_at_tau": {
+      "point_estimate": 0.5375,
+      "ci_95_lower": 0.4859,
+      "ci_95_upper": 0.5888
+    },
+    "recall_at_tau": {
+      "point_estimate": 0.7651,
+      "ci_95_lower": 0.7128,
+      "ci_95_upper": 0.814
+    },
+    "f1_at_tau": {
+      "point_estimate": 0.6314,
+      "ci_95_lower": 0.5871,
+      "ci_95_upper": 0.6724
+    },
+    "profit_per_1k_customers_rm": {
+      "point_estimate": 35206.24,
+      "ci_95_lower": 29031.2871,
+      "ci_95_upper": 41165.5085
+    }
+  },
+  "operational_summary": {
+    "pct_contacted": 37.84,
+    "churner_capture_rate": 76.51,
+    "net_profit_rm": 37213.0,
+    "profit_per_1k_rm": 35206.24
+  },
+  "objectives_verification": {
+    "MO1_beat_baseline": false,
+    "MO2_roc_auc_ge_084": true,
+    "MO2_pr_auc_ge_062": true,
+    "MO2_lift_ge_25": true,
+    "MO3_brier_calibrated": true,
+    "BO1_recall_at_20_ge_50": true,
+    "BO2_profit_beats_all_and_none": true
+  }
+}

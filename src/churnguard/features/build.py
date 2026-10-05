@@ -100,7 +100,7 @@ class FeatureEngineer(BaseEstimator, TransformerMixin):
 
 def get_feature_lists(
     include_engineered: bool = True,
-    drop_cols: Optional[list[str]] = None,
+    drop_cols: list[str] | None = None,
 ) -> tuple[list[str], list[str]]:
     """Return numeric and categorical feature column names."""
     base_numeric = ["tenure", "MonthlyCharges", "TotalCharges"]
@@ -152,7 +152,7 @@ def get_feature_lists(
 def build_preprocessor(
     include_engineered: bool = True,
     scale_numeric: bool = False,
-    drop_cols: Optional[list[str]] = None,
+    drop_cols: list[str] | None = None,
 ) -> ColumnTransformer:
     """Build scikit-learn ColumnTransformer for preprocessing.
 
@@ -197,7 +197,7 @@ def build_full_pipeline(
     model: BaseEstimator,
     include_engineered: bool = True,
     scale_numeric: bool = False,
-    drop_cols: Optional[list[str]] = None,
+    drop_cols: list[str] | None = None,
 ) -> Pipeline:
     """Combine FeatureEngineer, ColumnTransformer, and estimator into one end-to-end Pipeline.
 

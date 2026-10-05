@@ -80,15 +80,18 @@ Objective: maximise mean CV PR-AUC.
 | E06 | 0.6537 ± 0.0274 | 0.8417 | LightGBM with SMOTE in CV (degraded PR-AUC -> rejected per D-005) |
 | E07 | **0.6732 ± 0.0217** | **0.8468** | **Champion: LightGBM + Optuna tuned (MO1/MO2/MO4 met)** |
 | E08 | 0.6706 ± 0.0217 | 0.8464 | Fairness ablation (without gender/SeniorCitizen, minimal drop) |
-| E09 | | | Pending Phase 4 (Calibration on val) |
+| E09 | **0.6732 ± 0.0217** (CV) | **0.8468** (CV) | E07 + Isotonic Calibration on Val (Brier: 0.1542 -> 0.1293, MO3 met) |
 
 ### Final Test Results (once)
 | Metric | Value | 95% CI |
 |---|---|---|
-| ROC-AUC | | |
-| PR-AUC | | |
-| Brier | | |
-| Lift@10% | | |
-| Recall@20% | | |
-| Profit-optimal threshold | | |
-| Expected profit per 1,000 customers (RM) | | |
+| ROC-AUC | 0.8412 | [0.8155, 0.8679] |
+| PR-AUC | 0.6337 | [0.5776, 0.6899] |
+| Brier Score | 0.1381 | [0.1247, 0.1509] |
+| Lift@10% | 2.73x | [2.54x, 3.20x] |
+| Recall@20% | 51.60% | [46.05%, 54.86%] |
+| Profit-optimal threshold | 0.18 | - |
+| Expected profit per 1,000 customers (RM) | RM35,206.24 | [RM29,031.29, RM41,165.51] |
+| Precision at tau* | 53.75% | [48.59%, 58.88%] |
+| Recall at tau* | 76.51% | [71.28%, 81.40%] |
+| F1 at tau* | 0.6314 | [0.5871, 0.6724] |
