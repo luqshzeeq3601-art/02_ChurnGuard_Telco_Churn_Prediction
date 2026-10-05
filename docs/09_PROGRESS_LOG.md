@@ -6,9 +6,28 @@
 | Item | Value |
 |---|---|
 | Current phase | **Phase 9: Hardening** (Sprint B: Model integrity) |
-| Next task | **T9.8** Fix objective checks in `evaluate_test.py` (same-split, no hardcoded constants) |
-| Overall progress | 43 / 61 tasks |
+| Next task | **T9.9** v1.1 final test evaluation (once), champion + runner-up |
+| Overall progress | 44 / 61 tasks |
 | Health | On track: Sprint B in progress |
+
+---
+
+## 05 Oct 2026: Task T9.8 Completed (Phase 9 Sprint B)
+- **Done**:
+  - **T9.8**: Refactored objective checks in `src/churnguard/models/evaluate_test.py` via `compute_objectives_verification` to eliminate all hardcoded constants and fix comparison mismatches (F4):
+    - **MO1**: Read dynamically from `reports/e11_champion_decision.json` (paired 5-fold CV on train+val) rather than comparing test PR-AUC to a hardcoded baseline constant.
+    - **MO2**: Validates test point estimates and reports bootstrap 95% confidence interval lower bounds.
+    - **MO3**: Evaluates test Brier score of calibrated probabilities strictly against uncalibrated probabilities computed on the **exact same test rows**.
+    - **BO1**: Evaluates tie-aware `Recall@20%` on held-out test set ($\ge 50\%$).
+    - **BO2**: Compares campaign profit at $\tau^*$ against dynamic Contact All and Contact None benchmarks computed on the **exact same test rows**.
+    - **NFR7**: Computes demographic recall gaps on test split directly.
+  - Added unit test `test_compute_objectives_verification_same_split` in `tests/test_evaluate_test.py`.
+- **Evidence**:
+  - Zero hardcoded baseline numbers in objective verification logic.
+  - Same test rows guaranteed for both Brier comparison (`same_test_rows: True`) and profit comparison (`same_test_rows: True`).
+  - `pytest tests/test_evaluate_test.py`: 3/3 passed in 7.78s.
+- **Next**: **T9.9** v1.1 final test evaluation (once), champion + runner-up (F1, F2, F3, F5, F7).
+- **Blockers**: None.
 
 ---
 

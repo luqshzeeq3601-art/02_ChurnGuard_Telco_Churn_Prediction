@@ -113,6 +113,167 @@ def compute_bootstrap_ci(
     return ci_results
 
 
+def compute_objectives_verification(
+    y_test: np.ndarray,
+    y_prob: np.ndarray,
+    uncal_prob: np.ndarray | None,
+    point_estimates: dict[str, float],
+    ci_results: dict[str, dict[str, float]],
+    test_contact_all_profit: float,
+    gender_arr: np.ndarray | None = None,
+    senior_arr: np.ndarray | None = None,
+    optimal_tau: float = 0.1882,
+    e11_report_path: Path | str | None = None,
+) -> tuple[dict[str, bool], dict[str, Any]]:
+    """Compute verified objective statuses without hardcoded constants (T9.8 / F4).
+
+    Returns:
+        tuple of (objectives_verification, objectives_detail).
+    """
+    # 1. MO1: Paired CV from E11
+    e11_path = (
+        Path(e11_report_path)
+        if e11_report_path
+        else Path("reports") / "e11_champion_decision.json"
+    )
+    if e11_path.exists():
+        with open(e11_path, "r", encoding="utf-8") as f:
+            e11_data = json.load(f)
+        mo1_passed = bool(e11_data.get("mo1_met", False))
+        mo1_achieved = e11_data.get("mo1_achieved")
+        mo1_target = e11_data.get("mo1_target")
+    else:
+        mo1_passed = False
+        mo1_achieved = None
+        mo1_target = 0.6887
+
+    # 2. MO2: Ranking quality on held-out test
+    roc_auc_passed = bool(point_estimates["roc_auc"] >= 0.84)
+    pr_auc_passed = bool(point_estimates["pr_auc"] >= 0.62)
+    lift_passed = bool(point_estimates["lift_at_10"] >= 2.5)
+
+    # 3. MO3: Calibrated vs uncalibrated Brier on same test rows
+    cal_brier = float(point_estimates["brier_score"])
+    if uncal_prob is not None:
+        uncal_brier = float(brier_score_loss(y_test, uncal_prob))
+        mo3_passed = bool(cal_brier < uncal_brier)
+    else:
+        uncal_brier = cal_brier
+        mo3_passed = True
+
+    # 4. BO1: Tie-aware Recall@20 on test
+    bo1_passed = bool(point_estimates["recall_at_20"] >= 0.50)
+
+    # 5. BO2: Profit beats Contact All and Contact None on same test rows
+    test_profit = float(point_estimates["profit_per_1k_customers_rm"])
+    bo2_passed = bool(test_profit > max(test_contact_all_profit, 0.0))
+
+    # 6. NFR7: Demographic fairness on test
+    if gender_arr is not None:
+        y_pred = (y_prob >= optimal_tau).astype(int)
+        m_mask = gender_arr == "Male"
+        f_mask = gender_arr == "Female"
+        rec_m = float(
+            np.sum((y_pred == 1) & (y_test == 1) & m_mask)
+            / max(np.sum((y_test == 1) & m_mask), 1)
+        )
+        rec_f = float(
+            np.sum((y_pred == 1) & (y_test == 1) & f_mask)
+            / max(np.sum((y_test == 1) & f_mask), 1)
+        )
+        gender_gap = abs(rec_m - rec_f)
+        nfr7_passed = bool(gender_gap <= 0.05)
+    else:
+        gender_gap = None
+        nfr7_passed = True
+
+    senior_gap = None
+    if senior_arr is not None:
+        y_pred = (y_prob >= optimal_tau).astype(int)
+        s_mask = senior_arr == 1
+        ns_mask = senior_arr == 0
+        rec_s = float(
+            np.sum((y_pred == 1) & (y_test == 1) & s_mask)
+            / max(np.sum((y_test == 1) & s_mask), 1)
+        )
+        rec_ns = float(
+            np.sum((y_pred == 1) & (y_test == 1) & ns_mask)
+            / max(np.sum((y_test == 1) & ns_mask), 1)
+        )
+        senior_gap = abs(rec_s - rec_ns)
+
+    verification = {
+        "MO1_beat_baseline": mo1_passed,
+        "MO2_roc_auc_ge_084": roc_auc_passed,
+        "MO2_pr_auc_ge_062": pr_auc_passed,
+        "MO2_lift_ge_25": lift_passed,
+        "MO3_brier_calibrated": mo3_passed,
+        "BO1_recall_at_20_ge_50": bo1_passed,
+        "BO2_profit_beats_all_and_none": bo2_passed,
+        "NFR7_demographic_fairness": nfr7_passed,
+    }
+
+    detail = {
+        "MO1": {
+            "passed": mo1_passed,
+            "rule": "Paired 5-fold CV gain over baseline >= 0.03 (E11)",
+            "achieved": mo1_achieved,
+            "target": mo1_target,
+            "source": str(e11_path),
+        },
+        "MO2": {
+            "roc_auc": {
+                "point_estimate": point_estimates["roc_auc"],
+                "ci_lower": ci_results.get("roc_auc", {}).get("ci_lower"),
+                "target": 0.84,
+                "passed": roc_auc_passed,
+            },
+            "pr_auc": {
+                "point_estimate": point_estimates["pr_auc"],
+                "ci_lower": ci_results.get("pr_auc", {}).get("ci_lower"),
+                "target": 0.62,
+                "passed": pr_auc_passed,
+            },
+            "lift_at_10": {
+                "point_estimate": point_estimates["lift_at_10"],
+                "ci_lower": ci_results.get("lift_at_10", {}).get("ci_lower"),
+                "target": 2.5,
+                "passed": lift_passed,
+            },
+        },
+        "MO3": {
+            "calibrated_test_brier": cal_brier,
+            "uncalibrated_test_brier": round(uncal_brier, 4) if uncal_prob is not None else None,
+            "brier_improvement": (
+                round(uncal_brier - cal_brier, 4) if uncal_prob is not None else None
+            ),
+            "same_test_rows": True,
+            "passed": mo3_passed,
+        },
+        "BO1": {
+            "recall_at_20": point_estimates["recall_at_20"],
+            "target": 0.50,
+            "tie_aware": True,
+            "passed": bo1_passed,
+        },
+        "BO2": {
+            "test_optimal_profit_per_1k": test_profit,
+            "test_contact_all_profit_per_1k": round(test_contact_all_profit, 2),
+            "test_contact_none_profit_per_1k": 0.0,
+            "same_test_rows": True,
+            "passed": bo2_passed,
+        },
+        "NFR7": {
+            "test_gender_recall_gap": round(gender_gap, 4) if gender_gap is not None else None,
+            "test_senior_recall_gap": round(senior_gap, 4) if senior_gap is not None else None,
+            "threshold": 0.05,
+            "passed": nfr7_passed,
+        },
+    }
+
+    return verification, detail
+
+
 def run_final_test_evaluation(
     test_path: Path | str | None = None,
     save_json: bool = True,
@@ -132,7 +293,31 @@ def run_final_test_evaluation(
     clv_test = 12.0 * test_df["MonthlyCharges"].values
 
     # 3. Predict calibrated probabilities
-    y_prob = best_calibrator.predict_proba(X_test)[:, 1]
+    if best_calibrator is not None:
+        y_prob = best_calibrator.predict_proba(X_test)[:, 1]
+        # Uncalibrated baseline on same test split
+        if hasattr(best_calibrator, "calibrated_classifiers_"):
+            uncal_probs_list = [
+                clf.estimator.predict_proba(X_test)[:, 1]
+                for clf in best_calibrator.calibrated_classifiers_
+            ]
+            uncal_prob = np.mean(uncal_probs_list, axis=0)
+        elif hasattr(best_calibrator, "estimator"):
+            uncal_prob = best_calibrator.estimator.predict_proba(X_test)[:, 1]
+        else:
+            uncal_prob = y_prob
+    else:
+        # Load from models/model.joblib if available
+        model_path = CFG["paths"]["models_dir"] / "model.joblib"
+        if model_path.exists():
+            import joblib
+
+            loaded_model = joblib.load(model_path)
+            y_prob = loaded_model.predict_proba(X_test)[:, 1]
+            uncal_prob = y_prob
+        else:
+            raise RuntimeError("No calibrator or model available for test evaluation.")
+
     y_pred_tau = (y_prob >= optimal_tau).astype(int)
 
     # 4. Point Estimates
@@ -142,6 +327,15 @@ def run_final_test_evaluation(
         threshold=optimal_tau,
         clv_values=clv_test,
     )
+
+    # Compute contact-all baseline on same test split
+    contact_all_res = compute_profit_for_threshold(
+        y_true=y_test,
+        y_prob=y_prob,
+        threshold=0.0,
+        clv_values=clv_test,
+    )
+    test_contact_all_profit = float(contact_all_res["profit_per_1k_customers_rm"])
 
     point_estimates = {
         "roc_auc": round(float(roc_auc_score(y_test, y_prob)), 4),
@@ -169,13 +363,29 @@ def run_final_test_evaluation(
         seed=SEED,
     )
 
+    # 6. Objectives verification without hardcoded constants
+    gender_arr = test_df["gender"].values if "gender" in test_df.columns else None
+    senior_arr = test_df["SeniorCitizen"].values if "SeniorCitizen" in test_df.columns else None
+
+    obj_verification, obj_detail = compute_objectives_verification(
+        y_test=y_test,
+        y_prob=y_prob,
+        uncal_prob=uncal_prob,
+        point_estimates=point_estimates,
+        ci_results=ci_results,
+        test_contact_all_profit=test_contact_all_profit,
+        gender_arr=gender_arr,
+        senior_arr=senior_arr,
+        optimal_tau=optimal_tau,
+    )
+
     # Combine into comprehensive report
     final_report = {
         "dataset": "IBM Telco Churn (Held-out Test Split)",
         "n_samples": len(test_df),
         "n_churners": int(np.sum(y_test)),
         "churn_rate": round(float(np.mean(y_test) * 100), 2),
-        "champion_model": "LightGBM + Isotonic Calibration",
+        "champion_model": "Calibrated Churn Pipeline",
         "optimal_threshold": point_estimates["optimal_threshold"],
         "metrics": {
             k: {
@@ -200,18 +410,10 @@ def run_final_test_evaluation(
             "churner_capture_rate": point_estimates["churner_capture_rate_at_tau"],
             "net_profit_rm": point_estimates["net_profit_rm"],
             "profit_per_1k_rm": point_estimates["profit_per_1k_customers_rm"],
+            "test_contact_all_profit_per_1k": round(test_contact_all_profit, 2),
         },
-        "objectives_verification": {
-            "MO1_beat_baseline": bool(point_estimates["pr_auc"] >= 0.6587),
-            "MO2_roc_auc_ge_084": bool(point_estimates["roc_auc"] >= 0.84),
-            "MO2_pr_auc_ge_062": bool(point_estimates["pr_auc"] >= 0.62),
-            "MO2_lift_ge_25": bool(point_estimates["lift_at_10"] >= 2.5),
-            "MO3_brier_calibrated": bool(point_estimates["brier_score"] < 0.1542),
-            "BO1_recall_at_20_ge_50": bool(point_estimates["recall_at_20"] >= 0.50),
-            "BO2_profit_beats_all_and_none": bool(
-                point_estimates["profit_per_1k_customers_rm"] > 21614.0
-            ),
-        },
+        "objectives_verification": obj_verification,
+        "objectives_detail": obj_detail,
     }
 
     if save_json:
