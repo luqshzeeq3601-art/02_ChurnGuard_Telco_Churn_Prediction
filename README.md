@@ -1,9 +1,10 @@
 # 🛡️ ChurnGuard: Cost-Aware Telco Churn Prediction & Retention Platform
 
-[![CI/CD Pipeline](https://github.com/ZeeqRyz/02_ChurnGuard_Telco_Churn_Prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/ZeeqRyz/02_ChurnGuard_Telco_Churn_Prediction/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen.svg)](https://github.com/ZeeqRyz/02_ChurnGuard_Telco_Churn_Prediction)
+[![CI/CD Pipeline](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen.svg)](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction)
 [![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
+[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.5-F7931E.svg)](https://scikit-learn.org/)
 [![LightGBM](https://img.shields.io/badge/LightGBM-4.5-FF7A00.svg)](https://lightgbm.readthedocs.io/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.40-FF4B4B.svg)](https://streamlit.io/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
@@ -131,7 +132,7 @@ flowchart TD
 ### Local Setup
 ```bash
 # 1. Clone repository
-git clone https://github.com/ZeeqRyz/02_ChurnGuard_Telco_Churn_Prediction.git
+git clone https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction.git
 cd 02_ChurnGuard_Telco_Churn_Prediction
 
 # 2. Setup virtual environment and dependencies
