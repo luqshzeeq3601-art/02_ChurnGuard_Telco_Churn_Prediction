@@ -20,17 +20,20 @@ RUN groupadd -g 1000 appuser && \
 WORKDIR /app
 
 # Install Python dependencies
-COPY requirements.txt pyproject.toml ./
+COPY requirements.txt ./
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -e .
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy application source code, models, and configurations
+COPY README.md pyproject.toml ./
 COPY src/ ./src/
 COPY api/ ./api/
 COPY configs/ ./configs/
 COPY models/ ./models/
 COPY reports/ ./reports/
+
+# Install local package
+RUN pip install --no-cache-dir --no-deps -e .
 
 # Set ownership to non-root user
 RUN chown -R appuser:appuser /app
