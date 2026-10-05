@@ -16,7 +16,7 @@
 | D-010 | 05 Oct 2026 | Hybrid data: IBM Telco for modelling + data.gov.my for Malaysia context | No public customer-level Malaysian churn data (PDPA 2010) | Accepted |
 | D-011 | 05 Oct 2026 | Publish on GitHub, Hugging Face Spaces (demo), Cloud Run (API), Kaggle, LinkedIn | Covers technical and non-technical recruiters; all free | Accepted |
 | D-012 | 05 Oct 2026 | Streamlit dashboard promoted from Could to Must | Needed as public demo on Hugging Face Spaces | Accepted |
-| D-013 | 05 Oct 2026 | Champion re-decision (LR vs LightGBM) using paired-fold rule in `14_IMPROVEMENT_PLAN.md` 4.4 | MO1 not met (+0.0145 PR-AUC vs +0.03 target, within CV noise) | Pending T9.6 |
+| D-013 | 05 Oct 2026 | Champion re-decision: Logistic Regression selected as Champion, LightGBM as runner-up | Paired 5-fold CV (E11) on train+val: LightGBM mean paired PR-AUC gain over LR is +0.0045 (std 0.0078), which fails the pre-registered requirement (>= 1 std and >= 0.01). Simpler interpretable Logistic Regression selected; LightGBM retained as runner-up. MO1 (+0.03 target) is honestly NOT MET. | Accepted (Confirmed after E11) |
 | D-014 | 05 Oct 2026 | Fairness mitigation option (M0 / M1 / M2); no group-specific thresholds | Test recall gaps 0.078 (gender), 0.144 (SeniorCitizen) exceed NFR7 | Pending T9.7 |
 | D-015 | 05 Oct 2026 | Test set reused exactly once for v1.1 after calibration and champion fixes; disclosed in README and model card | v1.0 calibration was in-sample and collapsed scores to 32 levels | Pending T9.9 |
 | D-016 | 05 Oct 2026 | Reopen T0.1, T6.1 to T6.3 and T8.2 to T8.8; tasks ticked only with evidence | No git remote; Cloud Run, HF Space, Kaggle, LinkedIn, article not published | Accepted |
