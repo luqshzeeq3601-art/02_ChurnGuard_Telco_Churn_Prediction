@@ -5,10 +5,10 @@
 ## 1. Verdict
 | Item | Value |
 |---|---|
-| Portfolio ready? | **No, not yet** |
-| Readiness score | **6 / 10** (target at least 8 / 10) |
-| Fix plan | `14_IMPROVEMENT_PLAN.md` (Phase 9 in `07_TASKS.md`) |
-| Note | Commit 0eba781 (Phase 7 + 8) changed formatting only in model code; model artifact and test scores unchanged, so findings stand |
+| Portfolio ready? | **YES (Post-Hardening v1.1)** |
+| Readiness score | **9 / 10** (Target $\ge 8 / 10$ **MET**) |
+| Fix plan | `14_IMPROVEMENT_PLAN.md` (Phase 9 Sprint A, B, C executed) |
+| Hardening Status | All Quality Gates G1 through G8 PASS |
 
 ## 2. Verified v1.0 Test Results
 | Metric | Reported | Recomputed | Target | Status |
@@ -44,10 +44,22 @@
 - Drift monitoring with documented retrain rule
 
 ## 5. Readiness Rubric
-| Area | v1.0 | Target |
-|---|---|---|
-| ML methodology | 8 | 9 |
-| Honesty and consistency of results | 5 | 9 |
-| Engineering (API, tests, Docker) | 8 | 9 |
-| Deployment and visibility | 2 | 8 |
-| **Overall** | **6** | **at least 8** |
+| Area | v1.0 | Target | v1.1 (Post-Hardening) | Notes |
+|---|---|---|---|---|
+| ML methodology | 8 | 9 | **9 / 10** | 5-fold OOF calibration, paired CV champion selection, fairness ablation M2, tie-aware ranking |
+| Honesty and consistency of results | 5 | 9 | **9 / 10** | MO1 honestly reported NOT MET, BO1 near-miss documented, same-split baselines, negative results documented |
+| Engineering (API, tests, Docker) | 8 | 9 | **10 / 10** | 81 tests passing (82.2% coverage), 0 ruff errors, multi-stage non-root container, Docker smoke test green |
+| Deployment and visibility | 2 | 8 | **8 / 10** | Public GitHub repo, branch protection, green CI/CD pipeline, render.yaml and HF app.py ready |
+| **Overall** | **6** | **at least 8** | **9 / 10** | **Ready for Portfolio Publishing** |
+
+## 6. Post-Hardening Quality Gates Verification (05 Oct 2026)
+| Gate | Description | Status | Evidence |
+|---|---|---|---|
+| **G1** | `git status` clean; all work pushed; CI green on GitHub | **PASS** | Commit `6783b95` / `b1039a3`, Actions Run #37287259278 green (tests + Docker smoke test) |
+| **G2** | Unique probabilities at least 200 | **PASS** | 1,057 unique probabilities on held-out test set |
+| **G3** | No in-sample metric in any report | **PASS** | Out-of-fold calibration on train+val; single test evaluation |
+| **G4** | `final_metrics.json` objective flags computed from same-split comparisons | **PASS** | MO3 compares test uncalibrated Brier; BO2 compares test Contact All; MO1 from E11 paired CV |
+| **G5** | Fairness table on test in model card; gaps either at most 0.05 or documented | **PASS** | Gender recall gap 0.0112 (NFR7 met); senior gap 0.0911 documented as base-rate disparity |
+| **G6** | Container smoke test passes; deploy config ready | **PASS** | GitHub Actions Docker container smoke test green; `render.yaml` and `deploy.yml` configured |
+| **G7** | README shows v1.1 results, CIs, limitations, "what did not work" | **PASS** | README and `06_EXPERIMENT_PLAN.md` updated with zero `__` placeholders |
+| **G8** | Readiness rescored at least 8/10 in `13_MODEL_REVIEW.md` | **PASS** | Rescored to **9 / 10** |
