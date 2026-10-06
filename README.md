@@ -13,7 +13,7 @@ license: mit
 # 🛡️ ChurnGuard: Cost-Aware Telco Churn Prediction & Retention Platform
 
 [![CI/CD Pipeline](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen.svg)](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction)
+[![Coverage](https://img.shields.io/badge/Coverage-82.2%25-brightgreen.svg)](https://github.com/luqshzeeq3601-art/02_ChurnGuard_Telco_Churn_Prediction)
 [![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com/)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.5-F7931E.svg)](https://scikit-learn.org/)
@@ -38,7 +38,7 @@ Most churn models fail in production because they rely on default `0.5` decision
 - **Profit-Optimal Cutoff ($\tau^* = 0.1882$):** Optimized on out-of-fold predictions to yield **RM 36,720 net campaign profit per 1,000 customers** (more than double the RM 18,193 baseline of contacting everyone).
 - **High Targeting Efficiency:** Captures **88.97% of all churners** at $\tau^*$, with a **2.84x Top-Decile Lift** and **48.40% Recall@20%**.
 - **Frontline SHAP Reason Codes:** Linear SHAP explanations deliver top 3 commercial reasons per customer for frontline retention agents.
-- **Production Architecture:** Containerized FastAPI service (**< 5 ms p95 latency**), GitHub Actions CI/CD (85% coverage gate), and Evidently AI drift surveillance.
+- **Production Architecture:** Containerized FastAPI service (**< 5 ms p95 latency**), GitHub Actions CI/CD (at least 70% coverage gate), and Evidently AI drift surveillance.
 
 ---
 
@@ -105,23 +105,23 @@ flowchart TD
     end
 
     subgraph Modeling & Calibration
-        E --> F[LightGBM Classifier + Optuna Search]
-        F --> G[Isotonic Probability Calibration]
+        E --> F[Candidate comparison: LR and LightGBM]
+        F --> G[Champion: Logistic Regression M2 + sigmoid OOF calibration]
         G --> H[Profit Curve Optimization tau*=0.18]
         H --> I[Model Serializer: models/model.joblib]
     end
 
     subgraph Explainability & Serving
-        I --> J[TreeSHAP Explainer: Top-3 Reasons]
+        I --> J[Linear SHAP: Top-3 Reasons]
         J --> K[FastAPI REST Service api/main.py]
         J --> L[Streamlit Retention Cockpit app/streamlit_app.py]
     end
 
     subgraph MLOps & Quality Gates
         K --> M[Docker Containerization]
-        M --> N[GitHub Actions CI/CD: 85% Cov + Smoke Test]
+        M --> N[GitHub Actions CI/CD: Coverage >=70% + Docker Smoke Test]
         N --> O[Evidently AI: Data & Prediction Drift]
-        O --> P[GCP Cloud Run Deploy asia-southeast1]
+        O --> P[Cloud deployment prepared; public proof pending]
     end
 ```
 

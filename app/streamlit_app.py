@@ -21,6 +21,7 @@ import seaborn as sns
 import streamlit as st
 
 from churnguard.config import CFG
+from churnguard.dashboard import load_dashboard_summary
 from churnguard.models.predict import ChurnPredictor
 
 # Page setup
@@ -102,10 +103,7 @@ def load_sample_data() -> pd.DataFrame:
 def load_metrics_meta() -> dict:
     """Load final model metrics and metadata."""
     meta_path = Path(CFG["paths"]["models_dir"]) / "model_meta.json"
-    if meta_path.exists():
-        with open(meta_path, encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+    return load_dashboard_summary(meta_path, Path("reports/final_metrics.json"))
 
 
 @st.cache_data
@@ -147,11 +145,14 @@ with st.sidebar:
 
     st.markdown("---")
     st.subheader("Model Status")
-    st.write(f"**Model:** `{meta.get('model_name', 'LightGBM Champion')}`")
+    st.write(f"**Model:** `{meta.get('model_name', 'Unknown model')}`")
     st.write(f"**Version:** `{meta.get('model_version', '1.0.0')}`")
-    st.write("**Optimal Threshold ($\\tau^*$):** `0.18`")
-    st.write("**ROC-AUC (Test):** `0.8412`")
-    st.write("**PR-AUC (Test):** `0.6337`")
+    st.write(f"**Optimal Threshold ($\\tau^*$):** `{predictor.optimal_threshold:.4f}`")
+    recorded = meta.get("evaluation_metrics", {})
+    for label, key in [("ROC-AUC", "roc_auc"), ("PR-AUC", "pr_auc")]:
+        value = recorded.get(key, {}).get("point_estimate")
+        display = f"{value:.4f}" if value is not None else "unavailable"
+        st.write(f"**{label} (Recorded test):** `{display}`")
     st.caption("Framed for fictional Malaysian telco **NusaTel** (RM currency).")
 
 
@@ -292,7 +293,7 @@ elif selected_page == "📊 Batch Scoring & Retention Targeting":
     upload_file = st.file_uploader("Upload Customer CSV / Parquet", type=["csv", "parquet"])
 
     use_sample = st.checkbox(
-        "Use pre-loaded Malaysian test cohort (1,057 subscribers)", value=(upload_file is None)
+            "Use public IBM Telco benchmark cohort (1,057 rows)", value=(upload_file is None)
     )
 
     df_to_score = None

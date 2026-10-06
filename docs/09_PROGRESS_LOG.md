@@ -472,3 +472,10 @@
 - Risks changed:
 - Re-plan:
 ```
+
+
+## 6 October 2026: portfolio remediation execution
+
+Frozen-model reproduction agrees with saved test ROC-AUC 0.8449, PR-AUC 0.6739 and threshold 0.1882. Sidebar now reads actual metadata/evaluation; missing or mismatched report metrics remain unavailable. Real browser verified form scoring, two-row synthetic upload/ranking and CSV export. Required public hosting and profile pinning remain open.
+
+Evidence: local branch fix/portfolio-remediation; preserved originals and receipts under the workspace .portfolio-audit/2026-10-06/remediation folder. No remote push, merge, external post or cloud deployment was performed.
