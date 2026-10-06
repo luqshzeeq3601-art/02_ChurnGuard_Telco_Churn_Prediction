@@ -83,9 +83,17 @@
 ## Phase 8: Portfolio Packaging (W6)
 - [x] **T8.1** README: problem, results table, architecture diagram, how to run, limitations | AC: complete
 - [ ] **T8.2** Demo GIF / screenshots of API + dashboard | AC: in README | **REOPENED 05 Oct (F11: no GIF / screenshots yet)**
-- [ ] **T8.3** Clean repo, make public, pin repo on GitHub | AC: done | **REOPENED 05 Oct (F11: no git remote; repo not public)**
+- [ ] **T8.3** Clean repo, make public, pin repo on GitHub | AC: done | **Public repository and remote verified 6 Oct; profile pinning remains unverified.**
 - [ ] **T8.4** LinkedIn post + add to CV and portfolio spreadsheet | AC: posted; tracker status = Done | **REOPENED 05 Oct (F11: post drafted, not posted)**
 - [ ] **T8.5** Deploy Streamlit demo to Hugging Face Spaces | AC: public Space URL loads and scores a sample | **REOPENED 05 Oct (F11: entrypoint only; Space not deployed)**
 - [ ] **T8.6** Publish Kaggle notebook (EDA + model summary, link to GitHub) | AC: public notebook URL | **REOPENED 05 Oct (F11: notebook file only; not published on Kaggle)**
 - [ ] **T8.7** (Optional) Medium / dev.to write-up | AC: published, linked in README | **REOPENED 05 Oct (F11: article drafted, not published)**
 - [ ] **T8.8** Run pre-publish checklist in `10_PUBLISHING_PLAN.md` section 3 | AC: all items ticked | **REOPENED 05 Oct (F11: checklist needs live links)**
+
+
+## Portfolio remediation: 6 October 2026
+
+Frozen-model reproduction agrees with saved test ROC-AUC 0.8449, PR-AUC 0.6739 and threshold 0.1882. Sidebar now reads actual metadata/evaluation; missing or mismatched report metrics remain unavailable. Real browser verified form scoring, two-row synthetic upload/ranking and CSV export. Required public hosting and profile pinning remain open.
+
+- [x] Verified local remediation evidence recorded.
+- [ ] Remaining applicable runtime/publication/hosting gates verified.

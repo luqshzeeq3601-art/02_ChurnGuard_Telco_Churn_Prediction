@@ -21,3 +21,8 @@
 | D-015 | 05 Oct 2026 | Test set reused exactly once for v1.1 after calibration and champion fixes; disclosed in README and model card | v1.0 calibration was in-sample and collapsed scores to 32 levels. Single test evaluation performed for v1.1 reporting Champion (LR M2) and Runner-up (LightGBM) side by side with 1,000x bootstrap CIs. | Accepted (Confirmed after T9.9) |
 | D-016 | 05 Oct 2026 | Reopen T0.1, T6.1 to T6.3 and T8.2 to T8.8; tasks ticked only with evidence | No git remote; Cloud Run, HF Space, Kaggle, LinkedIn, article not published | Accepted |
 | D-017 | 05 Oct 2026 | Track small public benchmark data (<1 MB) and serialized model in git | IBM Telco (CC0, 977 KB) and data.gov.my context (CC-BY 4.0, 1 KB) are small, public, and static. Tracking in git enables zero-dependency reproducible Docker builds, standalone CI runs without cloud bucket credentials, and seamless 1-click Hugging Face Space / Render deployment. Meets repo hygiene while maintaining self-containment. | Accepted |
+
+
+## 6 October 2026: remediation evidence decision
+
+Preserve the original models and evaluation records. Repairs address packaging, evidence generation or display without retuning against viewed outcomes. Frozen-model reproduction agrees with saved test ROC-AUC 0.8449, PR-AUC 0.6739 and threshold 0.1882. Sidebar now reads actual metadata/evaluation; missing or mismatched report metrics remain unavailable. Real browser verified form scoring, two-row synthetic upload/ranking and CSV export. Required public hosting and profile pinning remain open.
