@@ -61,9 +61,24 @@ def test_sensitivity_analysis_shape():
     assert "optimal_threshold" in sens_df.columns
 
 
-def test_run_threshold_optimization_integration(tmp_path):
+def test_run_threshold_optimization_integration(tmp_path, monkeypatch):
     """Test full integration run on processed validation dataset."""
-    res = run_threshold_optimization(save_artifacts=True)
+    import hashlib
+
+    from churnguard.config import CFG
+
+    original_models = CFG["paths"]["models_dir"]
+    original_receipt = original_models / "optimal_threshold.json"
+    before = hashlib.sha256(original_receipt.read_bytes()).hexdigest()
+    output_models = tmp_path / "models"
+    output_models.mkdir()
+    monkeypatch.setitem(CFG["paths"], "models_dir", output_models)
+    monkeypatch.setitem(CFG["paths"], "figures_dir", tmp_path / "figures")
+    res = run_threshold_optimization(
+        oof_path=original_models / "oof_train_val_preds.parquet", save_artifacts=True
+    )
+    assert (output_models / "optimal_threshold.json").exists()
+    assert hashlib.sha256(original_receipt.read_bytes()).hexdigest() == before
     assert "optimal_res" in res
     assert "sensitivity_df" in res
     opt = res["optimal_res"]
